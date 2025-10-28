@@ -59,13 +59,9 @@ export class Seaweed implements Animal {
     ctx.lineWidth = 3;
     ctx.strokeStyle = stroke ?? "#f0f";
     ctx.fillStyle = fill ?? "#f0f";
-    const { curve } = CurveRender(ctx);
+    const { curve, path: draw } = CurveRender(ctx);
 
     // === START BODY ===
-    ctx.beginPath();
-
-    ctx.moveTo(...this.getPos(0, Math.PI / 2, 0).a);
-
     // Right half of the snake
     for (let i = 0; i < this.spine.joints.length; i++) {
       curve(...this.getPos(i, Math.PI / 2, 0).a);
@@ -84,11 +80,11 @@ export class Seaweed implements Animal {
     curve(...this.getPos(0, Math.PI / 6, 0).a);
 
     // Some overlap needed because curve requires extra vertices that are not rendered
-    curve(...this.getPos(0, Math.PI / 2, 0).a);
-    curve(...this.getPos(1, Math.PI / 2, 0).a);
-    curve(...this.getPos(2, Math.PI / 2, 0).a);
+    // curve(...this.getPos(0, Math.PI / 2, 0).a);
+    // curve(...this.getPos(1, Math.PI / 2, 0).a);
+    // curve(...this.getPos(2, Math.PI / 2, 0).a);
 
-    ctx.closePath();
+    draw();
     if (fill !== undefined) ctx.fill();
     if (stroke !== undefined) ctx.stroke();
     // === END BODY ===
