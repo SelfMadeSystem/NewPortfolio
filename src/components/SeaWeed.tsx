@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "preact/hooks";
 import { Seaweed } from "../utils/seaweed";
 import { Vector2 } from "../utils/vec";
-import { getComputerColor } from "../utils/styleUtils";
+import { getComputedColor } from "../utils/styleUtils";
 
 function isNeon() {
   return false;
@@ -146,7 +146,7 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
       const dt = sdt / 1000;
 
       const neon = isNeon();
-      const resolvedColor = getComputerColor(color, canvasRef.current!);
+      const resolvedColor = getComputedColor(color, canvasRef.current!);
       const visible = isOnScreen();
 
       if (mouseMove.length() > 100) {

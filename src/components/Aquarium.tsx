@@ -11,7 +11,7 @@ import {
 } from "../utils/mathUtils";
 import { useEffect, useRef } from "preact/hooks";
 import { Vector2 } from "../utils/vec";
-import { getComputerColor } from "../utils/styleUtils";
+import { getComputedColor } from "../utils/styleUtils";
 
 function isNeon() {
   return false;
@@ -112,7 +112,7 @@ abstract class BaseFish implements UpdateAndRender {
     const { x, y } = this.getPosition();
     const rotation = this.getRotation();
     const size = this.getSize();
-    const color = getComputerColor(this.getColor(), element);
+    const color = getComputedColor(this.getColor(), element);
 
     const neon = isNeon();
 

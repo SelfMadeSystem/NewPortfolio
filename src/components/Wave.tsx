@@ -1,6 +1,6 @@
-import { clamp, isInView, random, wrapNumber } from '../utils/mathUtils';
-import { useEffect, useRef } from 'preact/hooks';
-import { getComputerColor } from '../utils/styleUtils';
+import { clamp, isInView, random, wrapNumber } from "../utils/mathUtils";
+import { useEffect, useRef } from "preact/hooks";
+import { getComputedColor } from "../utils/styleUtils";
 
 /**
  * Adapted for React from https://github.com/SelfMadeSystem/Portfolio/blob/main/src/utils/MathUtils.ts
@@ -16,9 +16,9 @@ import { getComputerColor } from '../utils/styleUtils';
  */
 const Wave = ({
   id = undefined,
-  fill = '#000',
+  fill = "#000",
   fill2 = undefined,
-  stroke = '#000',
+  stroke = "#000",
   amount = 4,
   numberOfReverse = 2,
   waveHeight = 0.75,
@@ -61,17 +61,19 @@ const Wave = ({
         width,
         height: i / (amount - 1) || 0,
       };
-    }),
+    })
   );
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     const redraw = () => {
       if (!isInView(canvas)) {
@@ -90,7 +92,7 @@ const Wave = ({
         ctx.fillStyle = fillStyle;
         ctx.globalAlpha = opacity;
       } else {
-        ctx.fillStyle = '#242424';
+        ctx.fillStyle = "#242424";
       }
 
       for (const wave of waves.current) {
@@ -104,7 +106,10 @@ const Wave = ({
         const inversePath = new Path2D();
 
         const heightOffset = wave.height * (height - h);
-        let o = wrapNumber((date / 1000) * wave.speed * w, 0, w * 2) - w * 2 - w * wave.offset;
+        let o =
+          wrapNumber((date / 1000) * wave.speed * w, 0, w * 2) -
+          w * 2 -
+          w * wave.offset;
 
         path.moveTo(o, height);
         path.lineTo(o, height - heightOffset);
@@ -160,7 +165,7 @@ const Wave = ({
       }
 
       if (!neon || !neonClipped) {
-        paths.forEach(p => ctx.clip(p));
+        paths.forEach((p) => ctx.clip(p));
 
         ctx.globalAlpha = 1;
         ctx.fillRect(0, 0, width, height);
@@ -187,7 +192,11 @@ const Wave = ({
           const p = paths[i];
           const ip = inversePaths[i];
 
-          if ((!neonEmpty && !neonClipped) || (neonEmpty && i === paths.length - 1) || (neonClipped && i === 0)) {
+          if (
+            (!neonEmpty && !neonClipped) ||
+            (neonEmpty && i === paths.length - 1) ||
+            (neonClipped && i === 0)
+          ) {
             ctx.fillStyle = fillStyle;
             ctx.fill(p);
           }
@@ -205,7 +214,12 @@ const Wave = ({
 
     const isOnScreen = () => {
       const rect = canvas.getBoundingClientRect();
-      return rect.top < window.innerHeight && rect.bottom > 0 && rect.left < window.innerWidth && rect.right > 0;
+      return (
+        rect.top < window.innerHeight &&
+        rect.bottom > 0 &&
+        rect.left < window.innerWidth &&
+        rect.right > 0
+      );
     };
 
     const animateCanvas = () => {
@@ -227,9 +241,9 @@ const Wave = ({
     let width = (canvas.width = canvas.clientWidth);
     let height = (canvas.height = canvas.clientHeight);
 
-    const fillStyle = getComputerColor(fill, canvas);
-    const fill2Style = fill2 && getComputerColor(fill2, canvas);
-    const strokeStyle = stroke && getComputerColor(stroke, canvas);
+    const fillStyle = getComputedColor(fill, canvas);
+    const fill2Style = fill2 && getComputedColor(fill2, canvas);
+    const strokeStyle = stroke && getComputedColor(stroke, canvas);
 
     const setCanvasSize = () => {
       width = canvas.width = canvas.clientWidth;
@@ -253,7 +267,13 @@ const Wave = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <canvas ref={canvasRef} id={id} style={{ position: 'absolute', width: '100%', height: '100%' }} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      id={id}
+      style={{ position: "absolute", width: "100%", height: "100%" }}
+    />
+  );
 };
 
 export default Wave;
