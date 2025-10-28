@@ -1,62 +1,64 @@
-import type { Animal } from './animal';
-import { Chain } from './chain';
-import { CurveRender } from './curveRender';
-import { clamp, lerp, mod } from './mathUtils';
-import { Vector2 } from './vec';
+import type { Animal } from "./animal";
+import { Chain } from "./chain";
+import { CurveRender } from "./curveRender";
+import { clamp, lerp, mod, random } from "./mathUtils";
+import { Vector2 } from "./vec";
 
 const start = Date.now();
 
-// Wiggly lil green dude
 export class Seaweed implements Animal {
   spine: Chain;
   scale: number;
-  original: Vector2[];
+  eh: number = Math.random();
+  eh2: number = Math.random();
+  eh3: number = Math.random();
+  anchor: Vector2 = new Vector2(0, 0);
 
   constructor(origin: Vector2, scale: number) {
-    this.spine = new Chain(origin, 24, 128 * scale, Math.PI / 8);
+    this.spine = new Chain(origin, random(16, 32), 128 * scale, Math.PI / 8);
     this.scale = scale;
-    this.original = this.spine.joints.map(j => j.clone());
+    this.anchor = origin.clone();
   }
 
-  resolve(mousePos: Vector2, _dt: number) {
+  resolve(mousePos: Vector2, mouseMove: Vector2, _dt: number) {
     const dt = (Date.now() - start) / 1000;
-    // this.spine.joints[this.spine.joints.length - 1] = this.anchor;
-    this.spine.physics([]);
+    this.spine.joints[this.spine.joints.length - 1] = this.anchor;
+    this.spine.physics([[-1, this.anchor]]);
     this.spine.resetAngles();
 
     for (let i = 0; i < this.spine.joints.length; i++) {
-      const { x, y } = this.spine.joints[i];
-      const amnt = Math.sin(y * 0.02 - x * 0.01 + dt * 2) * 3;
-      const vec1 = new Vector2(0, 0);
+      const amnt = Math.sin(-i * ((this.eh2 + 1) / 3) - dt * 2 + this.eh + 1);
 
-      const og = this.original[i];
-      const diff = this.spine.joints[i].sub(og);
-      const spring = diff.mult(0.1);
-
-      this.spine.prevJoints[i] = this.spine.prevJoints[i].add(spring).add(vec1);
+      this.spine.prevJoints[i] = this.spine.prevJoints[i].add(
+        new Vector2(amnt, 0)
+      );
     }
 
-    // this.spine.resolve(this.spine.joints[0]);
     // apply a bit of velocity to all joints close to the mouse
     // to move away from the mouse the closer they are to the mouse
+    // and to move in the direction of mouse movement
     for (let i = 0; i < this.spine.joints.length; i++) {
       const j = this.spine.joints[i];
 
-      const dist = j.sub(mousePos).length();
+      const dist = j.dist(mousePos);
 
-      const d = 512;
+      const d = 128;
 
       const v = clamp(lerp(5, 0, dist / d), 0, 5);
       this.spine.prevJoints[i] = this.spine.prevJoints[i].add(
-        mousePos.sub(j).normalize().mult(v),
+        mousePos
+          .sub(j)
+          .normalize()
+          .sub(mouseMove.mult(_dt * 10))
+          .mult(v)
       );
     }
   }
 
   display(ctx: CanvasRenderingContext2D, stroke?: string, fill?: string) {
     ctx.lineWidth = 3;
-    ctx.strokeStyle = stroke ?? '#f0f';
-    ctx.fillStyle = fill ?? '#f0f';
+    ctx.strokeStyle = stroke ?? "#f0f";
+    ctx.fillStyle = fill ?? "#f0f";
     const { curve } = CurveRender(ctx);
 
     // === START BODY ===
@@ -126,7 +128,7 @@ export class Seaweed implements Animal {
     return this.spine.getPos(
       mod(i, this.spine.joints.length),
       angleOffset,
-      (lengthOffset + this.bodyWidth(i)) * this.scale,
+      (lengthOffset + this.bodyWidth(i)) * this.scale
     );
   }
 }

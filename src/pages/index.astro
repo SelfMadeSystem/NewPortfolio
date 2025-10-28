@@ -2,6 +2,7 @@
 import Wave from "../components/Wave";
 import Layout from "../layout/Layout.astro";
 import Aquarium from "../components/Aquarium.tsx";
+import SeaWeed from "../components/SeaWeed.tsx";
 ---
 
 <Layout>
@@ -50,6 +51,9 @@ import Aquarium from "../components/Aquarium.tsx";
       <div class="h-48 absolute bottom-full left-0 right-0 z-6">
         <Wave client:load id="wave1" neonEmpty neonClipped fill="#242424" />
       </div>
+    </div>
+    <div class="absolute bottom-0 left-0 right-0 h-screen z-10">
+      <SeaWeed client:load color="#fff" />
     </div>
   </div>
 </Layout>

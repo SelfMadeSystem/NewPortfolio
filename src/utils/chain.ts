@@ -2,7 +2,7 @@ import { mod } from './mathUtils';
 import { Vector2, constrainAngle, constrainDistance } from './vec';
 
 export const DEFAULT_PHYSICS = {
-  gravity: 0.4,
+  gravity: -0.4,
   drag: 0.6,
 };
 
@@ -27,7 +27,7 @@ export class Chain {
     jointCount: number,
     linkSize: number,
     angleConstraint: number = Math.PI * 2,
-    diff = new Vector2(0, linkSize),
+    diff = new Vector2(0, -linkSize),
   ) {
     this.linkSize = linkSize;
     this.angleConstraint = angleConstraint;
