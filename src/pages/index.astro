@@ -45,5 +45,11 @@ import Aquarium from "../components/Aquarium.tsx";
     <div class="absolute inset-0 z-5 pointer-events-none">
       <Aquarium client:load color="#fff" />
     </div>
+    <div class="h-48 bg-primary"></div>
+    <div class="h-48 relative z-6 bg-[#242424]">
+      <div class="h-48 absolute bottom-full left-0 right-0 z-6">
+        <Wave client:load id="wave1" neonEmpty neonClipped fill="#242424" />
+      </div>
+    </div>
   </div>
 </Layout>
