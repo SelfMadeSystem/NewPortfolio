@@ -1,0 +1,30 @@
+@import "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap";
+@import "tailwindcss";
+
+@theme {
+  --font-roboto: "Roboto", sans-serif;
+  --font-sans: var(--font-roboto);
+  --color-primary: #525aff;
+}
+
+.hand-wave {
+  display: inline-block;
+  animation: wave 1s infinite ease-in-out;
+  @media (prefers-reduced-motion) {
+    animation: none;
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: rotate(-14deg);
+  }
+
+  50% {
+    transform: rotate(14deg);
+  }
+
+  100% {
+    transform: rotate(-14deg);
+  }
+}

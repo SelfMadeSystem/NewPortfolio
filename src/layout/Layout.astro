@@ -1,0 +1,45 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Shoghi Simon's Portfolio",
+  description = "I've built Discord bots serving 2+ million users, e-commerce sites that tripled sales, and development tools that speed up workflows. Let's build something amazing together.",
+} = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <!-- Meta for SEO -->
+    <meta name="description" content={description} />
+    <meta
+      name="keywords"
+      content="Shoghi Simon, Portfolio, Shoghi, Simon, Shoghi Simon Portfolio, Developer, Software Engineer, Web Developer, Discord Bots, E-commerce, Development Tools"
+    />
+    <meta name="author" content="Shoghi Simon" />
+    <meta name="og:title" content="Shoghi Simon's Portfolio" />
+    <meta name="og:description" content={description} />
+    <meta name="og:image" content="https://shoghisimon.ca/pfp.png" />
+    <meta name="og:url" content="https://shoghisimon.ca" />
+    <meta name="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Shoghi Simon's Portfolio" />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://shoghisimon.ca/pfp.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

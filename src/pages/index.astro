@@ -1,16 +1,49 @@
 ---
-
+import Wave from "../components/Wave";
+import Layout from "../layout/Layout.astro";
+import Aquarium from "../components/Aquarium.tsx";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout>
+  <div class="relative">
+    <div class="h-screen relative flex items-start">
+      <div class="absolute inset-0 w-full h-full -scale-y-100 bg-primary">
+        <Wave
+          client:load
+          id="wave1"
+          neonEmpty
+          neonClipped
+          speed={[0.01, 0.03]}
+          waveWidth={[2, 4] satisfies [number, number]}
+          waveHeight={1}
+          amount={3}
+          opacity={0.6}
+          fill="#ffffff"
+        />
+      </div>
+      <div
+        class="relative flex flex-col items-center gap-4
+              backdrop-filter backdrop-blur-md
+              bg-white/25 text-gray-900 w-fit mx-auto
+              rounded-4xl p-16 max-md:px-8 mt-16 z-6 overflow-hidden"
+      >
+        <h1 class="text-6xl font-bold text-center">
+          <span>Hi, I'm</span>
+          <span>Shoghi Simon</span>
+          <span class="hand-wave">👋</span>
+        </h1>
+        <div class="text-xl max-w-lg mx-auto text-center">
+          I've built Discord bots serving 2+ million users, e-commerce sites
+          that tripled sales, and development tools that speed up workflows.
+        </div>
+        <div class="text-lg block max-w-lg mx-auto text-center mt-4 opacity-80">
+          Let's build something amazing together.
+        </div>
+      </div>
+    </div>
+    <div class="min-h-screen bg-primary"></div>
+    <div class="absolute inset-0 z-5 pointer-events-none">
+      <Aquarium client:load color="#fff" />
+    </div>
+  </div>
+</Layout>
