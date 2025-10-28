@@ -91,6 +91,8 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
       );
 
     function handleResize() {
+      canvasEl.width = canvasEl.clientWidth;
+      canvasEl.height = canvasEl.clientHeight;
       const newT = Math.max(1, Math.floor(canvasEl.width / gap));
       if (newT > t) {
         for (let i = t; i < newT; i++) {
