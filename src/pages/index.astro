@@ -3,9 +3,12 @@ import Wave from "../components/Wave";
 import Layout from "../layout/Layout.astro";
 import Aquarium from "../components/Aquarium.tsx";
 import SeaWeed from "../components/SeaWeed.tsx";
+import "../styles/index.css";
+import { SlideInLoader } from "../components/SlideInLoader";
 ---
 
 <Layout>
+  <SlideInLoader client:load />
   <div class="relative">
     <div class="h-screen relative flex items-start">
       <div class="absolute inset-0 w-full h-full -scale-y-100 bg-primary">
@@ -23,7 +26,7 @@ import SeaWeed from "../components/SeaWeed.tsx";
         />
       </div>
       <div
-        class="relative flex flex-col items-center gap-4
+        class="load-in relative flex flex-col items-center gap-4
               backdrop-filter backdrop-blur-md
               bg-white/25 text-gray-900 w-fit mx-auto
               rounded-4xl p-16 max-md:px-8 mt-16 z-6 overflow-hidden"
@@ -47,13 +50,38 @@ import SeaWeed from "../components/SeaWeed.tsx";
       <Aquarium client:load color="#fff" />
     </div>
     <div class="h-48 bg-primary"></div>
-    <div class="h-48 relative z-6 bg-[#242424]">
+    <div class="h-0 relative z-6">
       <div class="h-48 absolute bottom-full left-0 right-0 z-6">
         <Wave client:load id="wave1" neonEmpty neonClipped fill="#242424" />
       </div>
     </div>
-    <div class="absolute bottom-0 left-0 right-0 h-screen z-10">
-      <SeaWeed client:load color="#fff" />
+    <div class="bg-[#242424] relative z-10">
+      <div class="py-4 relative z-15">
+        <div
+          class="text-white bg-[#242424a0] text-center px-8 py-4 w-fit mx-auto backdrop-blur-md rounded-3xl"
+        >
+          <p class="text-center">
+            Made by <a href="https://github.com/SelfMadeSystem/" target="_blank"
+              >Shoghi Simon</a
+            > with
+            <a href="https://vitejs.dev/" target="_blank">Vite</a>,
+            <a href="https://lit.dev/" target="_blank">Lit</a>,
+            <a href="https://unocss.dev/" target="_blank">UnoCSS</a>,
+            <a href="https://www.typescriptlang.org/" target="_blank"
+              >TypeScript</a
+            >, and ❤️
+          </p>
+          <p class="text-center">
+            <a
+              href="https://github.com/SelfMadeSystem/Portfolio"
+              target="_blank">Source code</a
+            >
+          </p>
+        </div>
+      </div>
+      <div class="absolute bottom-0 left-0 right-0 h-screen z-10">
+        <SeaWeed client:load color="#fff" />
+      </div>
     </div>
   </div>
 </Layout>

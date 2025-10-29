@@ -1,43 +1,38 @@
-# Astro Starter Kit: Minimal
+# Shoghi Simon's Portfolio
 
-```sh
-bun create astro@latest -- --template minimal
-```
+## Main page
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Flat, material-styled portfolio site with animated aquatic theme, including waves, fish, and seaweed.
 
-## 🚀 Project Structure
+## Web Dev page
 
-Inside of your Astro project, you'll see the following folders and files:
+Apple Liquid Glass & AirBnB Lava inspired design.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+Inspiration:
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+- [Fluid Glass](https://chiuhans111.github.io/fluidglass/)
+- [Liquid Glass](https://kube.io/blog/liquid-glass-css-svg/)
+- [AirBnB Lava](https://airbnb.design/lava/)
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Backend Dev page
 
-Any static assets, like images, can be placed in the `public/` directory.
+Retro-futuristic theme with glitch effects.
 
-## 🧞 Commands
+Inspiration:
 
-All commands are run from the root of the project, from a terminal:
+- [alche.studio](https://alche.studio/)
+- [eloyb](https://eloyb.design/)
+- [8 bit snake game](https://codepen.io/filipz/full/JoogyPM)
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
+I think [scanning effect](https://tympanus.net/Development/ScanEffect/effect1/) would be cool here too.
 
-## 👀 Want to learn more?
+## Game Dev Page
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+I want insane WebGL effects here.
+
+Inspiration:
+
+- [igloo.inc](https://igloo.inc/)
+- [alche.studio](https://alche.studio/)
+- [evilmind.dev](https://evilmind.dev/)
+- [aether1](https://www.aether1.ai/)
