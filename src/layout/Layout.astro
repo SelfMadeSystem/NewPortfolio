@@ -4,11 +4,13 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
+  doUnloaded?: boolean;
 }
 
 const {
   title = "Shoghi Simon's Portfolio",
   description = "I've built Discord bots serving 2+ million users, e-commerce sites that tripled sales, and development tools that speed up workflows. Let's build something amazing together.",
+  doUnloaded = false,
 } = Astro.props;
 ---
 
@@ -39,7 +41,7 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-  <body class="">
+  <body class={doUnloaded ? 'unloaded' : ''}>
     <slot />
   </body>
 </html>

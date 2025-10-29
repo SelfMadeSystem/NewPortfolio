@@ -11,8 +11,8 @@ import web from '../assets/web.png';
 import Image from 'astro/components/Image.astro';
 ---
 
-<Layout>
-  <!-- <SlideInLoader client:load /> -->
+<Layout doUnloaded>
+  <SlideInLoader client:load />
   <div class="relative">
     <div class="h-screen relative flex items-start">
       <div class="absolute inset-0 w-full h-full -scale-y-100 bg-primary">
