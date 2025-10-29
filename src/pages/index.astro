@@ -25,7 +25,7 @@ import { SlideInLoader } from '../components/SlideInLoader';
           fill="#ffffff"
         />
       </div>
-      <div
+      <header
         class="load-in relative flex flex-col items-center gap-4
               backdrop-filter backdrop-blur-md
               bg-white/25 text-gray-900 w-fit mx-auto
@@ -43,18 +43,18 @@ import { SlideInLoader } from '../components/SlideInLoader';
         <div class="text-lg block max-w-lg mx-auto text-center mt-4 opacity-80">
           Let's build something amazing together.
         </div>
-      </div>
+      </header>
     </div>
-    <div class="min-h-screen bg-primary">
+    <main class="min-h-screen bg-primary">
       <div class="flex flex-col gap-16 relative z-15">
-        <div
+        <section
           class="flex flex-row flex-wrap justify-center items-center p-8 gap-8"
         >
           <a href="/web" class="goto-card">Web Development</a>
           <a href="/backend" class="goto-card">Backend Development</a>
           <a href="/games" class="goto-card">Game Development</a>
-        </div>
-        <div
+        </section>
+        <section
           class="text-center text-white font-medium p-8 mx-auto max-w-xl backdrop-blur-md bg-white/20 rounded-3xl"
         >
           <h2 class="text-3xl font-bold mb-8">Contact Me</h2>
@@ -69,9 +69,9 @@ import { SlideInLoader } from '../components/SlideInLoader';
               href="https://discord.com/users/299298175825739776">Discord</a
             >.
           </p>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
     <div class="absolute inset-0 z-5 pointer-events-none">
       <Aquarium client:load color="#fff" />
     </div>
@@ -83,7 +83,7 @@ import { SlideInLoader } from '../components/SlideInLoader';
     </div>
     <div class="bg-[#242424] relative z-10">
       <div class="py-4 relative z-15">
-        <div
+        <footer
           class="text-white bg-[#242424a0] text-center px-8 py-4 w-fit mx-auto backdrop-blur-md rounded-3xl"
         >
           <p class="text-center">
@@ -103,7 +103,7 @@ import { SlideInLoader } from '../components/SlideInLoader';
               target="_blank">Source code</a
             >
           </p>
-        </div>
+        </footer>
       </div>
       <div class="absolute bottom-0 left-0 right-0 h-screen z-10">
         <SeaWeed client:load color="#fff" />
