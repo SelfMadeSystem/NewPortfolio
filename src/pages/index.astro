@@ -5,10 +5,14 @@ import Aquarium from '../components/Aquarium.tsx';
 import SeaWeed from '../components/SeaWeed.tsx';
 import '../styles/index.css';
 import { SlideInLoader } from '../components/SlideInLoader';
+import backend from '../assets/backend.png';
+import game from '../assets/game.png';
+import web from '../assets/web.png';
+import Image from 'astro/components/Image.astro';
 ---
 
 <Layout>
-  <SlideInLoader client:load />
+  <!-- <SlideInLoader client:load /> -->
   <div class="relative">
     <div class="h-screen relative flex items-start">
       <div class="absolute inset-0 w-full h-full -scale-y-100 bg-primary">
@@ -48,11 +52,32 @@ import { SlideInLoader } from '../components/SlideInLoader';
     <main class="min-h-screen bg-primary">
       <div class="flex flex-col gap-16 relative z-15">
         <section
-          class="flex flex-row flex-wrap justify-center items-center p-8 gap-8"
+          class="flex flex-row flex-wrap justify-center items-stretch p-8 gap-8"
         >
-          <a href="/web" class="goto-card">Web Development</a>
-          <a href="/backend" class="goto-card">Backend Development</a>
-          <a href="/games" class="goto-card">Game Development</a>
+          <a href="/web" class="goto-card w-fit">
+            Web Development
+            <Image
+              src={web}
+              alt="Web Development"
+              class="my-auto w-64 rounded-lg shadow-lg"
+            />
+          </a>
+          <a href="/backend" class="goto-card">
+            Backend Development
+            <Image
+              src={backend}
+              alt="Backend Development"
+              class="my-auto w-64 rounded-lg shadow-lg"
+            />
+          </a>
+          <a href="/game" class="goto-card">
+            Game Development
+            <Image
+              src={game}
+              alt="Game Development"
+              class="my-auto w-64 rounded-lg shadow-lg"
+            />
+          </a>
         </section>
         <section
           class="text-center text-white font-medium p-8 mx-auto max-w-xl backdrop-blur-md bg-white/20 rounded-3xl"
