@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "preact/hooks";
-import { Seaweed } from "../utils/seaweed";
-import { Vector2 } from "../utils/vec";
-import { getComputedColor } from "../utils/styleUtils";
+import { Seaweed } from '../utils/seaweed';
+import { getComputedColor } from '../utils/styleUtils';
+import { Vector2 } from '../utils/vec';
+import { useEffect, useRef } from 'preact/hooks';
 
 function isNeon() {
   return false;
@@ -15,18 +15,18 @@ interface SeaWeedProps {
  * Preact version of the original SeaWeed LitElement.
  * Keeps the same canvas-based procedural animation and cleanup behavior.
  */
-export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
+export default function SeaWeed({ color = 'blue' }: SeaWeedProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Respect user preference to disable animations
-    if (localStorage.getItem("disable-animations") === "true") return;
+    if (localStorage.getItem('disable-animations') === 'true') return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // locally narrow to non-null variables so inner functions don't need to
@@ -70,10 +70,10 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
       prevScroll = scroll;
     }
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     const gap = 30;
     let t = Math.max(1, Math.floor(canvasEl.width / gap));
@@ -84,10 +84,10 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
           new Seaweed(
             new Vector2(
               canvasEl.width * ((i / t) * 0.9 + 0.05),
-              canvasEl.height
+              canvasEl.height,
             ),
-            0.1
-          )
+            0.1,
+          ),
       );
 
     function handleResize() {
@@ -100,10 +100,10 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
             new Seaweed(
               new Vector2(
                 canvasEl.width * ((i / newT) * 0.9 + 0.05),
-                canvasEl.height
+                canvasEl.height,
               ),
-              0.1
-            )
+              0.1,
+            ),
           );
         }
       } else if (newT < t) {
@@ -113,11 +113,11 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
       for (let i = 0; i < t; i++) {
         animals[i].anchor = new Vector2(
           canvasEl.width * ((i / t) * 0.9 + 0.05),
-          canvasEl.height
+          canvasEl.height,
         );
       }
     }
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     const prevDeltas: number[] = [];
     let prevTime = performance.now();
@@ -161,7 +161,7 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
           animal.display(
             ctx2,
             neon ? resolvedColor : undefined,
-            neon ? "#242424" : resolvedColor
+            neon ? '#242424' : resolvedColor,
           );
       }
 
@@ -175,18 +175,18 @@ export default function SeaWeed({ color = "blue" }: SeaWeedProps) {
     return () => {
       if (animationRef.current != null)
         cancelAnimationFrame(animationRef.current);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("touchmove", handleTouchMove as EventListener);
-      window.removeEventListener("scroll", handleScroll as EventListener);
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('touchmove', handleTouchMove as EventListener);
+      window.removeEventListener('scroll', handleScroll as EventListener);
+      window.removeEventListener('resize', handleResize);
     };
   }, [color]);
 
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: "absolute", width: "100%", height: "100%", top: 0 }}
+      style={{ position: 'absolute', width: '100%', height: '100%', top: 0 }}
     ></canvas>
   );
 }

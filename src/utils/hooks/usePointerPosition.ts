@@ -1,6 +1,6 @@
-import type { RefObject } from 'preact';
 import { Vector2 } from '../vec';
 import { useWindowEvent } from './useWindowEvent';
+import type { RefObject } from 'preact';
 import { useState } from 'preact/hooks';
 
 /**

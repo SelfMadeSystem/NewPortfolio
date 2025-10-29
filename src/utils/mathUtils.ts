@@ -5,7 +5,7 @@
  *
  * @author SelfMadeSystem (Shoghi Simon) 2024-11-07
  */
-import { Vector2 } from "./vec";
+import { Vector2 } from './vec';
 
 export const DEG2RAD = Math.PI / 180;
 export const RAD2DEG = 180 / Math.PI;
@@ -72,8 +72,8 @@ export function randomBool(probability = 0.5): boolean {
  */
 export function randomId(length = 8): string {
   return Array.from({ length }, () =>
-    Math.floor(Math.random() * 16).toString(16)
-  ).join("");
+    Math.floor(Math.random() * 16).toString(16),
+  ).join('');
 }
 
 /**
@@ -187,12 +187,12 @@ export function bezier(
   b: Vector2,
   c: Vector2,
   d: Vector2,
-  t: number
+  t: number,
 ): Vector2 {
   return lerpVec2(
     lerpVec2(lerpVec2(a, b, t), lerpVec2(b, c, t), t),
     lerpVec2(lerpVec2(b, c, t), lerpVec2(c, d, t), t),
-    t
+    t,
   );
 }
 

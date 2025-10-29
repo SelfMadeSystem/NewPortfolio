@@ -1,5 +1,5 @@
 import type { SetStateAction } from 'preact/compat';
-import { useEffect, useState, type Dispatch } from 'preact/hooks';
+import { type Dispatch, useEffect, useState } from 'preact/hooks';
 
 type Contexts = {
   '2d': CanvasRenderingContext2D;

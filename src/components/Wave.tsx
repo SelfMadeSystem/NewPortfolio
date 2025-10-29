@@ -1,6 +1,6 @@
-import { clamp, isInView, random, wrapNumber } from "../utils/mathUtils";
-import { useEffect, useRef } from "preact/hooks";
-import { getComputedColor } from "../utils/styleUtils";
+import { clamp, isInView, random, wrapNumber } from '../utils/mathUtils';
+import { getComputedColor } from '../utils/styleUtils';
+import { useEffect, useRef } from 'preact/hooks';
 
 /**
  * Adapted for React from https://github.com/SelfMadeSystem/Portfolio/blob/main/src/utils/MathUtils.ts
@@ -16,9 +16,9 @@ import { getComputedColor } from "../utils/styleUtils";
  */
 const Wave = ({
   id = undefined,
-  fill = "#000",
+  fill = '#000',
   fill2 = undefined,
-  stroke = "#000",
+  stroke = '#000',
   amount = 4,
   numberOfReverse = 2,
   waveHeight = 0.75,
@@ -61,18 +61,18 @@ const Wave = ({
         width,
         height: i / (amount - 1) || 0,
       };
-    })
+    }),
   );
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      '(prefers-reduced-motion: reduce)',
     ).matches;
 
     const redraw = () => {
@@ -92,7 +92,7 @@ const Wave = ({
         ctx.fillStyle = fillStyle;
         ctx.globalAlpha = opacity;
       } else {
-        ctx.fillStyle = "#242424";
+        ctx.fillStyle = '#242424';
       }
 
       for (const wave of waves.current) {
@@ -165,7 +165,7 @@ const Wave = ({
       }
 
       if (!neon || !neonClipped) {
-        paths.forEach((p) => ctx.clip(p));
+        paths.forEach(p => ctx.clip(p));
 
         ctx.globalAlpha = 1;
         ctx.fillRect(0, 0, width, height);
@@ -271,7 +271,7 @@ const Wave = ({
     <canvas
       ref={canvasRef}
       id={id}
-      style={{ position: "absolute", width: "100%", height: "100%" }}
+      style={{ position: 'absolute', width: '100%', height: '100%' }}
     />
   );
 };

@@ -9,13 +9,13 @@ export function useThreshold(
   dep: unknown[],
 ): number {
   const [count, setCount] = useState(0);
-  const accumulated = useRef(0);
+  const accumulatedRef = useRef(0);
 
   useEffect(() => {
-    accumulated.current += add;
-    if (Math.abs(accumulated.current) >= threshold) {
-      const delta = Math.floor(accumulated.current / threshold);
-      accumulated.current -= delta * threshold;
+    accumulatedRef.current += add;
+    if (Math.abs(accumulatedRef.current) >= threshold) {
+      const delta = Math.floor(accumulatedRef.current / threshold);
+      accumulatedRef.current -= delta * threshold;
       setCount(c => c + delta);
     }
   }, dep); // eslint-disable-line react-hooks/exhaustive-deps

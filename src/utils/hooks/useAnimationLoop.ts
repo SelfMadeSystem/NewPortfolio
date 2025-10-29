@@ -23,9 +23,13 @@ import { useEffect, useRef } from 'preact/hooks';
  *   to avoid unnecessary re-renders or restarts of the animation loop.
  */
 export function useAnimationLoop(callback: (dt: number, t: number) => void) {
-  const lastTimeRef = useRef<number>(performance.now());
+  const lastTimeRef = useRef<number>(-1);
   useEffect(() => {
     let animationFrameId: number;
+
+    if (lastTimeRef.current === -1) {
+      lastTimeRef.current = performance.now();
+    }
 
     const loop = (time: number) => {
       const dt = time - lastTimeRef.current;

@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "prettier --write  \"**/*.{mjs,js,jsx,ts,tsx,md,mdx,astro}\" && eslint --fix \"src/**/*.{js,ts,jsx,tsx,astro}\""
   },
   "dependencies": {
     "@astrojs/preact": "^4.1.1",
@@ -16,5 +17,17 @@
     "motion": "^12.23.24",
     "preact": "^10.27.2",
     "tailwindcss": "^4.1.16"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "astro-eslint-parser": "^1.2.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^1.4.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "^0.7.1"
   }
 }

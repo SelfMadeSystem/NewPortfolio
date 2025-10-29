@@ -153,10 +153,7 @@ export class Vector2 {
   }
 
   static random(max: Vector2): Vector2 {
-    return new Vector2(
-      Math.random() * max.x,
-      Math.random() * max.y,
-    );
+    return new Vector2(Math.random() * max.x, Math.random() * max.y);
   }
 
   add(other: Vector2): Vector2 {

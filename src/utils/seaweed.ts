@@ -1,8 +1,8 @@
-import type { Animal } from "./animal";
-import { Chain } from "./chain";
-import { CurveRender } from "./curveRender";
-import { clamp, lerp, mod, random } from "./mathUtils";
-import { Vector2 } from "./vec";
+import type { Animal } from './animal';
+import { Chain } from './chain';
+import { CurveRender } from './curveRender';
+import { clamp, lerp, mod, random } from './mathUtils';
+import { Vector2 } from './vec';
 
 const start = Date.now();
 
@@ -30,7 +30,7 @@ export class Seaweed implements Animal {
       const amnt = Math.sin(-i * ((this.eh2 + 1) / 3) - dt * 2 + this.eh + 1);
 
       this.spine.prevJoints[i] = this.spine.prevJoints[i].add(
-        new Vector2(amnt, 0)
+        new Vector2(amnt, 0),
       );
     }
 
@@ -50,15 +50,15 @@ export class Seaweed implements Animal {
           .sub(j)
           .normalize()
           .sub(mouseMove.mult(_dt * 10))
-          .mult(v)
+          .mult(v),
       );
     }
   }
 
   display(ctx: CanvasRenderingContext2D, stroke?: string, fill?: string) {
     ctx.lineWidth = 3;
-    ctx.strokeStyle = stroke ?? "#f0f";
-    ctx.fillStyle = fill ?? "#f0f";
+    ctx.strokeStyle = stroke ?? '#f0f';
+    ctx.fillStyle = fill ?? '#f0f';
     const { curve, path: draw } = CurveRender(ctx);
 
     // === START BODY ===
@@ -124,7 +124,7 @@ export class Seaweed implements Animal {
     return this.spine.getPos(
       mod(i, this.spine.joints.length),
       angleOffset,
-      (lengthOffset + this.bodyWidth(i)) * this.scale
+      (lengthOffset + this.bodyWidth(i)) * this.scale,
     );
   }
 }

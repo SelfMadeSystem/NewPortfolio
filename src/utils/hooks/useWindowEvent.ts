@@ -1,4 +1,4 @@
-import { useEffect } from "preact/hooks";
+import { useEffect } from 'preact/hooks';
 
 // Yoinked from:
 // https://github.com/mantinedev/mantine/blob/ac3b2922e7d3a2026a44c1b3fd549886d5a2174d/packages/%40mantine/hooks/src/use-window-event/use-window-event.ts
@@ -36,21 +36,21 @@ export function useWindowEvent<K extends keyof WindowEventMap>(
   listener: K extends keyof WindowEventMap
     ? (this: Window, ev: WindowEventMap[K]) => void
     : (this: Window, ev: CustomEvent) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: boolean | AddEventListenerOptions,
 ): void;
 export function useWindowEvent<K extends string>(
   type: K,
   listener: K extends keyof WindowEventMap
     ? (this: Window, ev: WindowEventMap[K]) => void
     : (this: Window, ev: CustomEvent) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: boolean | AddEventListenerOptions,
 ): void;
 export function useWindowEvent<K extends string>(
   type: K,
   listener: K extends keyof WindowEventMap
     ? (this: Window, ev: WindowEventMap[K]) => void
     : (this: Window, ev: CustomEvent) => void,
-  options?: boolean | AddEventListenerOptions
+  options?: boolean | AddEventListenerOptions,
 ) {
   useEffect(() => {
     window.addEventListener(type as any, listener, options);

@@ -1,4 +1,4 @@
-import { Vector2 } from "./vec";
+import { Vector2 } from './vec';
 
 type CurveRenderReturn = {
   curve: (x: number, y: number) => void;
@@ -32,7 +32,7 @@ export function CurveRender(ctx: CanvasRenderingContext2D): CurveRenderReturn {
           (p1.x + 6 * p2.x - p3.x) / 6,
           (p1.y + 6 * p2.y - p3.y) / 6,
           p2.x,
-          p2.y
+          p2.y,
         );
       }
     },

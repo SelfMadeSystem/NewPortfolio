@@ -8,21 +8,21 @@ import {
   random,
   wrapAngle,
   wrapNumber,
-} from "../utils/mathUtils";
-import { useEffect, useRef } from "preact/hooks";
-import { Vector2 } from "../utils/vec";
-import { getComputedColor } from "../utils/styleUtils";
+} from '../utils/mathUtils';
+import { getComputedColor } from '../utils/styleUtils';
+import { Vector2 } from '../utils/vec';
+import { useEffect, useRef } from 'preact/hooks';
 
 function isNeon() {
   return false;
 }
 
-if (!("Path2D" in globalThis)) {
+if (!('Path2D' in globalThis)) {
   (globalThis as any).Path2D = class {};
 }
 
 const FISH_SVG_PATH = new Path2D(
-  `M12,20L12.76,17C9.5,16.79 6.59,15.4 5.75,13.58C5.66,14.06 5.53,14.5 5.33,14.83C4.67,16 3.33,16 2,16C3.1,16 3.5,14.43 3.5,12.5C3.5,10.57 3.1,9 2,9C3.33,9 4.67,9 5.33,10.17C5.53,10.5 5.66,10.94 5.75,11.42C6.4,10 8.32,8.85 10.66,8.32L9,5C11,5 13,5 14.33,5.67C15.46,6.23 16.11,7.27 16.69,8.38C19.61,9.08 22,10.66 22,12.5C22,14.38 19.5,16 16.5,16.66C15.67,17.76 14.86,18.78 14.17,19.33C13.33,20 12.67,20 12,20M17,11A1,1 0 0,0 16,12A1,1 0 0,0 17,13A1,1 0 0,0 18,12A1,1 0 0,0 17,11Z`
+  `M12,20L12.76,17C9.5,16.79 6.59,15.4 5.75,13.58C5.66,14.06 5.53,14.5 5.33,14.83C4.67,16 3.33,16 2,16C3.1,16 3.5,14.43 3.5,12.5C3.5,10.57 3.1,9 2,9C3.33,9 4.67,9 5.33,10.17C5.53,10.5 5.66,10.94 5.75,11.42C6.4,10 8.32,8.85 10.66,8.32L9,5C11,5 13,5 14.33,5.67C15.46,6.23 16.11,7.27 16.69,8.38C19.61,9.08 22,10.66 22,12.5C22,14.38 19.5,16 16.5,16.66C15.67,17.76 14.86,18.78 14.17,19.33C13.33,20 12.67,20 12,20M17,11A1,1 0 0,0 16,12A1,1 0 0,0 17,13A1,1 0 0,0 18,12A1,1 0 0,0 17,11Z`,
 );
 
 const fishCanvasCache = new Map<string, HTMLCanvasElement>();
@@ -32,7 +32,7 @@ const fishUpscale = 2;
 function createColoredFishCanvas(
   color: string,
   fishScale: number,
-  neon: boolean
+  neon: boolean,
 ): HTMLCanvasElement {
   const cacheKey = `${color}-${fishScale}-${neon}`;
   if (fishCanvasCache.has(cacheKey)) {
@@ -41,15 +41,15 @@ function createColoredFishCanvas(
 
   fishScale *= fishUpscale;
 
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   canvas.width = 24 * fishScale;
   canvas.height = 24 * fishScale;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext('2d')!;
 
   ctx.scale(fishScale, fishScale);
 
   if (neon) {
-    ctx.fillStyle = "#242424";
+    ctx.fillStyle = '#242424';
     ctx.fill(FISH_SVG_PATH);
     ctx.strokeStyle = color;
     ctx.lineWidth = (3 / fishScale) * fishUpscale;
@@ -76,7 +76,7 @@ interface UpdateAndRender {
   update(
     canvasSize: Vector2,
     delta: number,
-    pointers: [Vector2, PointerClickState][]
+    pointers: [Vector2, PointerClickState][],
   ): void;
   draw(ctx: CanvasRenderingContext2D, element: HTMLElement): void;
   moveDiff(diff: Vector2, canvasSize: Vector2): void;
@@ -100,7 +100,7 @@ abstract class BaseFish implements UpdateAndRender {
   abstract update(
     canvasSize: Vector2,
     delta: number,
-    pointers: [Vector2, PointerClickState][]
+    pointers: [Vector2, PointerClickState][],
   ): void;
 
   /**
@@ -129,7 +129,7 @@ abstract class BaseFish implements UpdateAndRender {
         0,
         0,
         fishNeonCanvas.width / fishUpscale,
-        fishNeonCanvas.height / fishUpscale
+        fishNeonCanvas.height / fishUpscale,
       );
     } else {
       const fishFillCanvas = createColoredFishCanvas(color, size, false);
@@ -138,7 +138,7 @@ abstract class BaseFish implements UpdateAndRender {
         0,
         0,
         fishFillCanvas.width / fishUpscale,
-        fishFillCanvas.height / fishUpscale
+        fishFillCanvas.height / fishUpscale,
       );
     }
 
@@ -186,11 +186,14 @@ class Fish extends BaseFish {
   protected runAwayDuration: number = 5000;
 
   protected passedTurnTo: boolean = false;
-  constructor(protected color: string, canvasSize: Vector2) {
+  constructor(
+    protected color: string,
+    canvasSize: Vector2,
+  ) {
     super();
     this.position = new Vector2(
       random(0, canvasSize.x),
-      random(0, canvasSize.y)
+      random(0, canvasSize.y),
     );
     this.turnSpeed = random(-this.maxTurnSpeed, this.maxTurnSpeed);
   }
@@ -214,7 +217,7 @@ class Fish extends BaseFish {
   moveTo(pos: Vector2, canvasSize: Vector2) {
     this.position = new Vector2(
       wrapNumber(pos.x, -this.size * 12, canvasSize.x + this.size * 12),
-      wrapNumber(pos.y, -this.size * 12, canvasSize.y + this.size * 12)
+      wrapNumber(pos.y, -this.size * 12, canvasSize.y + this.size * 12),
     );
   }
 
@@ -224,7 +227,7 @@ class Fish extends BaseFish {
 
   move(speed: number, canvasSize: Vector2) {
     const pos = this.position.add(
-      Vector2.fromAngle(this.rotation * DEG2RAD, speed)
+      Vector2.fromAngle(this.rotation * DEG2RAD, speed),
     );
 
     this.moveTo(pos, canvasSize);
@@ -266,7 +269,7 @@ class Fish extends BaseFish {
     this.turnSpeed = clamp(
       this.turnSpeed,
       -this.maxTurnSpeed,
-      this.maxTurnSpeed
+      this.maxTurnSpeed,
     );
 
     const sign = Math.sign(diff);
@@ -284,7 +287,7 @@ class Fish extends BaseFish {
   update(
     canvasSize: Vector2,
     delta: number,
-    pointers: [Vector2, PointerClickState][]
+    pointers: [Vector2, PointerClickState][],
   ): void {
     for (const pointer of pointers) {
       const [pointerPos, clickState] = pointer;
@@ -314,7 +317,7 @@ class Fish extends BaseFish {
         this.maxTurnSpeed = lerp(
           this.normalMaxTurnSpeed,
           this.runAwayMaxTurnSpeed,
-          t
+          t,
         );
         this.turnAccel = lerp(this.normalTurnAccel, this.runAwayTurnAccel, t);
       }
@@ -324,7 +327,7 @@ class Fish extends BaseFish {
 
     if (this.runAwayTime > 0) {
       this.turnTo = wrapAngle(
-        this.position.angleTo(this.runAwayFrom) * RAD2DEG + 180
+        this.position.angleTo(this.runAwayFrom) * RAD2DEG + 180,
       );
     }
   }
@@ -371,7 +374,7 @@ class BasicFish extends Fish {
   update(
     canvasSize: Vector2,
     delta: number,
-    pointers: [Vector2, PointerClickState][]
+    pointers: [Vector2, PointerClickState][],
   ): void {
     super.update(canvasSize, delta, pointers);
 
@@ -409,7 +412,11 @@ class MiniFish extends Fish {
   protected closeSpeed = 0.07;
   protected farDistance = 750;
   protected closeDistance = 50;
-  constructor(color: string, canvasSize: Vector2, public school: School) {
+  constructor(
+    color: string,
+    canvasSize: Vector2,
+    public school: School,
+  ) {
     super(color, canvasSize);
     this.size = 1;
 
@@ -421,7 +428,7 @@ class MiniFish extends Fish {
     this.runAwayTurnAccel = 3000;
 
     this.offset = Vector2.fromAngle(Math.random() * 360 * DEG2RAD).mult(
-      Math.random() * 70 + 35
+      Math.random() * 70 + 35,
     );
     this.position = school.position
       .add(this.offset)
@@ -433,7 +440,7 @@ class MiniFish extends Fish {
   override update(
     canvasSize: Vector2,
     delta: number,
-    pointers: [Vector2, PointerClickState][]
+    pointers: [Vector2, PointerClickState][],
   ): void {
     super.update(canvasSize, delta, pointers);
 
@@ -467,10 +474,10 @@ class MiniFish extends Fish {
         lerp(
           this.closeSpeed,
           this.farSpeed,
-          dist / (this.farDistance * this.farDistance)
+          dist / (this.farDistance * this.farDistance),
         ),
         this.closeSpeed,
-        this.farSpeed
+        this.farSpeed,
       );
     }
   }
@@ -497,7 +504,11 @@ class School implements UpdateAndRender {
   public rotation: number = 0;
   public rotationChange: number = 30;
 
-  constructor(public size: number, color: string, canvasSize: Vector2) {
+  constructor(
+    public size: number,
+    color: string,
+    canvasSize: Vector2,
+  ) {
     this.position = Vector2.random(canvasSize);
     this.rotation = Math.random() * 360 - 180;
     this.rotationChange = (Math.random() - 0.5) ** 3 * 50;
@@ -521,7 +532,7 @@ class School implements UpdateAndRender {
   update(
     canvasSize: Vector2,
     delta: number,
-    pointers: [Vector2, PointerClickState][]
+    pointers: [Vector2, PointerClickState][],
   ): void {
     const deltaSeconds = delta / 1000;
 
@@ -578,7 +589,7 @@ type AquariumProps = {
 };
 
 export default function Aquarium({
-  color = "blue",
+  color = 'blue',
   maskId = null,
   maskInverse = false,
   flipMaskX = false,
@@ -591,7 +602,7 @@ export default function Aquarium({
   const lagCounterRef = useRef<number>(0);
 
   useEffect(() => {
-    if (localStorage.getItem("disable-animations") === "true") return;
+    if (localStorage.getItem('disable-animations') === 'true') return;
 
     let mounted = true;
 
@@ -612,232 +623,233 @@ export default function Aquarium({
       mounted = false;
       cancelAnimationFrame(animationFrameRef.current);
     };
-    // Intentionally only restart when maskId or core visual props change
-  }, [maskId, color, maskInverse, flipMaskX, flipMaskY]);
 
-  function startDraw() {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      console.error("canvas is null");
-      return;
-    }
-
-    startTimeRef.current = performance.now();
-    lagCounterRef.current = 0;
-
-    const ctx = canvas.getContext("2d")!;
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d")!;
-
-    let width = (tempCanvas.width = canvas.width = canvas.clientWidth);
-    let height = (tempCanvas.height = canvas.height = canvas.clientHeight);
-
-    const setCanvasSize = () => {
-      width = tempCanvas.width = canvas.width = canvas.clientWidth;
-      height = tempCanvas.height = canvas.height = canvas.clientHeight;
-    };
-    setCanvasSize();
-
-    const ro = new ResizeObserver(setCanvasSize);
-    ro.observe(canvas);
-
-    let prevTop = getTopInDocument(canvas);
-
-    // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
-    const fishies: UpdateAndRender[] = [];
-    fishies.push(new School(10, color, new Vector2(width, height)));
-    fishies.push(new School(10, color, new Vector2(width, height)));
-    for (let i = 0; i < 5; i++)
-      fishies.push(new BasicFish(color, new Vector2(width, height)));
-
-    const pointerStates: Map<number, PointerState> = new Map();
-    let lastTime = performance.now();
-
-    const onScroll = () => {
-      const top = getTopInDocument(canvas);
-      if (top !== prevTop) {
-        const diff = top - prevTop;
-        for (const f of fishies)
-          f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
-        prevTop = top;
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = requestAnimationFrame(redraw);
-      }
-    };
-
-    const onCustomScroll = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (detail && typeof detail.diffY === "number") {
-        const diff = detail.diffY;
-        for (const f of fishies)
-          f.moveDiff(new Vector2(0, diff), new Vector2(width, height));
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = requestAnimationFrame(redraw);
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("custom-scroll", onCustomScroll as EventListener);
-
-    const mask: HTMLCanvasElement | null = (() => {
-      if (!maskId) return null;
-      const maskElem = document.getElementById(
-        maskId
-      ) as HTMLCanvasElement | null;
-      if (!maskElem) return null;
-      return maskElem as HTMLCanvasElement | null;
-    })();
-
-    const ctxToUse = mask == null ? ctx : tempCtx;
-
-    const redraw = () => {
-      const now = performance.now();
-      let delta = now - lastTime;
-      lastTime = now;
-
-      // lag detection logic (kept from original)
-      if (startTimeRef.current + LAG_CHECK_TIME >= now) {
-        lagCounterRef.current++;
-      } else {
-        const frameDelay = (now - startTimeRef.current) / lagCounterRef.current;
-        if (lagCounterRef.current < LAG_CHECK_COUNT) {
-          console.warn(
-            "Lag detected, stopping drawing. Average frame delay: ",
-            frameDelay
-          );
-          ctx.clearRect(0, 0, width, height);
-          return;
-        }
-        lagCounterRef.current = 0;
-        startTimeRef.current = now;
-      }
-
-      if (delta > 32) delta = 32;
-
-      for (const f of fishies)
-        f.update(new Vector2(width, height), delta, [
-          ...pointerStates.values(),
-        ]);
-
-      if (!isInView(canvas)) {
-        animationFrameRef.current = requestAnimationFrame(redraw);
+    function startDraw() {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        console.error('canvas is null');
         return;
       }
 
-      ctxToUse.clearRect(0, 0, width, height);
-      for (const f of fishies) f.draw(ctxToUse, canvas);
+      startTimeRef.current = performance.now();
+      lagCounterRef.current = 0;
 
-      // advance pointer click states
-      for (const [, pointer] of pointerStates) {
-        const [_pos, clickState] = pointer;
-        if (clickState === PointerClickState.CLICKED)
-          pointer[1] = PointerClickState.HELD;
-      }
+      const ctx = canvas.getContext('2d')!;
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d')!;
 
-      if (mask != null) {
-        if (isInView(mask)) {
-          ctx.clearRect(0, 0, width, height);
+      let width = (tempCanvas.width = canvas.width = canvas.clientWidth);
+      let height = (tempCanvas.height = canvas.height = canvas.clientHeight);
 
-          const maskRect = mask.getBoundingClientRect();
-          const thisRect = canvas.getBoundingClientRect();
-          const maskHeight = thisRect.bottom - maskRect.top;
+      const setCanvasSize = () => {
+        width = tempCanvas.width = canvas.width = canvas.clientWidth;
+        height = tempCanvas.height = canvas.height = canvas.clientHeight;
+      };
+      setCanvasSize();
 
-          ctx.save();
-          ctx.translate(0, height - maskHeight);
-          if (flipMaskX) {
-            ctx.translate(width, 0);
-            ctx.scale(-1, 1);
-          }
-          if (flipMaskY) {
-            ctx.translate(0, mask.height);
-            ctx.scale(1, -1);
-          }
-          ctx.drawImage(mask, 0, 0);
-          ctx.restore();
+      const ro = new ResizeObserver(setCanvasSize);
+      ro.observe(canvas);
 
-          ctx.save();
-          if (!maskInverse) {
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, width, Math.ceil(height - maskHeight));
-          }
+      let prevTop = getTopInDocument(canvas);
 
-          ctx.globalCompositeOperation = maskInverse
-            ? "source-out"
-            : "source-in";
-          ctx.drawImage(tempCanvas, 0, 0, width, height);
-          ctx.restore();
-        } else {
-          ctx.clearRect(0, 0, width, height);
-          ctx.drawImage(tempCanvas, 0, 0, width, height);
+      // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
+      const fishies: UpdateAndRender[] = [];
+      fishies.push(new School(10, color, new Vector2(width, height)));
+      fishies.push(new School(10, color, new Vector2(width, height)));
+      for (let i = 0; i < 5; i++)
+        fishies.push(new BasicFish(color, new Vector2(width, height)));
+
+      const pointerStates: Map<number, PointerState> = new Map();
+      let lastTime = performance.now();
+
+      const onScroll = () => {
+        const top = getTopInDocument(canvas);
+        if (top !== prevTop) {
+          const diff = top - prevTop;
+          for (const f of fishies)
+            f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
+          prevTop = top;
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = requestAnimationFrame(redraw);
         }
-      }
+      };
 
-      animationFrameRef.current = requestAnimationFrame(redraw);
-    };
+      const onCustomScroll = (e: Event) => {
+        const detail = (e as CustomEvent).detail;
+        if (detail && typeof detail.diffY === 'number') {
+          const diff = detail.diffY;
+          for (const f of fishies)
+            f.moveDiff(new Vector2(0, diff), new Vector2(width, height));
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = requestAnimationFrame(redraw);
+        }
+      };
 
-    // start loop
-    redraw();
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('custom-scroll', onCustomScroll as EventListener);
 
-    // pointer helpers
-    const pointerToLocal = (e: PointerEvent): Vector2 => {
-      const rect = canvas.getBoundingClientRect();
-      return new Vector2(e.clientX - rect.left, e.clientY - rect.top);
-    };
+      const mask: HTMLCanvasElement | null = (() => {
+        if (!maskId) return null;
+        const maskElem = document.getElementById(
+          maskId,
+        ) as HTMLCanvasElement | null;
+        if (!maskElem) return null;
+        return maskElem as HTMLCanvasElement | null;
+      })();
 
-    const pointerDown = (e: PointerEvent) => {
-      pointerStates.set(e.pointerId, [
-        pointerToLocal(e),
-        PointerClickState.CLICKED,
-      ]);
-    };
-    const pointerMove = (e: PointerEvent) => {
-      const current = pointerStates.get(e.pointerId);
-      if (current != null) current[0] = pointerToLocal(e);
-      else
+      const ctxToUse = mask == null ? ctx : tempCtx;
+
+      const redraw = () => {
+        const now = performance.now();
+        let delta = now - lastTime;
+        lastTime = now;
+
+        // lag detection logic (kept from original)
+        if (startTimeRef.current + LAG_CHECK_TIME >= now) {
+          lagCounterRef.current++;
+        } else {
+          const frameDelay =
+            (now - startTimeRef.current) / lagCounterRef.current;
+          if (lagCounterRef.current < LAG_CHECK_COUNT) {
+            console.warn(
+              'Lag detected, stopping drawing. Average frame delay: ',
+              frameDelay,
+            );
+            ctx.clearRect(0, 0, width, height);
+            return;
+          }
+          lagCounterRef.current = 0;
+          startTimeRef.current = now;
+        }
+
+        if (delta > 32) delta = 32;
+
+        for (const f of fishies)
+          f.update(new Vector2(width, height), delta, [
+            ...pointerStates.values(),
+          ]);
+
+        if (!isInView(canvas)) {
+          animationFrameRef.current = requestAnimationFrame(redraw);
+          return;
+        }
+
+        ctxToUse.clearRect(0, 0, width, height);
+        for (const f of fishies) f.draw(ctxToUse, canvas);
+
+        // advance pointer click states
+        for (const [, pointer] of pointerStates) {
+          const [_pos, clickState] = pointer;
+          if (clickState === PointerClickState.CLICKED)
+            pointer[1] = PointerClickState.HELD;
+        }
+
+        if (mask != null) {
+          if (isInView(mask)) {
+            ctx.clearRect(0, 0, width, height);
+
+            const maskRect = mask.getBoundingClientRect();
+            const thisRect = canvas.getBoundingClientRect();
+            const maskHeight = thisRect.bottom - maskRect.top;
+
+            ctx.save();
+            ctx.translate(0, height - maskHeight);
+            if (flipMaskX) {
+              ctx.translate(width, 0);
+              ctx.scale(-1, 1);
+            }
+            if (flipMaskY) {
+              ctx.translate(0, mask.height);
+              ctx.scale(1, -1);
+            }
+            ctx.drawImage(mask, 0, 0);
+            ctx.restore();
+
+            ctx.save();
+            if (!maskInverse) {
+              ctx.fillStyle = 'white';
+              ctx.fillRect(0, 0, width, Math.ceil(height - maskHeight));
+            }
+
+            ctx.globalCompositeOperation = maskInverse
+              ? 'source-out'
+              : 'source-in';
+            ctx.drawImage(tempCanvas, 0, 0, width, height);
+            ctx.restore();
+          } else {
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(tempCanvas, 0, 0, width, height);
+          }
+        }
+
+        animationFrameRef.current = requestAnimationFrame(redraw);
+      };
+
+      // start loop
+      redraw();
+
+      // pointer helpers
+      const pointerToLocal = (e: PointerEvent): Vector2 => {
+        const rect = canvas.getBoundingClientRect();
+        return new Vector2(e.clientX - rect.left, e.clientY - rect.top);
+      };
+
+      const pointerDown = (e: PointerEvent) => {
+        pointerStates.set(e.pointerId, [
+          pointerToLocal(e),
+          PointerClickState.CLICKED,
+        ]);
+      };
+      const pointerMove = (e: PointerEvent) => {
+        const current = pointerStates.get(e.pointerId);
+        if (current != null) current[0] = pointerToLocal(e);
+        else
+          pointerStates.set(e.pointerId, [
+            pointerToLocal(e),
+            PointerClickState.NONE,
+          ]);
+      };
+      const pointerUp = (e: PointerEvent) => {
         pointerStates.set(e.pointerId, [
           pointerToLocal(e),
           PointerClickState.NONE,
         ]);
-    };
-    const pointerUp = (e: PointerEvent) => {
-      pointerStates.set(e.pointerId, [
-        pointerToLocal(e),
-        PointerClickState.NONE,
-      ]);
-    };
+      };
 
-    window.addEventListener("pointerdown", pointerDown);
-    window.addEventListener("pointermove", pointerMove);
-    window.addEventListener("pointerup", pointerUp);
+      window.addEventListener('pointerdown', pointerDown);
+      window.addEventListener('pointermove', pointerMove);
+      window.addEventListener('pointerup', pointerUp);
 
-    // cleanup function for listeners / observers / animation
-    const cleanup = () => {
-      cancelAnimationFrame(animationFrameRef.current);
-      ro.disconnect();
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener(
-        "custom-scroll",
-        onCustomScroll as EventListener
-      );
-      window.removeEventListener("pointerdown", pointerDown);
-      window.removeEventListener("pointermove", pointerMove);
-      window.removeEventListener("pointerup", pointerUp);
-    };
+      // cleanup function for listeners / observers / animation
+      const cleanup = () => {
+        cancelAnimationFrame(animationFrameRef.current);
+        ro.disconnect();
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener(
+          'custom-scroll',
+          onCustomScroll as EventListener,
+        );
+        window.removeEventListener('pointerdown', pointerDown);
+        window.removeEventListener('pointermove', pointerMove);
+        window.removeEventListener('pointerup', pointerUp);
+      };
 
-    // return cleanup to be called by outer effect on unmount/prop change
-    // (we can't return from here directly; store it on the animationFrameRef so outer effect can call it if needed)
-    // but for simplicity call cleanup when the component unmounts via effect cleanup above
-    // to be safe, attach it to the ref so other code could call it if extended
-    (animationFrameRef as any).cleanup = cleanup;
-  }
+      // return cleanup to be called by outer effect on unmount/prop change
+      // (we can't return from here directly; store it on the animationFrameRef so outer effect can call it if needed)
+      // but for simplicity call cleanup when the component unmounts via effect cleanup above
+      // to be safe, attach it to the ref so other code could call it if extended
+      (animationFrameRef as any).cleanup = cleanup;
+    }
+    // Intentionally only restart when maskId or core visual props change
+  }, [maskId, color, maskInverse, flipMaskX, flipMaskY]);
 
   return (
     <canvas
       ref={canvasRef}
       style={{
-        position: "sticky",
-        width: "100%",
-        height: "100vh",
+        position: 'sticky',
+        width: '100%',
+        height: '100vh',
         top: 0,
       }}
     />
