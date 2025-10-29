@@ -45,7 +45,33 @@ import { SlideInLoader } from "../components/SlideInLoader";
         </div>
       </div>
     </div>
-    <div class="min-h-screen bg-primary"></div>
+    <div class="min-h-screen bg-primary">
+      <div class="flex flex-col gap-16 relative z-15">
+        <div
+          class="flex flex-row flex-wrap justify-center items-center p-8 gap-8"
+        >
+          <a href="/web" class="goto-card">Web Development</a>
+          <a href="/backend" class="goto-card">Backend Development</a>
+          <a href="/games" class="goto-card">Game Development</a>
+        </div>
+        <div
+          class="text-center text-white font-medium p-8 mx-auto max-w-xl backdrop-blur-md bg-white/20 rounded-3xl"
+        >
+          <h2 class="text-3xl font-bold mb-8">Contact Me</h2>
+          <p class="text-xl">
+            Interested in working together or have any questions? <br /> Feel free
+            to reach out via email at <a
+              class="text-white"
+              href="mailto:sms@shoghisimon.ca">sms@shoghisimon.ca</a
+            > or send me a message on
+            <a
+              class="text-white"
+              href="https://discord.com/users/299298175825739776">Discord</a
+            >.
+          </p>
+        </div>
+      </div>
+    </div>
     <div class="absolute inset-0 z-5 pointer-events-none">
       <Aquarium client:load color="#fff" />
     </div>
