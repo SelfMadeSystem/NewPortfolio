@@ -4,26 +4,37 @@ import { useCanvas } from '../utils/hooks/useCanvas';
 import { usePointerPosition } from '../utils/hooks/usePointerPosition';
 import { Vector2 } from '../utils/vec';
 import { getLines } from '../utils/wordWrap';
+import { SCALE_DOWN } from './RippleGL';
+import { rippleCanvasStore } from './rippleStore';
 import { useRef } from 'preact/hooks';
 
 const defaultOptions = {
   fontSize: 24,
   fontFamily: 'monospace',
-  rippleStrength: 10.0,
-  rippleDamping: 1.0,
-  rippleRadius: 5.0,
-  rippleStride: 4.0,
-  maxThreshold: 400.0,
-  minThreshold: 0.0,
+  randChars: 3,
+  randDuration: 500,
+  maxThreshold: 0.6,
+  minThreshold: 0.1,
   colorBoost: 0.2,
   colorBoostBlue: 0.5,
 };
 
 type WebGLTextOptions = typeof defaultOptions;
 
-function textButRandom(text: string) {
-  const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789[]{}<>?/|\\`~!@#$%^&*()-_=+';
+const chars =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789[]{}<>?/|\\`~!@#$%^&*()-_=+';
+
+function randSubsetOfChars(length: number) {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randIndex = Math.floor(Math.random() * chars.length);
+    result += chars[randIndex];
+  }
+  return result;
+}
+
+function textButRandom(text: string, options: WebGLTextOptions) {
+  const chars = randSubsetOfChars(options.randChars);
   let result = '';
   for (let i = 0; i < text.length; i++) {
     const t = text[i];
@@ -96,6 +107,7 @@ varying vec2 v_texcoord;
 uniform sampler2D textTex;
 uniform sampler2D randTex;
 uniform sampler2D rippleTex;
+uniform vec4 ripplePosition; // x, y, width, height
 uniform float time;
 uniform vec2 pointerPos;
 uniform vec2 resolution;
@@ -115,8 +127,10 @@ vec2 getCharPos(vec2 uv) {
 }
 
 vec4 getRipple(vec2 uv) {
-  vec4 rippleData = texture2D(rippleTex, uv);
-  return rippleData;
+  uv.y = 1.0 - uv.y;
+  // uv is local uv in this texture. we need to map to ripple texture space
+  vec2 rippleUV = uv * ripplePosition.zw + ripplePosition.xy;
+  return texture2D(rippleTex, rippleUV);
 }
 
 vec4 getAvgRipple(vec2 charCoord) {
@@ -132,9 +146,26 @@ vec4 getAvgRipple(vec2 charCoord) {
 void main() {
   // Draw randTex if close to pointer, else textTex
   vec2 uv = v_texcoord;
+  vec2 fragCoord = uv * resolution;
+  // gl_FragColor = getRipple(uv);
+  // return;
   vec2 charCoord = getCharPos(uv);
+
+  vec2 charIndex = floor((fragCoord - charOffset) / charSize);
+  vec2 gridSize = (resolution - charOffset) / charSize;
+  bool inBounds = charIndex.x >= 0.0 && charIndex.x < gridSize.x &&
+                  charIndex.y >= 0.0 && charIndex.y < gridSize.y;
+
+  if (!inBounds) {
+    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red for out-of-bounds
+    return;
+  }
+
+  // Calculate position within the character cell
+  vec2 cellPos = mod(fragCoord - charOffset, charSize);
+
   vec4 ripple = getAvgRipple(charCoord);
-  float dist = 500.0 - (ripple.x * 500.0);
+  float height = abs(ripple.x);
   vec4 textTexel = texture2D(textTex, uv);
   vec4 randTexel = texture2D(randTex, uv);
 
@@ -145,66 +176,22 @@ void main() {
   float velocity = currentHeight - prevHeight;
 
   vec4 color;
-  if (dist < maxThreshold) {
-    // Create a value that goes 0->1->0 over [minThreshold, maxThreshold]
-    float midThreshold = (minThreshold + maxThreshold) / 2.0;
-    float mixAmount = 1.0 - abs(dist - midThreshold) / (midThreshold - minThreshold);
-    mixAmount = clamp(mixAmount, 0.0, 1.0);
-    mixAmount = (mixAmount * 0.5) + 0.5;
+  if (height > 0.0) {
+    // if between min and max threshold, fully rand
+    float mixAmount = smoothstep(minThreshold, maxThreshold, height);
     
     // Only show random characters when the wave is moving in the positive direction (expanding)
     float isExpanding = step(0.0, velocity);
     float randomness = mixAmount * isExpanding;
-    // float randomness = 1.0;
-    
+
     color = mix(textTexel, randTexel, randomness);
 
-    color.rgb -= vec3(colorBoostBlue, colorBoostBlue, colorBoost) * (1.0 - (dist / maxThreshold));
+    color.rgb -= vec3(colorBoostBlue, colorBoostBlue, colorBoost) * mixAmount;
   } else {
     color = textTexel;
   }
+
   gl_FragColor = color;
-}
-`;
-
-const rippleFragShader = /* glsl */ `
-precision highp float;
-
-
-varying vec2 v_texcoord;
-uniform sampler2D prevTex;
-uniform float time;
-uniform float dt;
-uniform vec2 pointerPos;
-uniform bool pointerDown;
-uniform vec2 resolution;
-uniform float rippleStrength;
-uniform float rippleDamping;
-uniform float rippleRadius;
-uniform float rippleStride;
-
-void main()
-{
-  vec2 uv = v_texcoord;
-  uv.y = 1.0 - uv.y;
-  vec2 fragCoord = uv * resolution;
-  vec2 stride = vec2(rippleStride) / resolution;
-  vec4 hC = texture2D(prevTex, uv);
-  vec4 hL = texture2D(prevTex, uv - vec2(stride.x, 0.0));
-  vec4 hR = texture2D(prevTex, uv + vec2(stride.x, 0.0));
-  vec4 hT = texture2D(prevTex, uv + vec2(0.0, stride.y));
-  vec4 hB = texture2D(prevTex, uv - vec2(0.0, stride.y));
-
-  float new_height = (hL.x + hR.x + hT.x + hB.x) / 2.0 - hC.y;
-  float dist = distance(fragCoord, pointerPos);
-
-  if (pointerDown) {
-    new_height += rippleStrength * exp(-dist/rippleRadius);
-  }
-
-  new_height *= rippleDamping;
-
-  gl_FragColor = vec4(new_height, hC.x, hC.y, 1.0);
 }
 `;
 
@@ -217,15 +204,11 @@ export function WebGLText({
   children: string;
 } & Partial<WebGLTextOptions>) {
   const options: WebGLTextOptions = { ...defaultOptions, ...ogOptions };
-  const shaderOffsetRef = useRef<Vector2>(new Vector2(0, 4));
+  const shaderOffsetRef = useRef<Vector2>(new Vector2(0, 0));
   const charSizeRef = useRef<Vector2>(new Vector2(0, 0));
   const textProgramRef = useRef<twgl.ProgramInfo | null>(null);
-  const rippleProgramRef = useRef<twgl.ProgramInfo | null>(null);
-  const rippleTexRef = useRef<[WebGLTexture, WebGLTexture] | null>(null);
-  const rippleFBORef = useRef<
-    [twgl.FramebufferInfo, twgl.FramebufferInfo] | null
-  >(null);
   const spanRef = useRef<HTMLDivElement | null>(null);
+  const rippleTexRef = useRef<WebGLTexture | null>(null);
   const lastRandTimeRef = useRef<number>(0);
 
   const getText = () => {
@@ -248,47 +231,10 @@ export function WebGLText({
         vertexShader,
         textFragShader,
       ]);
-
-      rippleProgramRef.current = twgl.createProgramInfo(gl, [
-        vertexShader,
-        rippleFragShader,
-      ]);
     },
 
     resize: (gl, canvas) => {
       gl.viewport(0, 0, canvas.width, canvas.height);
-
-      if (!rippleProgramRef.current) {
-        return;
-      }
-
-      const tex1 = twgl.createTexture(gl, {
-        width: canvas.width,
-        height: canvas.height,
-        mag: gl.LINEAR,
-        min: gl.LINEAR,
-      });
-      const tex2 = twgl.createTexture(gl, {
-        width: canvas.width,
-        height: canvas.height,
-        mag: gl.LINEAR,
-        min: gl.LINEAR,
-      });
-      rippleTexRef.current = [tex1, tex2];
-
-      const fbo1 = twgl.createFramebufferInfo(
-        gl,
-        [{ attachment: tex1 }],
-        canvas.width,
-        canvas.height,
-      );
-      const fbo2 = twgl.createFramebufferInfo(
-        gl,
-        [{ attachment: tex2 }],
-        canvas.width,
-        canvas.height,
-      );
-      rippleFBORef.current = [fbo1, fbo2];
     },
   });
   const [textCtx, textCanvas, setTextCanvas] = useCanvas<'2d'>({
@@ -322,21 +268,63 @@ export function WebGLText({
       !textCanvas ||
       !randCanvas ||
       !glCanvas ||
-      !textProgramRef.current ||
-      !rippleProgramRef.current ||
-      !rippleTexRef.current
+      !textProgramRef.current
     ) {
       return;
     }
 
+    const rippleCanvas = rippleCanvasStore.get();
+
+    if (!rippleCanvas) {
+      return;
+    }
+
+    let rippleTex = rippleTexRef.current;
+
+    if (!rippleTex) {
+      // create texture from ripple canvas
+      rippleTex = twgl.createTexture(gl, {
+        src: rippleCanvas,
+        mag: gl.LINEAR,
+        min: gl.LINEAR,
+      });
+      rippleTexRef.current = rippleTex;
+    } else {
+      // update texture
+      gl.bindTexture(gl.TEXTURE_2D, rippleTex);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        rippleCanvas,
+      );
+    }
+
+    const canvasRect = rippleCanvas.getBoundingClientRect();
+    const thisRect = glCanvas.getBoundingClientRect();
+    const ripplePosX =
+      (thisRect.left - canvasRect.left) / rippleCanvas.width / SCALE_DOWN;
+    const ripplePosY =
+      1.0 -
+      (thisRect.top - canvasRect.top + thisRect.height) /
+        rippleCanvas.height /
+        SCALE_DOWN;
+    const rippleWidth = thisRect.width / rippleCanvas.width / SCALE_DOWN;
+    const rippleHeight = thisRect.height / rippleCanvas.height / SCALE_DOWN;
+
     const textProgramInfo = textProgramRef.current;
-    const rippleProgramInfo = rippleProgramRef.current;
-    const [rippleTex1, rippleTex2] = rippleTexRef.current;
 
     // draw random text for the rand canvas (centered, multiline-capable)
-    if (t - lastRandTimeRef.current > 100) {
+    if (t - lastRandTimeRef.current > options.randDuration) {
       lastRandTimeRef.current = t;
-      drawTextLines(randCtx, randCanvas, textButRandom(getText()), options);
+      drawTextLines(
+        randCtx,
+        randCanvas,
+        textButRandom(getText(), options),
+        options,
+      );
     }
 
     // Now draw to WebGL canvas
@@ -382,37 +370,13 @@ export function WebGLText({
     };
     const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
 
-    {
-      // Ripple pass and swap
-      gl.useProgram(rippleProgramInfo.program);
-      twgl.setBuffersAndAttributes(gl, rippleProgramInfo, bufferInfo);
-      twgl.setUniforms(rippleProgramInfo, {
-        prevTex: rippleTex1,
-        time: t,
-        dt: dt,
-        pointerPos: pointer.a,
-        pointerDown: pointer.distSq(prevPointer.current) > 1,
-        resolution: [glCanvas.width, glCanvas.height],
-        rippleStrength: options.rippleStrength,
-        rippleDamping: options.rippleDamping,
-        rippleRadius: options.rippleRadius,
-        rippleStride: options.rippleStride,
-      });
-      const fbo = rippleFBORef.current!;
-      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[1].framebuffer);
-      twgl.drawBufferInfo(gl, bufferInfo);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      // swap
-      rippleTexRef.current = [rippleTex2, rippleTex1];
-      rippleFBORef.current = [fbo[1], fbo[0]];
-    }
-
     gl.useProgram(textProgramInfo.program);
     twgl.setBuffersAndAttributes(gl, textProgramInfo, bufferInfo);
     twgl.setUniforms(textProgramInfo, {
       textTex: textTex,
       randTex: randTex,
-      rippleTex: rippleTex1,
+      rippleTex: rippleTex,
+      ripplePosition: [ripplePosX, ripplePosY, rippleWidth, rippleHeight],
       time: t,
       pointerPos: pointer.a,
       resolution: [glCanvas.width, glCanvas.height],
