@@ -58,12 +58,12 @@ function drawTextLines(
   context.font = getFont(options);
   context.textAlign = 'left';
   // use top baseline so we can control vertical centering precisely
-  context.textBaseline = 'top';
+  context.textBaseline = 'bottom';
   context.fillStyle = 'white';
 
   const lineHeight = getLineHeight(options);
 
-  const startY = lineHeight * 0.2;
+  const startY = lineHeight;
 
   let maxWidth = 0;
   for (const line of lines) {
