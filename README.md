@@ -20,9 +20,11 @@ Retro-futuristic theme with glitch effects.
 
 Inspiration:
 
-- [alche.studio](https://alche.studio/)
-- [eloyb](https://eloyb.design/)
+- https://www.byld.dev
+- https://hjeunecrack.fr
+- https://rosehip.griflan.com/
 - [8 bit snake game](https://codepen.io/filipz/full/JoogyPM)
+- https://lcd.ertdfgcvb.xyz/
 
 I think [scanning effect](https://tympanus.net/Development/ScanEffect/effect1/) would be cool here too.
 
