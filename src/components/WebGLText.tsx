@@ -106,10 +106,12 @@ function drawTextLines(
   // Offset to center glyphs in the CSS line box
   const verticalOffset = (lineHeight - fontHeight) / 2;
 
+  const startY = verticalOffset + ascent;
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     // y is the baseline, so add offset + ascent
-    const y = i * lineHeight + verticalOffset + ascent;
+    const y = i * lineHeight + startY;
     context.fillText(line, 0, y);
   }
 }

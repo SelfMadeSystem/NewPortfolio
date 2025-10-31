@@ -1,240 +1,224 @@
 ---
 // Retro-futuristic theme with glitch effects.
+import RecursiveStoreText from '../components/RecursiveStoreText.astro';
 import { RippleGL } from '../components/RippleGL';
-import { WebGLText } from '../components/WebGLText';
+import { ScreenText } from '../components/ScreenText';
+import StoreText from '../components/StoreText.astro';
 import Layout from '../layout/Layout.astro';
 import '../styles/backend.css';
 ---
 
 <Layout>
   <RippleGL client:load />
-  <main class="min-h-screen bg-gray-950 text-gray-100 px-4 py-12 font-mono">
-    <section class="max-w-5xl mx-auto">
-      <div class="mb-12">
-        <h1 class="text-4xl md:text-5xl mb-4">
-          <WebGLText client:load class="w-fit mx-auto">
-            Backend Development
-          </WebGLText>
-        </h1>
-        <WebGLText client:load class="p-8">
-          When applications need to handle millions of users or process complex
-          data, that's where I shine. I've built everything from high-traffic
-          Discord bots to sophisticated development tools, always focusing on
-          performance, reliability, and developer experience.
-        </WebGLText>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 text-center"
-        >
-          <div>
-            <h2 class="text-2xl mb-2">
-              <WebGLText client:load class="w-fit mx-auto">Languages</WebGLText>
-            </h2>
-            <ul class="space-y-1">
+  <ScreenText client:load />
+
+  <RecursiveStoreText>
+    <main class="min-h-screen bg-gray-950 text-gray-100 px-4 py-12 font-mono">
+      <section class="max-w-5xl mx-auto">
+        <div class="mb-12">
+          <h1 class="text-4xl md:text-5xl mb-4">
+            <div class="w-fit mx-auto">Backend Development</div>
+          </h1>
+          <div class="p-8">
+            When applications need to handle millions of users or process
+            complex data, that's where I shine. I've built everything from
+            high-traffic Discord bots to sophisticated development tools, always
+            focusing on performance, reliability, and developer experience.
+          </div>
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 text-center"
+          >
+            <div>
+              <h2 class="text-2xl mb-2">Languages</h2>
+              <ul class="space-y-1">
+                <li>TypeScript</li>
+                <li>Java</li>
+                <li>Rust</li>
+                <li>C#</li>
+                <li>GDScript</li>
+                <li>PHP</li>
+                <li>Python</li>
+              </ul>
+            </div>
+            <div>
+              <h2 class="text-2xl mb-2">Frameworks</h2>
+              <ul class="space-y-1">
+                <li>Next.JS</li>
+                <li>Node.JS</li>
+                <li>Bun.JS</li>
+                <li>ASP.NET</li>
+                <li>Express.JS</li>
+              </ul>
+            </div>
+            <div>
+              <h2 class="text-2xl mb-2">Tools</h2>
+              <ul class="space-y-1">
+                <li>Google</li>
+                <li>Git</li>
+                <li>VSCode</li>
+                <li>Fish</li>
+                <li>Bash</li>
+                <li>Nix</li>
+              </ul>
+            </div>
+            <div>
+              <h2 class="text-2xl mb-2">Systems</h2>
+              <ul class="space-y-1">
+                <li>Nginx</li>
+                <li>Linux</li>
+                <li>Apache2</li>
+                <li>Podman</li>
+                <li>Docker</li>
+              </ul>
+            </div>
+            <div>
+              <h2 class="text-2xl mb-2">Services</h2>
+              <ul class="space-y-1">
+                <li>libSQL</li>
+                <li>PostgreSQL</li>
+                <li>MySQL</li>
+                <li>MinIO</li>
+                <li>MariaDB</li>
+                <li>SQLite</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          <!-- Countryvia -->
+          <div
+            class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
+          >
+            <h3 class="text-3xl mb-2">Countryvia</h3>
+            <p class="text-lg mb-4">
+              I took over development of Countryvia, a popular Discord trivia
+              bot focused on geography and country facts. Built with Node.js and
+              TypeScript, it serves over 65,000 servers and 2 million users,
+              making it one of Discord's most widely-used trivia bots.
+            </p>
+            <ul class="text-base mb-4 text-left list-disc list-inside">
+              <li>NodeJS</li>
               <li>TypeScript</li>
+              <li>Discord.JS</li>
+            </ul>
+            <a
+              href="https://discord.gg/4vSs3KJUNN"
+              target="_blank"
+              class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
+              >Join the Discord</a
+            >
+          </div>
+
+          <!-- Live JSX Editor -->
+          <div
+            class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
+          >
+            <h3 class="text-3xl mb-2">Live JSX Editor</h3>
+            <p class="text-lg mb-4">
+              A real-time JSX editor with live preview, featuring multi-file
+              support, NPM package imports, and advanced tooling. Built with
+              custom esbuild integration and TailwindCSS v4 support for a
+              seamless development experience. Perfect for prototyping and
+              sharing React components quickly.
+            </p>
+            <ul class="text-base mb-4 text-left list-disc list-inside">
+              <li>TypeScript</li>
+              <li>React</li>
+              <li>esbuild</li>
+              <li>TailwindCSS</li>
+              <li>Monaco Editor</li>
+            </ul>
+            <a
+              href="https://live-jsx-app.shoghisimon.ca/"
+              target="_blank"
+              class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
+              >Visit</a
+            >
+          </div>
+
+          <!-- ServerScripter -->
+          <div
+            class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
+          >
+            <h3 class="text-3xl mb-2">ServerScripter</h3>
+            <p class="text-lg mb-4">
+              A multi-platform Minecraft plugin that enables server-side
+              scripting in multiple languages. Built with Java and designed for
+              cross-platform compatibility, it's been powering MC-Galaxy since
+              2021, dramatically speeding up feature development through rapid
+              script implementation.
+            </p>
+            <ul class="text-base mb-4 text-left list-disc list-inside">
               <li>Java</li>
-              <li>Rust</li>
-              <li>C#</li>
-              <li>GDScript</li>
-              <li>PHP</li>
-              <li>Python</li>
+              <li>Gradle</li>
             </ul>
-          </div>
-          <div>
-            <h2 class="text-2xl mb-2">
-              <WebGLText client:load class="w-fit mx-auto">Frameworks</WebGLText
-              >
-            </h2>
-            <ul class="space-y-1">
-              <li>Next.JS</li>
-              <li>Node.JS</li>
-              <li>Bun.JS</li>
-              <li>ASP.NET</li>
-              <li>Express.JS</li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="text-2xl mb-2">
-              <WebGLText client:load class="w-fit mx-auto">Tools</WebGLText>
-            </h2>
-            <ul class="space-y-1">
-              <li>Google</li>
-              <li>Git</li>
-              <li>VSCode</li>
-              <li>Fish</li>
-              <li>Bash</li>
-              <li>Nix</li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="text-2xl mb-2">
-              <WebGLText client:load class="w-fit mx-auto">Systems</WebGLText>
-            </h2>
-            <ul class="space-y-1">
-              <li>Nginx</li>
-              <li>Linux</li>
-              <li>Apache2</li>
-              <li>Podman</li>
-              <li>Docker</li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="text-2xl mb-2">
-              <WebGLText client:load class="w-fit mx-auto">Services</WebGLText>
-            </h2>
-            <ul class="space-y-1">
-              <li>libSQL</li>
-              <li>PostgreSQL</li>
-              <li>MySQL</li>
-              <li>MinIO</li>
-              <li>MariaDB</li>
-              <li>SQLite</li>
-            </ul>
+            <div class="mb-2">
+              <h4 class="text-xl mb-1">Platforms</h4>
+              <ul class="text-base list-disc list-inside">
+                <li>Spigot</li>
+                <li>BungeeCord</li>
+                <li>Velocity</li>
+              </ul>
+            </div>
+            <div class="mb-2">
+              <h4 class="text-xl mb-1">Languages Supported</h4>
+              <ul class="text-base list-disc list-inside">
+                <li>
+                  Python (<a
+                    href="https://github.com/SelfMadeSystem/SPYgotUtils"
+                    target="_blank"
+                    class="underline">SPYgotUtils</a
+                  >, <a
+                    href="https://www.jython.org"
+                    target="_blank"
+                    class="underline">Jython</a
+                  >, <a
+                    href="https://www.graalvm.org"
+                    target="_blank"
+                    class="underline">GraalVM</a
+                  >)
+                </li>
+                <li>
+                  JavaScript (<a
+                    href="http://mozilla.github.io/rhino/"
+                    target="_blank"
+                    class="underline">Rhino</a
+                  >, <a
+                    href="https://www.graalvm.org"
+                    target="_blank"
+                    class="underline">GraalVM</a
+                  >)
+                </li>
+                <li>
+                  Groovy (<a
+                    href="https://www.groovy-lang.org"
+                    target="_blank"
+                    class="underline">Groovy</a
+                  >)
+                </li>
+                <li>
+                  R (<a
+                    href="https://www.graalvm.org"
+                    target="_blank"
+                    class="underline">GraalVM</a
+                  >)
+                </li>
+              </ul>
+            </div>
+            <a
+              href="https://github.com/SelfMadeSystem/ServerScripter"
+              target="_blank"
+              class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
+              >Visit</a
+            >
           </div>
         </div>
-      </div>
+      </section>
+    </main>
+  </RecursiveStoreText>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        <!-- Countryvia -->
-        <div
-          class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
-        >
-          <h3 class="text-3xl mb-2">Countryvia</h3>
-          <p class="text-lg mb-4">
-            I took over development of Countryvia, a popular Discord trivia bot
-            focused on geography and country facts. Built with Node.js and
-            TypeScript, it serves over 65,000 servers and 2 million users,
-            making it one of Discord's most widely-used trivia bots.
-          </p>
-          <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li>
-              NodeJS - A JavaScript runtime built on Chrome's V8 JavaScript
-              engine
-            </li>
-            <li>TypeScript - JavaScript with types. It's great!</li>
-            <li>
-              Discord.JS - A powerful library for interacting with the Discord
-              API
-            </li>
-          </ul>
-          <a
-            href="https://discord.gg/4vSs3KJUNN"
-            target="_blank"
-            class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
-            >Join the Discord</a
-          >
-        </div>
-
-        <!-- Live JSX Editor -->
-        <div
-          class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
-        >
-          <h3 class="text-3xl mb-2">Live JSX Editor</h3>
-          <p class="text-lg mb-4">
-            A real-time JSX editor with live preview, featuring multi-file
-            support, NPM package imports, and advanced tooling. Built with
-            custom esbuild integration and TailwindCSS v4 support for a seamless
-            development experience. Perfect for prototyping and sharing React
-            components quickly.
-          </p>
-          <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li>TypeScript - JavaScript with types. It's great!</li>
-            <li>React - A JavaScript library for building user interfaces</li>
-            <li>esbuild - An extremely fast JavaScript bundler and minifier</li>
-            <li>
-              TailwindCSS - A utility-first CSS framework for rapid UI
-              development
-            </li>
-            <li>
-              Monaco Editor - The code editor that powers VS Code, for the web
-            </li>
-          </ul>
-          <a
-            href="https://live-jsx-app.shoghisimon.ca/"
-            target="_blank"
-            class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
-            >Visit</a
-          >
-        </div>
-
-        <!-- ServerScripter -->
-        <div
-          class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
-        >
-          <h3 class="text-3xl mb-2">ServerScripter</h3>
-          <p class="text-lg mb-4">
-            A multi-platform Minecraft plugin that enables server-side scripting
-            in multiple languages. Built with Java and designed for
-            cross-platform compatibility, it's been powering MC-Galaxy since
-            2021, dramatically speeding up feature development through rapid
-            script implementation.
-          </p>
-          <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li>
-              Java - The main programming language used to create the plugin.
-            </li>
-            <li>Gradle - The build tool used to build the plugin.</li>
-          </ul>
-          <div class="mb-2">
-            <h4 class="text-xl mb-1">Platforms</h4>
-            <ul class="text-base list-disc list-inside">
-              <li>Spigot</li>
-              <li>BungeeCord</li>
-              <li>Velocity</li>
-            </ul>
-          </div>
-          <div class="mb-2">
-            <h4 class="text-xl mb-1">Languages Supported</h4>
-            <ul class="text-base list-disc list-inside">
-              <li>
-                Python (<a
-                  href="https://github.com/SelfMadeSystem/SPYgotUtils"
-                  target="_blank"
-                  class="underline">SPYgotUtils</a
-                >, <a
-                  href="https://www.jython.org"
-                  target="_blank"
-                  class="underline">Jython</a
-                >, <a
-                  href="https://www.graalvm.org"
-                  target="_blank"
-                  class="underline">GraalVM</a
-                >)
-              </li>
-              <li>
-                JavaScript (<a
-                  href="http://mozilla.github.io/rhino/"
-                  target="_blank"
-                  class="underline">Rhino</a
-                >, <a
-                  href="https://www.graalvm.org"
-                  target="_blank"
-                  class="underline">GraalVM</a
-                >)
-              </li>
-              <li>
-                Groovy (<a
-                  href="https://www.groovy-lang.org"
-                  target="_blank"
-                  class="underline">Groovy</a
-                >)
-              </li>
-              <li>
-                R (<a
-                  href="https://www.graalvm.org"
-                  target="_blank"
-                  class="underline">GraalVM</a
-                >)
-              </li>
-            </ul>
-          </div>
-          <a
-            href="https://github.com/SelfMadeSystem/ServerScripter"
-            target="_blank"
-            class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
-            >Visit</a
-          >
-        </div>
-      </div>
-    </section>
-  </main>
+  <div class="hidden">
+    <StoreText />
+  </div>
 </Layout>

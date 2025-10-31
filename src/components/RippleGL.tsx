@@ -221,7 +221,6 @@ export function RippleGL({
     (canvas: HTMLCanvasElement | null) => {
       _setCanvas(canvas);
       rippleCanvasStore.set(canvas);
-      console.log('Ripple canvas set:', rippleCanvasStore.get());
     },
     [_setCanvas],
   );

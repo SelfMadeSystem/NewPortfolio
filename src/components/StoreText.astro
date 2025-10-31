@@ -1,0 +1,147 @@
+<store-text>
+  <slot />
+</store-text>
+
+<style is:global>
+  store-text {
+    display: inline-block;
+    vertical-align: top;
+    color: transparent;
+    padding: 0;
+    margin: 0;
+  }
+</style>
+
+<script>
+  import { addTextToStore, type TextOnScreen } from '../utils/textStore';
+  import { Vector2 } from '../utils/vec';
+  import { getLines } from '../utils/wordWrap';
+
+  const metricsCache = new Map<string, TextMetrics>();
+
+  function getCachedMetrics(font: string) {
+    if (metricsCache.has(font)) {
+      return metricsCache.get(font)!;
+    }
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Failed to get 2D context for text measurement.');
+    }
+    ctx.font = font;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    const metrics = ctx.measureText('\u2588');
+    metricsCache.set(font, metrics);
+    return metrics;
+  }
+
+  class StoreText extends HTMLElement {
+    updateText: ((newItem: TextOnScreen) => void) | null = null;
+    deleteText: (() => void) | null = null;
+    observer: ResizeObserver | null = null;
+    windowResizeHandler: (() => void) | null = null;
+
+    constructor() {
+      super();
+    }
+
+    createTextOnScreen(): TextOnScreen {
+      const lines = getLines(this);
+      const rect = this.getBoundingClientRect();
+      const pos = new Vector2(
+        rect.left + window.scrollX,
+        rect.top + window.scrollY,
+      );
+      const size = new Vector2(rect.width, rect.height);
+      const style = getComputedStyle(this);
+
+      let textAlign: CanvasTextAlign = 'left';
+      switch (style.textAlign) {
+        case 'center':
+          textAlign = 'center';
+          break;
+        case 'right':
+          textAlign = 'right';
+          break;
+        case 'left':
+          textAlign = 'left';
+          break;
+        case 'end':
+          textAlign = 'end';
+          break;
+        case 'start':
+          textAlign = 'start';
+          break;
+        case 'justify':
+          console.warn(
+            'Justify textAlign is not supported in StoreText. Defaulting to left.',
+          );
+          textAlign = 'left';
+          break;
+        default:
+          console.warn(
+            `Unknown textAlign value "${style.textAlign}" in StoreText. Defaulting to left.`,
+          );
+          textAlign = 'left';
+          break;
+      }
+
+      const font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      const metrics = getCachedMetrics(font);
+
+      return {
+        lines,
+        pos,
+        size,
+        fontSize: parseFloat(style.fontSize),
+        fontFamily: style.fontFamily,
+        fontWeight: style.fontWeight,
+        lineHeight: parseFloat(style.lineHeight),
+        textAlign,
+        metrics,
+      };
+    }
+
+    connectedCallback() {
+      const textItem = this.createTextOnScreen();
+      [this.updateText, this.deleteText] = addTextToStore(textItem);
+
+      const observer = new ResizeObserver(() => {
+        console.log('StoreText: Text updated due to resize.');
+        if (this.updateText) {
+          const newTextItem = this.createTextOnScreen();
+          this.updateText(newTextItem);
+        }
+      });
+      observer.observe(this);
+      this.observer = observer;
+
+      // Also update when window resizes
+      this.windowResizeHandler = () => {
+        if (this.updateText) {
+          const newTextItem = this.createTextOnScreen();
+          this.updateText(newTextItem);
+        }
+      };
+      window.addEventListener('resize', this.windowResizeHandler);
+    }
+
+    disconnectedCallback() {
+      if (this.deleteText) {
+        this.deleteText();
+      }
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+      if (this.windowResizeHandler) {
+        window.removeEventListener('resize', this.windowResizeHandler);
+        this.windowResizeHandler = null;
+      }
+    }
+  }
+
+  if (!customElements.get('store-text')) {
+    customElements.define('store-text', StoreText);
+  }
+</script>

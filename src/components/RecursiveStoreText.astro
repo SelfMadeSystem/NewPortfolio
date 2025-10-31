@@ -1,0 +1,25 @@
+---
+import { parseHTML } from 'linkedom';
+
+const html = await Astro.slots.render('default');
+const { document } = parseHTML(html);
+
+function wrapNode(node) {
+  // If text node and not just whitespace, wrap in <store-text>
+  if (node.nodeType === 3 && node.textContent.trim()) {
+    const wrapper = document.createElement('store-text');
+    wrapper.textContent = node.textContent;
+    node.replaceWith(wrapper);
+    return wrapper;
+  }
+  // If element node, recurse on children
+  if (node.nodeType === 1 && node.childNodes.length) {
+    Array.from(node.childNodes).forEach(wrapNode);
+  }
+  return node;
+}
+
+Array.from(document.childNodes).forEach(wrapNode);
+---
+
+<Fragment set:html={document.toString()} />
