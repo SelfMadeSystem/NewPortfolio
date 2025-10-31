@@ -9,8 +9,6 @@ import { rippleCanvasStore } from './rippleStore';
 import { useRef } from 'preact/hooks';
 
 const defaultOptions = {
-  fontSize: 24,
-  fontFamily: 'monospace',
   randChars: 3,
   randDuration: 500,
   maxThreshold: 0.6,
@@ -48,45 +46,70 @@ function textButRandom(text: string, options: WebGLTextOptions) {
   return result;
 }
 
-function getFont(options: WebGLTextOptions) {
-  return `${options.fontSize}px ${options.fontFamily}`;
+function getFontFromStyle(style: CSSStyleDeclaration) {
+  const fontSize = style.fontSize || '16px';
+  const fontFamily = style.fontFamily || 'monospace';
+  const fontWeight = style.fontWeight || 'normal';
+  const fontStyle = style.fontStyle || 'normal';
+  return `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
 }
 
-function getLineHeight(options: WebGLTextOptions) {
-  const fontSize = options.fontSize || 16;
-  const lineHeight = Math.ceil(fontSize * 1.2);
-  return lineHeight;
+function getLineHeightFromStyle(style: CSSStyleDeclaration) {
+  // Try to use lineHeight from style, else fallback to 1.2 * fontSize
+  const fontSizePx = style.fontSize || '16px';
+  const fontSize = parseFloat(fontSizePx);
+  let lineHeightPx = style.lineHeight;
+  let lineHeight = fontSize * 1.2;
+  if (lineHeightPx && lineHeightPx !== 'normal') {
+    if (lineHeightPx.endsWith('px')) {
+      lineHeight = parseFloat(lineHeightPx);
+    } else if (!isNaN(Number(lineHeightPx))) {
+      lineHeight = fontSize * Number(lineHeightPx);
+    }
+  }
+  return Math.ceil(lineHeight);
+}
+
+const metricsCache = new Map<string, TextMetrics>();
+
+function getCachedMetrics(context: CanvasRenderingContext2D, font: string) {
+  if (metricsCache.has(font)) {
+    return metricsCache.get(font)!;
+  }
+  context.font = font;
+  const metrics = context.measureText('M');
+  metricsCache.set(font, metrics);
+  return metrics;
 }
 
 function drawTextLines(
   context: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   text: string,
-  options: WebGLTextOptions,
+  style: CSSStyleDeclaration,
 ) {
   const lines = text.split('\n');
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.font = getFont(options);
+  context.font = getFontFromStyle(style);
   context.textAlign = 'left';
-  // use top baseline so we can control vertical centering precisely
-  context.textBaseline = 'bottom';
+  context.textBaseline = 'alphabetic'; // matches CSS
   context.fillStyle = 'white';
 
-  const lineHeight = getLineHeight(options);
+  const lineHeight = getLineHeightFromStyle(style);
 
-  const startY = lineHeight;
+  // Use a typical character for metrics
+  const metrics = getCachedMetrics(context, context.font);
+  const ascent = metrics.actualBoundingBoxAscent;
+  const descent = metrics.actualBoundingBoxDescent;
+  const fontHeight = ascent + descent;
 
-  let maxWidth = 0;
-  for (const line of lines) {
-    const metrics = context.measureText(line);
-    if (metrics.width > maxWidth) {
-      maxWidth = metrics.width;
-    }
-  }
+  // Offset to center glyphs in the CSS line box
+  const verticalOffset = (lineHeight - fontHeight) / 2;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const y = startY + i * lineHeight;
+    // y is the baseline, so add offset + ascent
+    const y = i * lineHeight + verticalOffset + ascent;
     context.fillText(line, 0, y);
   }
 }
@@ -164,6 +187,18 @@ void main() {
   // Calculate position within the character cell
   vec2 cellPos = mod(fragCoord - charOffset, charSize);
 
+  // --- Debug grid overlay ---
+  if (false) {
+    float gridThickness = 1.0;
+    float edgeX = step(cellPos.x, gridThickness) + step(charSize.x - cellPos.x, gridThickness);
+    float edgeY = step(cellPos.y, gridThickness) + step(charSize.y - cellPos.y, gridThickness);
+    float edge = max(edgeX, edgeY);
+    if (edge > 0.0) {
+      gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); // Green grid lines
+      return;
+    }
+  }
+
   vec4 ripple = getAvgRipple(charCoord);
   float height = abs(ripple.x);
   vec4 textTexel = texture2D(textTex, uv);
@@ -218,6 +253,19 @@ export function WebGLText({
     return result;
   };
 
+  // Get computed style from spanRef
+  const getSpanStyle = () => {
+    if (!spanRef.current) {
+      // fallback to default
+      const dummy = document.createElement('span');
+      document.body.appendChild(dummy);
+      const style = window.getComputedStyle(dummy);
+      document.body.removeChild(dummy);
+      return style;
+    }
+    return window.getComputedStyle(spanRef.current);
+  };
+
   const [gl, glCanvas, setCanvas] = useCanvas<'webgl'>({
     contextId: 'webgl',
     autoResize: true,
@@ -237,21 +285,21 @@ export function WebGLText({
       gl.viewport(0, 0, canvas.width, canvas.height);
     },
   });
+
   const [textCtx, textCanvas, setTextCanvas] = useCanvas<'2d'>({
     contextId: '2d',
     autoResize: true,
     resize(context, canvas) {
-      console.log(getLines(spanRef.current!));
-      // only need to draw to this once
-      drawTextLines(context, canvas, getText(), options);
-      // measure character size
-      context.font = getFont(options);
+      const style = getSpanStyle();
+      drawTextLines(context, canvas, getText(), style);
+      context.font = getFontFromStyle(style);
       const metrics = context.measureText('M');
       const width = metrics.width;
-      const height = getLineHeight(options);
+      const height = getLineHeightFromStyle(style);
       charSizeRef.current = new Vector2(width, height);
     },
   });
+
   const [randCtx, randCanvas, setRandCanvas] = useCanvas<'2d'>({
     contextId: '2d',
     autoResize: true,
@@ -317,13 +365,15 @@ export function WebGLText({
     const textProgramInfo = textProgramRef.current;
 
     // draw random text for the rand canvas (centered, multiline-capable)
+
     if (t - lastRandTimeRef.current > options.randDuration) {
       lastRandTimeRef.current = t;
+      const style = getSpanStyle();
       drawTextLines(
         randCtx,
         randCanvas,
         textButRandom(getText(), options),
-        options,
+        style,
       );
     }
 
@@ -396,16 +446,10 @@ export function WebGLText({
     prevPointer.current = pointer;
   });
 
+  // For the visible span, let CSS control font styles
   return (
-    <div
-      class={className || ''}
-      style={{
-        fontFamily: options.fontFamily,
-        fontSize: `${options.fontSize}px`,
-        lineHeight: `${getLineHeight(options)}px`,
-      }}
-    >
-      <div className="relative">
+    <div class={className || ''}>
+      <div className="relative text-start">
         <span ref={spanRef} class="text-transparent">
           {children}
         </span>
