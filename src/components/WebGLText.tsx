@@ -2,15 +2,17 @@ import * as twgl from 'twgl.js';
 import { useAnimationLoop } from '../utils/hooks/useAnimationLoop';
 import { useCanvas } from '../utils/hooks/useCanvas';
 import { usePointerPosition } from '../utils/hooks/usePointerPosition';
+import { useTextStore } from '../utils/textStore';
 import { Vector2 } from '../utils/vec';
-import { getLines } from '../utils/wordWrap';
 import { SCALE_DOWN } from './RippleGL';
-import { rippleCanvasStore } from './rippleStore';
+import {
+  randomTextStore,
+  rippleCanvasStore,
+  screenTextStore,
+} from './canvasStore';
 import { useRef } from 'preact/hooks';
 
 const defaultOptions = {
-  randChars: 3,
-  randDuration: 500,
   maxThreshold: 0.6,
   minThreshold: 0.1,
   colorBoost: 0.2,
@@ -18,103 +20,6 @@ const defaultOptions = {
 };
 
 type WebGLTextOptions = typeof defaultOptions;
-
-const chars =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789[]{}<>?/|\\`~!@#$%^&*()-_=+';
-
-function randSubsetOfChars(length: number) {
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randIndex = Math.floor(Math.random() * chars.length);
-    result += chars[randIndex];
-  }
-  return result;
-}
-
-function textButRandom(text: string, options: WebGLTextOptions) {
-  const chars = randSubsetOfChars(options.randChars);
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const t = text[i];
-    if (t.trim() === '') {
-      result += t;
-    } else {
-      const randIndex = Math.floor(Math.random() * chars.length);
-      result += chars[randIndex];
-    }
-  }
-  return result;
-}
-
-function getFontFromStyle(style: CSSStyleDeclaration) {
-  const fontSize = style.fontSize || '16px';
-  const fontFamily = style.fontFamily || 'monospace';
-  const fontWeight = style.fontWeight || 'normal';
-  const fontStyle = style.fontStyle || 'normal';
-  return `${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`;
-}
-
-function getLineHeightFromStyle(style: CSSStyleDeclaration) {
-  // Try to use lineHeight from style, else fallback to 1.2 * fontSize
-  const fontSizePx = style.fontSize || '16px';
-  const fontSize = parseFloat(fontSizePx);
-  let lineHeightPx = style.lineHeight;
-  let lineHeight = fontSize * 1.2;
-  if (lineHeightPx && lineHeightPx !== 'normal') {
-    if (lineHeightPx.endsWith('px')) {
-      lineHeight = parseFloat(lineHeightPx);
-    } else if (!isNaN(Number(lineHeightPx))) {
-      lineHeight = fontSize * Number(lineHeightPx);
-    }
-  }
-  return Math.ceil(lineHeight);
-}
-
-const metricsCache = new Map<string, TextMetrics>();
-
-function getCachedMetrics(context: CanvasRenderingContext2D, font: string) {
-  if (metricsCache.has(font)) {
-    return metricsCache.get(font)!;
-  }
-  context.font = font;
-  const metrics = context.measureText('M');
-  metricsCache.set(font, metrics);
-  return metrics;
-}
-
-function drawTextLines(
-  context: CanvasRenderingContext2D,
-  canvas: HTMLCanvasElement,
-  text: string,
-  style: CSSStyleDeclaration,
-) {
-  const lines = text.split('\n');
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.font = getFontFromStyle(style);
-  context.textAlign = 'left';
-  context.textBaseline = 'alphabetic'; // matches CSS
-  context.fillStyle = 'white';
-
-  const lineHeight = getLineHeightFromStyle(style);
-
-  // Use a typical character for metrics
-  const metrics = getCachedMetrics(context, context.font);
-  const ascent = metrics.actualBoundingBoxAscent;
-  const descent = metrics.actualBoundingBoxDescent;
-  const fontHeight = ascent + descent;
-
-  // Offset to center glyphs in the CSS line box
-  const verticalOffset = (lineHeight - fontHeight) / 2;
-
-  const startY = verticalOffset + ascent;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    // y is the baseline, so add offset + ascent
-    const y = i * lineHeight + startY;
-    context.fillText(line, 0, y);
-  }
-}
 
 const vertexShader = /* glsl */ `
 attribute vec4 position;
@@ -148,7 +53,7 @@ vec2 getCharPos(vec2 uv) {
   vec2 fragCoord = uv * resolution;
   vec2 charIndex = floor((fragCoord - charOffset) / charSize);
   vec2 charUV = (charIndex * charSize) / resolution;
-  return charUV;
+  return charUV + charOffset / resolution;
 }
 
 vec4 getRipple(vec2 uv) {
@@ -181,10 +86,10 @@ void main() {
   bool inBounds = charIndex.x >= 0.0 && charIndex.x < gridSize.x &&
                   charIndex.y >= 0.0 && charIndex.y < gridSize.y;
 
-  if (!inBounds) {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red for out-of-bounds
-    return;
-  }
+  // if (!inBounds) {
+  //   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red for out-of-bounds
+  //   return;
+  // }
 
   // Calculate position within the character cell
   vec2 cellPos = mod(fragCoord - charOffset, charSize);
@@ -232,41 +137,34 @@ void main() {
 }
 `;
 
-export function WebGLText({
-  class: className,
-  children,
-  ...ogOptions
-}: {
-  class?: string;
-  children: string;
-} & Partial<WebGLTextOptions>) {
+function updateTexOrNew(
+  tex: WebGLTexture | null,
+  gl: WebGLRenderingContext,
+  canvas: HTMLCanvasElement,
+): WebGLTexture {
+  if (!gl.isTexture(tex)) {
+    tex = null;
+  }
+  if (tex) {
+    // update existing texture
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+    return tex;
+  }
+  return twgl.createTexture(gl, {
+    src: canvas,
+    mag: gl.LINEAR,
+    min: gl.LINEAR,
+  });
+}
+
+export function WebGLText({ ...ogOptions }: Partial<WebGLTextOptions>) {
   const options: WebGLTextOptions = { ...defaultOptions, ...ogOptions };
-  const shaderOffsetRef = useRef<Vector2>(new Vector2(0, 0));
-  const charSizeRef = useRef<Vector2>(new Vector2(0, 0));
   const textProgramRef = useRef<twgl.ProgramInfo | null>(null);
-  const spanRef = useRef<HTMLDivElement | null>(null);
   const rippleTexRef = useRef<WebGLTexture | null>(null);
-  const lastRandTimeRef = useRef<number>(0);
-
-  const getText = () => {
-    if (!spanRef.current) return children;
-    const lines = getLines(spanRef.current);
-    let result = lines.join('\n');
-    return result;
-  };
-
-  // Get computed style from spanRef
-  const getSpanStyle = () => {
-    if (!spanRef.current) {
-      // fallback to default
-      const dummy = document.createElement('span');
-      document.body.appendChild(dummy);
-      const style = window.getComputedStyle(dummy);
-      document.body.removeChild(dummy);
-      return style;
-    }
-    return window.getComputedStyle(spanRef.current);
-  };
+  const textTexRef = useRef<WebGLTexture | null>(null);
+  const randTexRef = useRef<WebGLTexture | null>(null);
+  const texts = useTextStore();
 
   const [gl, glCanvas, setCanvas] = useCanvas<'webgl'>({
     contextId: 'webgl',
@@ -288,69 +186,36 @@ export function WebGLText({
     },
   });
 
-  const [textCtx, textCanvas, setTextCanvas] = useCanvas<'2d'>({
-    contextId: '2d',
-    autoResize: true,
-    resize(context, canvas) {
-      const style = getSpanStyle();
-      drawTextLines(context, canvas, getText(), style);
-      context.font = getFontFromStyle(style);
-      const metrics = context.measureText('M');
-      const width = metrics.width;
-      const height = getLineHeightFromStyle(style);
-      charSizeRef.current = new Vector2(width, height);
-    },
-  });
-
-  const [randCtx, randCanvas, setRandCanvas] = useCanvas<'2d'>({
-    contextId: '2d',
-    autoResize: true,
-  });
-
   const pointer = usePointerPosition(glCanvas) || new Vector2(-1000, -1000);
   const prevPointer = useRef<Vector2>(new Vector2(-1000, -1000));
 
   useAnimationLoop((dt, t) => {
-    if (
-      !gl ||
-      !textCtx ||
-      !randCtx ||
-      !textCanvas ||
-      !randCanvas ||
-      !glCanvas ||
-      !textProgramRef.current
-    ) {
+    if (!gl || !glCanvas || !textProgramRef.current) {
       return;
     }
 
     const rippleCanvas = rippleCanvasStore.get();
+    const textCanvas = screenTextStore.get();
+    const randCanvas = randomTextStore.get();
 
-    if (!rippleCanvas) {
+    if (!rippleCanvas || !textCanvas || !randCanvas) {
       return;
     }
 
-    let rippleTex = rippleTexRef.current;
+    const rippleTex = updateTexOrNew(rippleTexRef.current, gl, rippleCanvas);
+    rippleTexRef.current = rippleTex;
 
-    if (!rippleTex) {
-      // create texture from ripple canvas
-      rippleTex = twgl.createTexture(gl, {
-        src: rippleCanvas,
-        mag: gl.LINEAR,
-        min: gl.LINEAR,
-      });
-      rippleTexRef.current = rippleTex;
-    } else {
-      // update texture
-      gl.bindTexture(gl.TEXTURE_2D, rippleTex);
-      gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        rippleCanvas,
-      );
-    }
+    const textTex = updateTexOrNew(textTexRef.current, gl, textCanvas);
+    textTexRef.current = textTex;
+
+    const randTex = updateTexOrNew(randTexRef.current, gl, randCanvas);
+    randTexRef.current = randTex;
+
+    const textProgramInfo = textProgramRef.current;
+
+    // Now draw to WebGL canvas
+    gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
     const canvasRect = rippleCanvas.getBoundingClientRect();
     const thisRect = glCanvas.getBoundingClientRect();
@@ -364,82 +229,51 @@ export function WebGLText({
     const rippleWidth = thisRect.width / rippleCanvas.width / SCALE_DOWN;
     const rippleHeight = thisRect.height / rippleCanvas.height / SCALE_DOWN;
 
-    const textProgramInfo = textProgramRef.current;
+    for (const text of texts) {
+      const charSize = new Vector2(text.metrics.width, text.lineHeight);
 
-    // draw random text for the rand canvas (centered, multiline-capable)
-
-    if (t - lastRandTimeRef.current > options.randDuration) {
-      lastRandTimeRef.current = t;
-      const style = getSpanStyle();
-      drawTextLines(
-        randCtx,
-        randCanvas,
-        textButRandom(getText(), options),
-        style,
+      const topLeft = new Vector2(text.pos.x, text.pos.y - window.scrollY).div(
+        new Vector2(glCanvas.width, glCanvas.height),
       );
+      const bottomRight = new Vector2(
+        text.pos.x + text.size.x,
+        text.pos.y + text.size.y - window.scrollY,
+      ).div(new Vector2(glCanvas.width, glCanvas.height));
+
+      const arrays = {
+        position: {
+          numComponents: 2,
+          data: topLeft
+            .mult(2, -2)
+            .sub(new Vector2(1, -1))
+            .iTexCoords(bottomRight.mult(2, -2).sub(new Vector2(1, -1))),
+        },
+        texcoord: {
+          numComponents: 2,
+          data: topLeft.iTexCoords(bottomRight),
+        },
+      };
+      const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
+
+      gl.useProgram(textProgramInfo.program);
+      twgl.setBuffersAndAttributes(gl, textProgramInfo, bufferInfo);
+      twgl.setUniforms(textProgramInfo, {
+        textTex: textTex,
+        randTex: randTex,
+        rippleTex: rippleTex,
+        ripplePosition: [ripplePosX, ripplePosY, rippleWidth, rippleHeight],
+        time: t,
+        pointerPos: pointer.a,
+        resolution: [glCanvas.width, glCanvas.height],
+        charSize: charSize.a,
+        charOffset: [text.pos.x, text.pos.y - window.scrollY],
+        maxThreshold: options.maxThreshold,
+        minThreshold: options.minThreshold,
+        colorBoost: options.colorBoost,
+        colorBoostBlue: options.colorBoostBlue,
+      });
+      twgl.drawBufferInfo(gl, bufferInfo);
     }
-
-    // Now draw to WebGL canvas
-    gl.viewport(0, 0, glCanvas.width, glCanvas.height);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    const textTex = twgl.createTexture(gl, {
-      src: textCanvas,
-      mag: gl.LINEAR,
-      min: gl.LINEAR,
-    });
-    const randTex = twgl.createTexture(gl, {
-      src: randCanvas,
-      mag: gl.LINEAR,
-      min: gl.LINEAR,
-    });
-
-    const arrays = {
-      position: {
-        numComponents: 2,
-        // prettier-ignore
-        data: [
-          -1, -1,
-           1, -1,
-          -1,  1,
-          -1,  1,
-           1, -1,
-           1,  1,
-        ],
-      },
-      texcoord: {
-        numComponents: 2,
-        // prettier-ignore
-        data: [
-          0, 1,
-          1, 1,
-          0, 0,
-          0, 0,
-          1, 1,
-          1, 0,
-        ],
-      },
-    };
-    const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
-
-    gl.useProgram(textProgramInfo.program);
-    twgl.setBuffersAndAttributes(gl, textProgramInfo, bufferInfo);
-    twgl.setUniforms(textProgramInfo, {
-      textTex: textTex,
-      randTex: randTex,
-      rippleTex: rippleTex,
-      ripplePosition: [ripplePosX, ripplePosY, rippleWidth, rippleHeight],
-      time: t,
-      pointerPos: pointer.a,
-      resolution: [glCanvas.width, glCanvas.height],
-      charSize: charSizeRef.current.a,
-      charOffset: shaderOffsetRef.current.a,
-      maxThreshold: options.maxThreshold,
-      minThreshold: options.minThreshold,
-      colorBoost: options.colorBoost,
-      colorBoostBlue: options.colorBoostBlue,
-    });
-    twgl.drawBufferInfo(gl, bufferInfo);
 
     // Clean up
     gl.deleteTexture(textTex);
@@ -448,26 +282,11 @@ export function WebGLText({
     prevPointer.current = pointer;
   });
 
-  // For the visible span, let CSS control font styles
+  // Only render the WebGL canvas, since text/rand canvases are managed globally
   return (
-    <div class={className || ''}>
-      <div className="relative text-start">
-        <span ref={spanRef} class="text-transparent">
-          {children}
-        </span>
-        <canvas
-          ref={setTextCanvas}
-          className="pointer-events-none invisible absolute inset-0 h-full w-full"
-        />
-        <canvas
-          ref={setRandCanvas}
-          className="pointer-events-none invisible absolute inset-0 h-full w-full"
-        />
-        <canvas
-          ref={setCanvas}
-          className="pointer-events-none absolute inset-0 h-full w-full"
-        />
-      </div>
-    </div>
+    <canvas
+      ref={setCanvas}
+      className="pointer-events-none fixed inset-0 h-full w-full"
+    />
   );
 }

@@ -3,7 +3,7 @@ import { useAnimationLoop } from '../utils/hooks/useAnimationLoop';
 import { useCanvas } from '../utils/hooks/useCanvas';
 import { usePointerPosition } from '../utils/hooks/usePointerPosition';
 import { Vector2 } from '../utils/vec';
-import { rippleCanvasStore } from './rippleStore';
+import { rippleCanvasStore } from './canvasStore';
 import { useCallback, useRef } from 'preact/hooks';
 
 const defaultOptions = {

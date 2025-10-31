@@ -306,6 +306,61 @@ export class Vector2 {
   get a(): [number, number] {
     return [this.x, this.y];
   }
+
+  texCoords(
+    other: Vector2,
+  ): [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ] {
+    // prettier-ignore
+    return [
+      this.x,  this.y,
+      other.x, this.y,
+      this.x,  other.y,
+      this.x,  other.y,
+      other.x, this.y,
+      other.x, other.y,
+    ]
+  }
+
+  // Swap Y axis for texture coordinates
+  iTexCoords(
+    other: Vector2,
+  ): [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ] {
+    // prettier-ignore
+    return [
+      this.x,  other.y,
+      other.x, other.y,
+      this.x,  this.y,
+      this.x,  this.y,
+      other.x, other.y,
+      other.x, this.y,
+    ]
+  }
 }
 
 const PI = Math.PI;

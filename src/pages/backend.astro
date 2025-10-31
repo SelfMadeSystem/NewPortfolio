@@ -4,6 +4,7 @@ import RecursiveStoreText from '../components/RecursiveStoreText.astro';
 import { RippleGL } from '../components/RippleGL';
 import { ScreenText } from '../components/ScreenText';
 import StoreText from '../components/StoreText.astro';
+import { WebGLText } from '../components/WebGLText';
 import Layout from '../layout/Layout.astro';
 import '../styles/backend.css';
 ---
@@ -11,6 +12,7 @@ import '../styles/backend.css';
 <Layout>
   <RippleGL client:load />
   <ScreenText client:load />
+  <WebGLText client:load />
 
   <RecursiveStoreText>
     <main class="min-h-screen bg-gray-950 text-gray-100 px-4 py-12 font-mono">
