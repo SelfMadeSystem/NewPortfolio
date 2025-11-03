@@ -16,7 +16,7 @@ export function HashVisible({
     id: string;
   }
 >) {
-  const [isVisible, setIsVisible] = useState(defaultVisible);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (!id) return;
