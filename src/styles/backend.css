@@ -18,3 +18,21 @@
   background: radial-gradient(circle at center, #0000 20%, #000 20%) 4px 4px /
     8px 8px fixed;
 }
+
+@property --rainbow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.backdrop-rainbow {
+  --rainbow-angle: 0deg;
+  animation: rainbow 10s linear infinite;
+  backdrop-filter: sepia(1) saturate(4) hue-rotate(var(--rainbow-angle));
+}
+
+@keyframes rainbow {
+  to {
+    --rainbow-angle: 360deg;
+  }
+}

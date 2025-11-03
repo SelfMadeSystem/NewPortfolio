@@ -13,7 +13,7 @@ import '../styles/backend.css';
   <script src="../components/ShuffleText.ts"></script>
 
   <div class="min-h-screen text-gray-100 font-mono flex flex-col">
-    <header class="outline outline-white">
+    <header class="outline outline-white backdrop-rainbow">
       <shuffle-text class="left-2 top-2">Shoghi Simon's Portfolio</shuffle-text>
       <h1 class="text-4xl md:text-5xl w-fit pt-2 pb-4">
         <shuffle-text>Backend Development</shuffle-text>
@@ -23,7 +23,7 @@ import '../styles/backend.css';
       </a>
     </header>
     <main class="flex flex-row grow">
-      <aside class="border-r border-white p-2">
+      <aside class="border-r border-white p-2 backdrop-rainbow">
         <nav class="flex flex-col space-y-4 text-lg">
           <a href="#projects" class="text-indigo-400 hover:underline"
             ><shuffle-text>Projects</shuffle-text></a
@@ -52,7 +52,9 @@ import '../styles/backend.css';
           class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
         >
           <!-- Countryvia -->
-          <div class="border p-8 flex flex-col justify-between">
+          <div
+            class="border p-8 flex flex-col justify-between backdrop-rainbow"
+          >
             <h3 class="text-3xl mb-2">
               <shuffle-text>Countryvia</shuffle-text>
             </h3>
@@ -81,7 +83,9 @@ import '../styles/backend.css';
             </a>
           </div>
           <!-- Live JSX Editor -->
-          <div class="border p-8 flex flex-col justify-between">
+          <div
+            class="border p-8 flex flex-col justify-between backdrop-rainbow"
+          >
             <h3 class="text-3xl mb-2">
               <shuffle-text>Live JSX Editor</shuffle-text>
             </h3>
@@ -113,7 +117,9 @@ import '../styles/backend.css';
             </a>
           </div>
           <!-- ServerScripter -->
-          <div class="border p-8 flex flex-col justify-between">
+          <div
+            class="border p-8 flex flex-col justify-between backdrop-rainbow"
+          >
             <h3 class="text-3xl mb-2">
               <shuffle-text>ServerScripter</shuffle-text>
             </h3>
@@ -212,7 +218,9 @@ import '../styles/backend.css';
         </HashVisible>
       </section>
     </main>
-    <footer class="outline outline-white text-center p-4 mt-auto">
+    <footer
+      class="outline outline-white text-center p-4 mt-auto backdrop-rainbow"
+    >
       <shuffle-text
         >© {new Date().getFullYear()} Shoghi Simon. All rights reserved.</shuffle-text
       >
