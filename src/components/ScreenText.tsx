@@ -80,11 +80,13 @@ export function ScreenText({
   text: TextOnScreen | null;
   setText: (text: TextOnScreen) => void;
 }>) {
+  const [redrawTrigger, setRedrawTrigger] = useState(0);
   const [tCtx, tCanvas, setTCanvas] = useCanvas<'2d'>({
     contextId: '2d',
     autoResize: true,
     resize: (context, canvas) => {
       context.clearRect(0, 0, canvas.width, canvas.height);
+      setRedrawTrigger(r => r + 1);
     },
     setup(context, canvas) {
       tCanvasRef(canvas);
@@ -115,7 +117,7 @@ export function ScreenText({
   useEffect(() => {
     if (!tCtx || !tCanvas || !text) return;
     drawTextOnCanvas(tCtx, tCanvas, text);
-  }, [tCtx, tCanvas, text]);
+  }, [tCtx, tCanvas, text, redrawTrigger]);
 
   useEffect(() => {
     if (!rCtx || !rCanvas || !text) return;
@@ -123,7 +125,7 @@ export function ScreenText({
   }, [rCtx, rCanvas, text, chars]);
 
   return (
-    <div className="relative">
+    <div class="relative">
       <TextOnScreenElement setOnScreenText={setText}>
         {children}
       </TextOnScreenElement>

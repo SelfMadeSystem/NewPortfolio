@@ -38,7 +38,7 @@ export class ShuffleText extends HTMLElement {
         this.startShuffling();
       });
 
-    this.innerText = '\u00A0'; // prevent layout shift
+    this.innerText = '\u00A0'.repeat(this.originalText.length);
     this.classList.add('loaded');
     // Start shuffling immediately if visible. If not visible, shuffle when
     // becomes visible.
@@ -103,7 +103,10 @@ export class ShuffleText extends HTMLElement {
         this.originalText.substring(start, end),
         characters,
       );
-      this.innerText = this.originalText.substring(0, start) + shuffled;
+      this.innerText =
+        this.originalText.substring(0, start) +
+        shuffled +
+        '\u00A0'.repeat(this.originalText.length - end);
 
       if (end < this.originalText.length) {
         this.endIndex++;
@@ -120,7 +123,7 @@ export class ShuffleText extends HTMLElement {
 
   private stopShuffling() {
     this.cancelInterval();
-    this.innerText = this.originalText;
+    // this.innerText = this.originalText;
   }
 }
 

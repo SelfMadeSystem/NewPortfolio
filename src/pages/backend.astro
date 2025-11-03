@@ -2,6 +2,7 @@
 // Retro-futuristic theme with glitch effects.
 import { RippleGL } from '../components/RippleGL';
 import { WebGLText } from '../components/WebGLText';
+import { HashVisible } from '../components/HashVisible';
 import Layout from '../layout/Layout.astro';
 import '../styles/backend.css';
 ---
@@ -11,14 +12,28 @@ import '../styles/backend.css';
 
   <script src="../components/ShuffleText.ts"></script>
 
-  <main class="min-h-screen text-gray-100 font-mono">
-    <h1 class="text-4xl md:text-5xl mb-4 outline outline-white pt-2 pb-4">
-      <div class="w-fit mx-auto">
+  <div class="min-h-screen text-gray-100 font-mono flex flex-col">
+    <header class="outline outline-white">
+      <shuffle-text class="left-2 top-2">Shoghi Simon's Portfolio</shuffle-text>
+      <h1 class="text-4xl md:text-5xl w-fit pt-2 pb-4">
         <shuffle-text>Backend Development</shuffle-text>
-      </div>
-    </h1>
-    <section class="max-w-5xl mx-auto">
-      <div class="mb-12">
+      </h1>
+      <a href="/" class="absolute right-0 top-2 text-blue-400 hover:underline">
+        <shuffle-text class="p-2">← Back</shuffle-text>
+      </a>
+    </header>
+    <main class="flex flex-row grow">
+      <aside class="border-r border-white p-2">
+        <nav class="flex flex-col space-y-4 text-lg">
+          <a href="#projects" class="text-indigo-400 hover:underline"
+            ><shuffle-text>Projects</shuffle-text></a
+          >
+          <a href="#technologies" class="text-indigo-400 hover:underline"
+            ><shuffle-text>Technologies</shuffle-text></a
+          >
+        </nav>
+      </aside>
+      <section class="max-w-5xl mx-auto pb-8">
         <div class="p-8">
           <WebGLText client:load
             ><shuffle-text no-shuffle
@@ -30,8 +45,107 @@ import '../styles/backend.css';
             ></WebGLText
           >
         </div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 text-center"
+        <HashVisible
+          client:load
+          id="projects"
+          defaultVisible
+          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+        >
+          <!-- Countryvia -->
+          <div class="border p-8 flex flex-col justify-between">
+            <h3 class="text-3xl mb-2">
+              <shuffle-text>Countryvia</shuffle-text>
+            </h3>
+            <p class="text-lg mb-4">
+              <shuffle-text>
+                I took over development of Countryvia, a popular Discord trivia
+                bot focused on geography and country facts. Built with Node.js
+                and TypeScript, it serves over 65,000 servers and 2 million
+                users, making it one of Discord's most widely-used trivia bots.
+              </shuffle-text>
+            </p>
+            <ul class="text-base mb-4 text-left">
+              <li><shuffle-text>• NodeJS</shuffle-text></li>
+              <li><shuffle-text>• TypeScript</shuffle-text></li>
+              <li><shuffle-text>• Discord.JS</shuffle-text></li>
+            </ul>
+            <a
+              href="https://discord.gg/4vSs3KJUNN"
+              target="_blank"
+              class="inline-block mt-auto text-white"
+            >
+              <shuffle-text
+                class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
+                >Join the Discord</shuffle-text
+              >
+            </a>
+          </div>
+          <!-- Live JSX Editor -->
+          <div class="border p-8 flex flex-col justify-between">
+            <h3 class="text-3xl mb-2">
+              <shuffle-text>Live JSX Editor</shuffle-text>
+            </h3>
+            <p class="text-lg mb-4">
+              <shuffle-text>
+                A real-time JSX editor with live preview, featuring multi-file
+                support, NPM package imports, and advanced tooling. Built with
+                custom esbuild integration and TailwindCSS v4 support for a
+                seamless development experience. Perfect for prototyping and
+                sharing React components quickly.
+              </shuffle-text>
+            </p>
+            <ul class="text-base mb-4 text-left">
+              <li><shuffle-text>• TypeScript</shuffle-text></li>
+              <li><shuffle-text>• React</shuffle-text></li>
+              <li><shuffle-text>• esbuild</shuffle-text></li>
+              <li><shuffle-text>• TailwindCSS</shuffle-text></li>
+              <li><shuffle-text>• Monaco Editor</shuffle-text></li>
+            </ul>
+            <a
+              href="https://live-jsx-app.shoghisimon.ca/"
+              target="_blank"
+              class="inline-block mt-auto text-white"
+            >
+              <shuffle-text
+                class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
+                >Visit</shuffle-text
+              >
+            </a>
+          </div>
+          <!-- ServerScripter -->
+          <div class="border p-8 flex flex-col justify-between">
+            <h3 class="text-3xl mb-2">
+              <shuffle-text>ServerScripter</shuffle-text>
+            </h3>
+            <p class="text-lg mb-4">
+              <shuffle-text>
+                A multi-platform Minecraft plugin that enables server-side
+                scripting in multiple languages. Built with Java and designed
+                for cross-platform compatibility, it's been powering MC-Galaxy
+                since 2021, dramatically speeding up feature development through
+                rapid script implementation.
+              </shuffle-text>
+            </p>
+            <ul class="text-base mb-4 text-left">
+              <li><shuffle-text>• Java</shuffle-text></li>
+              <li><shuffle-text>• Gradle</shuffle-text></li>
+            </ul>
+            <a
+              href="https://github.com/SelfMadeSystem/ServerScripter"
+              target="_blank"
+              class="inline-block mt-auto text-white"
+            >
+              <shuffle-text
+                class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
+                >Visit</shuffle-text
+              >
+            </a>
+          </div>
+        </HashVisible>
+        <HashVisible
+          client:load
+          id="technologies"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 text-center"
         >
           <div>
             <h2 class="text-2xl mb-2">
@@ -47,7 +161,7 @@ import '../styles/backend.css';
               <li><shuffle-text>Python</shuffle-text></li>
             </ul>
           </div>
-          <div>
+          <div class="border-x">
             <h2 class="text-2xl mb-2">
               <shuffle-text>Frameworks</shuffle-text>
             </h2>
@@ -70,8 +184,10 @@ import '../styles/backend.css';
               <li><shuffle-text>Nix</shuffle-text></li>
             </ul>
           </div>
-          <div>
-            <h2 class="text-2xl mb-2"><shuffle-text>Systems</shuffle-text></h2>
+          <div class="border-x">
+            <h2 class="text-2xl mb-2">
+              <shuffle-text>Systems</shuffle-text>
+            </h2>
             <ul class="space-y-1">
               <li><shuffle-text>Nginx</shuffle-text></li>
               <li><shuffle-text>Linux</shuffle-text></li>
@@ -81,7 +197,9 @@ import '../styles/backend.css';
             </ul>
           </div>
           <div>
-            <h2 class="text-2xl mb-2"><shuffle-text>Services</shuffle-text></h2>
+            <h2 class="text-2xl mb-2">
+              <shuffle-text>Services</shuffle-text>
+            </h2>
             <ul class="space-y-1">
               <li><shuffle-text>libSQL</shuffle-text></li>
               <li><shuffle-text>PostgreSQL</shuffle-text></li>
@@ -91,150 +209,13 @@ import '../styles/backend.css';
               <li><shuffle-text>SQLite</shuffle-text></li>
             </ul>
           </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        <!-- Countryvia -->
-        <div
-          class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
-        >
-          <h3 class="text-3xl mb-2"><shuffle-text>Countryvia</shuffle-text></h3>
-          <p class="text-lg mb-4">
-            <shuffle-text>
-              I took over development of Countryvia, a popular Discord trivia
-              bot focused on geography and country facts. Built with Node.js and
-              TypeScript, it serves over 65,000 servers and 2 million users,
-              making it one of Discord's most widely-used trivia bots.
-            </shuffle-text>
-          </p>
-          <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li><shuffle-text>NodeJS</shuffle-text></li>
-            <li><shuffle-text>TypeScript</shuffle-text></li>
-            <li><shuffle-text>Discord.JS</shuffle-text></li>
-          </ul>
-          <a
-            href="https://discord.gg/4vSs3KJUNN"
-            target="_blank"
-            class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
-            >Join the Discord</a
-          >
-        </div>
-
-        <!-- Live JSX Editor -->
-        <div
-          class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
-        >
-          <h3 class="text-3xl mb-2">
-            <shuffle-text>Live JSX Editor</shuffle-text>
-          </h3>
-          <p class="text-lg mb-4">
-            <shuffle-text>
-              A real-time JSX editor with live preview, featuring multi-file
-              support, NPM package imports, and advanced tooling. Built with
-              custom esbuild integration and TailwindCSS v4 support for a
-              seamless development experience. Perfect for prototyping and
-              sharing React components quickly.
-            </shuffle-text>
-          </p>
-          <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li><shuffle-text>TypeScript</shuffle-text></li>
-            <li><shuffle-text>React</shuffle-text></li>
-            <li><shuffle-text>esbuild</shuffle-text></li>
-            <li><shuffle-text>TailwindCSS</shuffle-text></li>
-            <li><shuffle-text>Monaco Editor</shuffle-text></li>
-          </ul>
-          <a
-            href="https://live-jsx-app.shoghisimon.ca/"
-            target="_blank"
-            class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
-            >Visit</a
-          >
-        </div>
-
-        <!-- ServerScripter -->
-        <div
-          class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
-        >
-          <h3 class="text-3xl mb-2">
-            <shuffle-text>ServerScripter</shuffle-text>
-          </h3>
-          <p class="text-lg mb-4">
-            <shuffle-text>
-              A multi-platform Minecraft plugin that enables server-side
-              scripting in multiple languages. Built with Java and designed for
-              cross-platform compatibility, it's been powering MC-Galaxy since
-              2021, dramatically speeding up feature development through rapid
-              script implementation.
-            </shuffle-text>
-          </p>
-          <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li><shuffle-text>Java</shuffle-text></li>
-            <li><shuffle-text>Gradle</shuffle-text></li>
-          </ul>
-          <div class="mb-2">
-            <h4 class="text-xl mb-1"><shuffle-text>Platforms</shuffle-text></h4>
-            <ul class="text-base list-disc list-inside">
-              <li><shuffle-text>Spigot</shuffle-text></li>
-              <li><shuffle-text>BungeeCord</shuffle-text></li>
-              <li><shuffle-text>Velocity</shuffle-text></li>
-            </ul>
-          </div>
-          <div class="mb-2">
-            <h4 class="text-xl mb-1">
-              <shuffle-text>Languages Supported</shuffle-text>
-            </h4>
-            <ul class="text-base list-disc list-inside">
-              <li>
-                Python (<a
-                  href="https://github.com/SelfMadeSystem/SPYgotUtils"
-                  target="_blank"
-                  class="underline">SPYgotUtils</a
-                >, <a
-                  href="https://www.jython.org"
-                  target="_blank"
-                  class="underline">Jython</a
-                >, <a
-                  href="https://www.graalvm.org"
-                  target="_blank"
-                  class="underline">GraalVM</a
-                >)
-              </li>
-              <li>
-                JavaScript (<a
-                  href="http://mozilla.github.io/rhino/"
-                  target="_blank"
-                  class="underline">Rhino</a
-                >, <a
-                  href="https://www.graalvm.org"
-                  target="_blank"
-                  class="underline">GraalVM</a
-                >)
-              </li>
-              <li>
-                Groovy (<a
-                  href="https://www.groovy-lang.org"
-                  target="_blank"
-                  class="underline">Groovy</a
-                >)
-              </li>
-              <li>
-                R (<a
-                  href="https://www.graalvm.org"
-                  target="_blank"
-                  class="underline">GraalVM</a
-                >)
-              </li>
-            </ul>
-          </div>
-          <a
-            href="https://github.com/SelfMadeSystem/ServerScripter"
-            target="_blank"
-            class="inline-block mt-auto px-4 py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded transition"
-            >Visit</a
-          >
-        </div>
-      </div>
-    </section>
-  </main>
+        </HashVisible>
+      </section>
+    </main>
+    <footer class="outline outline-white text-center p-4 mt-auto">
+      <shuffle-text
+        >© {new Date().getFullYear()} Shoghi Simon. All rights reserved.</shuffle-text
+      >
+    </footer>
+  </div>
 </Layout>
