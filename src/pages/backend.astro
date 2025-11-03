@@ -5,9 +5,12 @@ import { WebGLText } from '../components/WebGLText';
 import { HashVisible } from '../components/HashVisible';
 import Layout from '../layout/Layout.astro';
 import '../styles/backend.css';
+
+const description =
+  "When applications need to handle millions of users or process complex data, that's where I shine. I've built everything from high-traffic Discord bots to sophisticated development tools and military-grade applications, always focusing on performance, reliability, and developer experience.";
 ---
 
-<Layout>
+<Layout description={description}>
   <RippleGL client:load />
 
   <script src="../components/ShuffleText.ts"></script>
@@ -36,13 +39,7 @@ import '../styles/backend.css';
       <section class="max-w-5xl mx-auto pb-8">
         <div class="p-8">
           <WebGLText client:load
-            ><shuffle-text no-shuffle
-              >When applications need to handle millions of users or process
-              complex data, that's where I shine. I've built everything from
-              high-traffic Discord bots to sophisticated development tools and
-              military-grade applications, always focusing on performance,
-              reliability, and developer experience.</shuffle-text
-            ></WebGLText
+            ><shuffle-text no-shuffle>{description}</shuffle-text></WebGLText
           >
         </div>
         <HashVisible
