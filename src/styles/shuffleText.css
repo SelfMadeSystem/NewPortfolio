@@ -1,0 +1,7 @@
+shuffle-text {
+  color: transparent;
+}
+
+shuffle-text.loaded {
+  color: inherit;
+}

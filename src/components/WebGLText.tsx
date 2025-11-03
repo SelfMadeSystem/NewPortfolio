@@ -270,7 +270,7 @@ export function WebGLText({
       pointerPos: pointer.a,
       resolution: [glCanvas.width, glCanvas.height],
       charSize: charSize.a,
-      charOffset: [text.pos.x, text.pos.y - window.scrollY],
+      charOffset: text.pos.a,
       maxThreshold: options.maxThreshold,
       minThreshold: options.minThreshold,
       colorBoost: options.colorBoost,

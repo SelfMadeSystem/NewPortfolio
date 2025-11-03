@@ -1,4 +1,5 @@
 import { useCanvas } from '../utils/hooks/useCanvas';
+import { randSubsetOfChars, textButRandom } from '../utils/textUtils';
 import { type TextOnScreen, TextOnScreenElement } from './TextOnScreen';
 import type { PropsWithChildren } from 'preact/compat';
 import { useEffect, useState } from 'preact/hooks';
@@ -6,32 +7,6 @@ import { useEffect, useState } from 'preact/hooks';
 const options = {
   randChars: 3,
 };
-
-const chars =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789[]{}<>?/|\\`~!@#$%^&*()-_=+';
-
-function randSubsetOfChars(length: number) {
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    const randIndex = Math.floor(Math.random() * chars.length);
-    result += chars[randIndex];
-  }
-  return result;
-}
-
-function textButRandom(text: string, chars: string) {
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const t = text[i];
-    if (t.trim() === '') {
-      result += t;
-    } else {
-      const randIndex = Math.floor(Math.random() * chars.length);
-      result += chars[randIndex];
-    }
-  }
-  return result;
-}
 
 const textButRandomCache = new Map<string, string>();
 
@@ -72,8 +47,7 @@ function drawTextOnCanvas(
   ctx.textAlign = textAlign;
   const startY =
     -metrics.fontBoundingBoxDescent / 2 +
-    pos.y -
-    window.scrollY +
+    pos.y +
     (fontSize - lineHeight) / 2 +
     lineHeight;
 

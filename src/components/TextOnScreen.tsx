@@ -1,7 +1,7 @@
 import { getCachedMetrics } from '../utils/canvasUtils';
 import { Vector2 } from '../utils/vec';
 import { getLines } from '../utils/wordWrap';
-import type { CSSProperties, ComponentChild } from 'preact';
+import type { CSSProperties } from 'preact';
 import type { PropsWithChildren } from 'preact/compat';
 import { type MutableRef, useEffect, useRef } from 'preact/hooks';
 

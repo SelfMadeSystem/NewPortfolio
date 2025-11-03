@@ -6,7 +6,8 @@
 }
 
 .fancy-thingamajig canvas {
-  filter: hue-rotate(-90deg) brightness(20%);
+  background: #000;
+  filter: hue-rotate(-90deg) brightness(50%);
 }
 
 .fancy-thingamajig::after {

@@ -9,12 +9,16 @@ import '../styles/backend.css';
 <Layout>
   <RippleGL client:load />
 
-  <main class="min-h-screen text-gray-100 px-4 py-12 font-mono">
+  <script src="../components/ShuffleText.ts"></script>
+
+  <main class="min-h-screen text-gray-100 font-mono">
+    <h1 class="text-4xl md:text-5xl mb-4 outline outline-white pt-2 pb-4">
+      <div class="w-fit mx-auto">
+        <shuffle-text>Backend Development</shuffle-text>
+      </div>
+    </h1>
     <section class="max-w-5xl mx-auto">
       <div class="mb-12">
-        <h1 class="text-4xl md:text-5xl mb-4">
-          <div class="w-fit mx-auto">Backend Development</div>
-        </h1>
         <div class="p-8">
           <WebGLText client:load>
             When applications need to handle millions of users or process
@@ -27,57 +31,61 @@ import '../styles/backend.css';
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 text-center"
         >
           <div>
-            <h2 class="text-2xl mb-2">Languages</h2>
+            <h2 class="text-2xl mb-2">
+              <shuffle-text>Languages</shuffle-text>
+            </h2>
             <ul class="space-y-1">
-              <li>TypeScript</li>
-              <li>Java</li>
-              <li>Rust</li>
-              <li>C#</li>
-              <li>GDScript</li>
-              <li>PHP</li>
-              <li>Python</li>
+              <li><shuffle-text>TypeScript</shuffle-text></li>
+              <li><shuffle-text>Java</shuffle-text></li>
+              <li><shuffle-text>Rust</shuffle-text></li>
+              <li><shuffle-text>C#</shuffle-text></li>
+              <li><shuffle-text>GDScript</shuffle-text></li>
+              <li><shuffle-text>PHP</shuffle-text></li>
+              <li><shuffle-text>Python</shuffle-text></li>
             </ul>
           </div>
           <div>
-            <h2 class="text-2xl mb-2">Frameworks</h2>
+            <h2 class="text-2xl mb-2">
+              <shuffle-text>Frameworks</shuffle-text>
+            </h2>
             <ul class="space-y-1">
-              <li>Next.JS</li>
-              <li>Node.JS</li>
-              <li>Bun.JS</li>
-              <li>ASP.NET</li>
-              <li>Express.JS</li>
+              <li><shuffle-text>Next.JS</shuffle-text></li>
+              <li><shuffle-text>Node.JS</shuffle-text></li>
+              <li><shuffle-text>Bun.JS</shuffle-text></li>
+              <li><shuffle-text>ASP.NET</shuffle-text></li>
+              <li><shuffle-text>Express.JS</shuffle-text></li>
             </ul>
           </div>
           <div>
-            <h2 class="text-2xl mb-2">Tools</h2>
+            <h2 class="text-2xl mb-2"><shuffle-text>Tools</shuffle-text></h2>
             <ul class="space-y-1">
-              <li>Google</li>
-              <li>Git</li>
-              <li>VSCode</li>
-              <li>Fish</li>
-              <li>Bash</li>
-              <li>Nix</li>
+              <li><shuffle-text>Google</shuffle-text></li>
+              <li><shuffle-text>Git</shuffle-text></li>
+              <li><shuffle-text>VSCode</shuffle-text></li>
+              <li><shuffle-text>Fish</shuffle-text></li>
+              <li><shuffle-text>Bash</shuffle-text></li>
+              <li><shuffle-text>Nix</shuffle-text></li>
             </ul>
           </div>
           <div>
-            <h2 class="text-2xl mb-2">Systems</h2>
+            <h2 class="text-2xl mb-2"><shuffle-text>Systems</shuffle-text></h2>
             <ul class="space-y-1">
-              <li>Nginx</li>
-              <li>Linux</li>
-              <li>Apache2</li>
-              <li>Podman</li>
-              <li>Docker</li>
+              <li><shuffle-text>Nginx</shuffle-text></li>
+              <li><shuffle-text>Linux</shuffle-text></li>
+              <li><shuffle-text>Apache2</shuffle-text></li>
+              <li><shuffle-text>Podman</shuffle-text></li>
+              <li><shuffle-text>Docker</shuffle-text></li>
             </ul>
           </div>
           <div>
-            <h2 class="text-2xl mb-2">Services</h2>
+            <h2 class="text-2xl mb-2"><shuffle-text>Services</shuffle-text></h2>
             <ul class="space-y-1">
-              <li>libSQL</li>
-              <li>PostgreSQL</li>
-              <li>MySQL</li>
-              <li>MinIO</li>
-              <li>MariaDB</li>
-              <li>SQLite</li>
+              <li><shuffle-text>libSQL</shuffle-text></li>
+              <li><shuffle-text>PostgreSQL</shuffle-text></li>
+              <li><shuffle-text>MySQL</shuffle-text></li>
+              <li><shuffle-text>MinIO</shuffle-text></li>
+              <li><shuffle-text>MariaDB</shuffle-text></li>
+              <li><shuffle-text>SQLite</shuffle-text></li>
             </ul>
           </div>
         </div>
@@ -88,17 +96,19 @@ import '../styles/backend.css';
         <div
           class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
         >
-          <h3 class="text-3xl mb-2">Countryvia</h3>
+          <h3 class="text-3xl mb-2"><shuffle-text>Countryvia</shuffle-text></h3>
           <p class="text-lg mb-4">
-            I took over development of Countryvia, a popular Discord trivia bot
-            focused on geography and country facts. Built with Node.js and
-            TypeScript, it serves over 65,000 servers and 2 million users,
-            making it one of Discord's most widely-used trivia bots.
+            <shuffle-text>
+              I took over development of Countryvia, a popular Discord trivia
+              bot focused on geography and country facts. Built with Node.js and
+              TypeScript, it serves over 65,000 servers and 2 million users,
+              making it one of Discord's most widely-used trivia bots.
+            </shuffle-text>
           </p>
           <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li>NodeJS</li>
-            <li>TypeScript</li>
-            <li>Discord.JS</li>
+            <li><shuffle-text>NodeJS</shuffle-text></li>
+            <li><shuffle-text>TypeScript</shuffle-text></li>
+            <li><shuffle-text>Discord.JS</shuffle-text></li>
           </ul>
           <a
             href="https://discord.gg/4vSs3KJUNN"
@@ -112,20 +122,24 @@ import '../styles/backend.css';
         <div
           class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
         >
-          <h3 class="text-3xl mb-2">Live JSX Editor</h3>
+          <h3 class="text-3xl mb-2">
+            <shuffle-text>Live JSX Editor</shuffle-text>
+          </h3>
           <p class="text-lg mb-4">
-            A real-time JSX editor with live preview, featuring multi-file
-            support, NPM package imports, and advanced tooling. Built with
-            custom esbuild integration and TailwindCSS v4 support for a seamless
-            development experience. Perfect for prototyping and sharing React
-            components quickly.
+            <shuffle-text>
+              A real-time JSX editor with live preview, featuring multi-file
+              support, NPM package imports, and advanced tooling. Built with
+              custom esbuild integration and TailwindCSS v4 support for a
+              seamless development experience. Perfect for prototyping and
+              sharing React components quickly.
+            </shuffle-text>
           </p>
           <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li>TypeScript</li>
-            <li>React</li>
-            <li>esbuild</li>
-            <li>TailwindCSS</li>
-            <li>Monaco Editor</li>
+            <li><shuffle-text>TypeScript</shuffle-text></li>
+            <li><shuffle-text>React</shuffle-text></li>
+            <li><shuffle-text>esbuild</shuffle-text></li>
+            <li><shuffle-text>TailwindCSS</shuffle-text></li>
+            <li><shuffle-text>Monaco Editor</shuffle-text></li>
           </ul>
           <a
             href="https://live-jsx-app.shoghisimon.ca/"
@@ -139,28 +153,34 @@ import '../styles/backend.css';
         <div
           class="bg-gray-900/80 rounded-xl shadow-lg p-8 flex flex-col justify-between"
         >
-          <h3 class="text-3xl mb-2">ServerScripter</h3>
+          <h3 class="text-3xl mb-2">
+            <shuffle-text>ServerScripter</shuffle-text>
+          </h3>
           <p class="text-lg mb-4">
-            A multi-platform Minecraft plugin that enables server-side scripting
-            in multiple languages. Built with Java and designed for
-            cross-platform compatibility, it's been powering MC-Galaxy since
-            2021, dramatically speeding up feature development through rapid
-            script implementation.
+            <shuffle-text>
+              A multi-platform Minecraft plugin that enables server-side
+              scripting in multiple languages. Built with Java and designed for
+              cross-platform compatibility, it's been powering MC-Galaxy since
+              2021, dramatically speeding up feature development through rapid
+              script implementation.
+            </shuffle-text>
           </p>
           <ul class="text-base mb-4 text-left list-disc list-inside">
-            <li>Java</li>
-            <li>Gradle</li>
+            <li><shuffle-text>Java</shuffle-text></li>
+            <li><shuffle-text>Gradle</shuffle-text></li>
           </ul>
           <div class="mb-2">
-            <h4 class="text-xl mb-1">Platforms</h4>
+            <h4 class="text-xl mb-1"><shuffle-text>Platforms</shuffle-text></h4>
             <ul class="text-base list-disc list-inside">
-              <li>Spigot</li>
-              <li>BungeeCord</li>
-              <li>Velocity</li>
+              <li><shuffle-text>Spigot</shuffle-text></li>
+              <li><shuffle-text>BungeeCord</shuffle-text></li>
+              <li><shuffle-text>Velocity</shuffle-text></li>
             </ul>
           </div>
           <div class="mb-2">
-            <h4 class="text-xl mb-1">Languages Supported</h4>
+            <h4 class="text-xl mb-1">
+              <shuffle-text>Languages Supported</shuffle-text>
+            </h4>
             <ul class="text-base list-disc list-inside">
               <li>
                 Python (<a
