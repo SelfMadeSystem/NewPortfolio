@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/immutability */
-import { useAnimationLoop } from '../utils/hooks/useAnimationLoop';
 import { useCanvas } from '../utils/hooks/useCanvas';
-import { useTextStore } from '../utils/textStore';
-import { randomTextStore, screenTextStore } from './canvasStore';
+import { type TextOnScreen, TextOnScreenElement } from './TextOnScreen';
+import type { PropsWithChildren } from 'preact/compat';
 import { useEffect, useState } from 'preact/hooks';
 
 const options = {
@@ -48,8 +46,66 @@ function textButRandomCached(text: string, chars: string) {
   }
 }
 
-export function ScreenText() {
-  const texts = useTextStore();
+function drawTextOnCanvas(
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  text: TextOnScreen,
+  chars?: string,
+) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.textBaseline = 'alphabetic';
+
+  const {
+    lines,
+    pos,
+    size,
+    fontSize,
+    fontFamily,
+    fontWeight,
+    lineHeight,
+    textAlign,
+    metrics,
+  } = text;
+
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.textAlign = textAlign;
+  const startY =
+    -metrics.fontBoundingBoxDescent / 2 +
+    pos.y -
+    window.scrollY +
+    (fontSize - lineHeight) / 2 +
+    lineHeight;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const y = i * lineHeight + startY;
+    let x = pos.x;
+    if (textAlign === 'center') {
+      x += size.x / 2;
+    } else if (textAlign === 'right' || textAlign === 'end') {
+      x += size.x;
+    }
+    if (chars) {
+      ctx.fillText(textButRandomCached(line, chars), x, y);
+    } else {
+      ctx.fillText(line, x, y);
+    }
+  }
+}
+
+export function ScreenText({
+  children,
+  tCanvasRef,
+  rCanvasRef,
+  text,
+  setText,
+}: PropsWithChildren<{
+  tCanvasRef: (canvas: HTMLCanvasElement) => void;
+  rCanvasRef: (canvas: HTMLCanvasElement) => void;
+  text: TextOnScreen | null;
+  setText: (text: TextOnScreen) => void;
+}>) {
   const [tCtx, tCanvas, setTCanvas] = useCanvas<'2d'>({
     contextId: '2d',
     autoResize: true,
@@ -57,7 +113,7 @@ export function ScreenText() {
       context.clearRect(0, 0, canvas.width, canvas.height);
     },
     setup(context, canvas) {
-      screenTextStore.set(canvas);
+      tCanvasRef(canvas);
     },
   });
   const [rCtx, rCanvas, setRCanvas] = useCanvas<'2d'>({
@@ -67,7 +123,7 @@ export function ScreenText() {
       context.clearRect(0, 0, canvas.width, canvas.height);
     },
     setup(context, canvas) {
-      randomTextStore.set(canvas);
+      rCanvasRef(canvas);
     },
   });
   const [chars, setChars] = useState(() =>
@@ -75,75 +131,36 @@ export function ScreenText() {
   );
 
   useEffect(() => {
+    if (!text || !rCtx || !rCanvas) return;
     const interval = setInterval(() => {
       setChars(randSubsetOfChars(options.randChars));
     }, 500);
     return () => clearInterval(interval);
-  });
+  }, [text, rCtx, rCanvas]);
 
-  useAnimationLoop(dt => {
-    if (!tCtx || !tCanvas || !rCtx || !rCanvas) return;
+  useEffect(() => {
+    if (!tCtx || !tCanvas || !text) return;
+    drawTextOnCanvas(tCtx, tCanvas, text);
+  }, [tCtx, tCanvas, text]);
 
-    tCtx.clearRect(0, 0, tCanvas.width, tCanvas.height);
-    rCtx.clearRect(0, 0, rCanvas.width, rCanvas.height);
-    rCtx.fillStyle = tCtx.fillStyle = 'white';
-    rCtx.textBaseline = tCtx.textBaseline = 'alphabetic';
-
-    for (const {
-      lines,
-      pos,
-      size,
-      fontSize,
-      fontFamily,
-      fontWeight,
-      lineHeight,
-      textAlign,
-      metrics,
-    } of texts) {
-      // only draw if on screen
-      if (
-        pos.x + size.x < 0 ||
-        pos.x > window.innerWidth + window.scrollX ||
-        pos.y + size.y < 0 ||
-        pos.y > window.innerHeight + window.scrollY
-      ) {
-        continue;
-      }
-
-      rCtx.font = tCtx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-      rCtx.textAlign = tCtx.textAlign = textAlign;
-      const startY =
-        -metrics.fontBoundingBoxDescent / 2 +
-        pos.y -
-        window.scrollY +
-        (fontSize - lineHeight) / 2 +
-        lineHeight;
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const y = i * lineHeight + startY;
-        let x = pos.x;
-        if (textAlign === 'center') {
-          x += size.x / 2;
-        } else if (textAlign === 'right' || textAlign === 'end') {
-          x += size.x;
-        }
-        tCtx.fillText(line, x, y);
-        rCtx.fillText(textButRandomCached(line, chars), x, y);
-      }
-    }
-  });
+  useEffect(() => {
+    if (!rCtx || !rCanvas || !text) return;
+    drawTextOnCanvas(rCtx, rCanvas, text, chars);
+  }, [rCtx, rCanvas, text, chars]);
 
   return (
-    <>
+    <div className="relative">
+      <TextOnScreenElement setOnScreenText={setText}>
+        {children}
+      </TextOnScreenElement>
       <canvas
         ref={setTCanvas}
-        class="pointer-events-none invisible fixed inset-0 z-100 h-full w-full"
+        class="pointer-events-none invisible absolute inset-0 z-100 h-full w-full"
       />
       <canvas
         ref={setRCanvas}
-        class="pointer-events-none invisible fixed inset-0 z-100 h-full w-full"
+        class="pointer-events-none invisible absolute inset-0 z-100 h-full w-full"
       />
-    </>
+    </div>
   );
 }

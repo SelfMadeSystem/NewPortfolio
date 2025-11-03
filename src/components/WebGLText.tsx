@@ -2,15 +2,13 @@ import * as twgl from 'twgl.js';
 import { useAnimationLoop } from '../utils/hooks/useAnimationLoop';
 import { useCanvas } from '../utils/hooks/useCanvas';
 import { usePointerPosition } from '../utils/hooks/usePointerPosition';
-import { useTextStore } from '../utils/textStore';
 import { Vector2 } from '../utils/vec';
 import { SCALE_DOWN } from './RippleGL';
-import {
-  randomTextStore,
-  rippleCanvasStore,
-  screenTextStore,
-} from './canvasStore';
-import { useRef } from 'preact/hooks';
+import { ScreenText } from './ScreenText';
+import { type TextOnScreen, TextOnScreenElement } from './TextOnScreen';
+import { rippleCanvasStore } from './canvasStore';
+import type { PropsWithChildren } from 'preact/compat';
+import { useRef, useState } from 'preact/hooks';
 
 const defaultOptions = {
   maxThreshold: 0.6,
@@ -158,13 +156,18 @@ function updateTexOrNew(
   });
 }
 
-export function WebGLText({ ...ogOptions }: Partial<WebGLTextOptions>) {
+export function WebGLText({
+  children,
+  ...ogOptions
+}: PropsWithChildren<Partial<WebGLTextOptions>>) {
   const options: WebGLTextOptions = { ...defaultOptions, ...ogOptions };
   const textProgramRef = useRef<twgl.ProgramInfo | null>(null);
   const rippleTexRef = useRef<WebGLTexture | null>(null);
+  const [textCanvas, setTextCanvas] = useState<HTMLCanvasElement | null>(null);
+  const [randCanvas, setRandCanvas] = useState<HTMLCanvasElement | null>(null);
+  const [text, setText] = useState<TextOnScreen | null>(null);
   const textTexRef = useRef<WebGLTexture | null>(null);
   const randTexRef = useRef<WebGLTexture | null>(null);
-  const texts = useTextStore();
 
   const [gl, glCanvas, setCanvas] = useCanvas<'webgl'>({
     contextId: 'webgl',
@@ -190,13 +193,18 @@ export function WebGLText({ ...ogOptions }: Partial<WebGLTextOptions>) {
   const prevPointer = useRef<Vector2>(new Vector2(-1000, -1000));
 
   useAnimationLoop((dt, t) => {
-    if (!gl || !glCanvas || !textProgramRef.current) {
+    if (
+      !gl ||
+      !glCanvas ||
+      !textProgramRef.current ||
+      !textCanvas ||
+      !randCanvas ||
+      !text
+    ) {
       return;
     }
 
     const rippleCanvas = rippleCanvasStore.get();
-    const textCanvas = screenTextStore.get();
-    const randCanvas = randomTextStore.get();
 
     if (!rippleCanvas || !textCanvas || !randCanvas) {
       return;
@@ -229,64 +237,68 @@ export function WebGLText({ ...ogOptions }: Partial<WebGLTextOptions>) {
     const rippleWidth = thisRect.width / rippleCanvas.width / SCALE_DOWN;
     const rippleHeight = thisRect.height / rippleCanvas.height / SCALE_DOWN;
 
-    for (const text of texts) {
-      const charSize = new Vector2(text.metrics.width, text.lineHeight);
+    const charSize = new Vector2(text.metrics.width, text.lineHeight);
 
-      const topLeft = new Vector2(text.pos.x, text.pos.y - window.scrollY).div(
-        new Vector2(glCanvas.width, glCanvas.height),
-      );
-      const bottomRight = new Vector2(
-        text.pos.x + text.size.x,
-        text.pos.y + text.size.y - window.scrollY,
-      ).div(new Vector2(glCanvas.width, glCanvas.height));
+    const topLeft = new Vector2(text.pos.x, text.pos.y - window.scrollY).div(
+      new Vector2(glCanvas.width, glCanvas.height),
+    );
+    const bottomRight = new Vector2(
+      text.pos.x + text.size.x,
+      text.pos.y + text.size.y - window.scrollY,
+    ).div(new Vector2(glCanvas.width, glCanvas.height));
 
-      const arrays = {
-        position: {
-          numComponents: 2,
-          data: topLeft
-            .mult(2, -2)
-            .sub(new Vector2(1, -1))
-            .iTexCoords(bottomRight.mult(2, -2).sub(new Vector2(1, -1))),
-        },
-        texcoord: {
-          numComponents: 2,
-          data: topLeft.iTexCoords(bottomRight),
-        },
-      };
-      const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
+    const arrays = {
+      position: {
+        numComponents: 2,
+        data: topLeft
+          .mult(2, -2)
+          .sub(new Vector2(1, -1))
+          .iTexCoords(bottomRight.mult(2, -2).sub(new Vector2(1, -1))),
+      },
+      texcoord: {
+        numComponents: 2,
+        data: topLeft.iTexCoords(bottomRight),
+      },
+    };
+    const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
 
-      gl.useProgram(textProgramInfo.program);
-      twgl.setBuffersAndAttributes(gl, textProgramInfo, bufferInfo);
-      twgl.setUniforms(textProgramInfo, {
-        textTex: textTex,
-        randTex: randTex,
-        rippleTex: rippleTex,
-        ripplePosition: [ripplePosX, ripplePosY, rippleWidth, rippleHeight],
-        time: t,
-        pointerPos: pointer.a,
-        resolution: [glCanvas.width, glCanvas.height],
-        charSize: charSize.a,
-        charOffset: [text.pos.x, text.pos.y - window.scrollY],
-        maxThreshold: options.maxThreshold,
-        minThreshold: options.minThreshold,
-        colorBoost: options.colorBoost,
-        colorBoostBlue: options.colorBoostBlue,
-      });
-      twgl.drawBufferInfo(gl, bufferInfo);
-    }
-
-    // Clean up
-    gl.deleteTexture(textTex);
-    gl.deleteTexture(randTex);
+    gl.useProgram(textProgramInfo.program);
+    twgl.setBuffersAndAttributes(gl, textProgramInfo, bufferInfo);
+    twgl.setUniforms(textProgramInfo, {
+      textTex: textTex,
+      randTex: randTex,
+      rippleTex: rippleTex,
+      ripplePosition: [ripplePosX, ripplePosY, rippleWidth, rippleHeight],
+      time: t,
+      pointerPos: pointer.a,
+      resolution: [glCanvas.width, glCanvas.height],
+      charSize: charSize.a,
+      charOffset: [text.pos.x, text.pos.y - window.scrollY],
+      maxThreshold: options.maxThreshold,
+      minThreshold: options.minThreshold,
+      colorBoost: options.colorBoost,
+      colorBoostBlue: options.colorBoostBlue,
+    });
+    twgl.drawBufferInfo(gl, bufferInfo);
 
     prevPointer.current = pointer;
   });
 
   // Only render the WebGL canvas, since text/rand canvases are managed globally
   return (
-    <canvas
-      ref={setCanvas}
-      className="pointer-events-none fixed inset-0 h-full w-full"
-    />
+    <div class="relative">
+      <ScreenText
+        text={text}
+        setText={setText}
+        rCanvasRef={setRandCanvas}
+        tCanvasRef={setTextCanvas}
+      >
+        {children}
+      </ScreenText>
+      <canvas
+        ref={setCanvas}
+        className="pointer-events-none absolute inset-0 h-full w-full"
+      />
+    </div>
   );
 }
