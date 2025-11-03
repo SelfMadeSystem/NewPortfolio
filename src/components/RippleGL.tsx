@@ -34,6 +34,7 @@ uniform sampler2D prevTex;
 uniform float time;
 uniform float dt;
 uniform vec2 pointerPos;
+uniform vec2 prevPointerPos;
 uniform bool pointerDown;
 uniform vec2 resolution;
 uniform float rippleStrength;
@@ -46,6 +47,13 @@ vec4 sampleTex(sampler2D tex, vec2 uv) {
     return vec4(0.0, 0.0, 0.0, 0.0);
   }
   return texture2D(tex, uv);
+}
+
+float distFromLine(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p - a;
+  vec2 ba = b - a;
+  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+  return length(pa - ba * h);
 }
 
 void main()
@@ -63,7 +71,7 @@ void main()
   float t = hL.w * 0.5 + hR.w * 0.5 + hT.w * 0.5 + hB.w * 0.5;
 
   float new_height = (hL.x + hR.x + hT.x + hB.x) / t - hC.y;
-  float dist = distance(fragCoord, pointerPos);
+  float dist = distFromLine(fragCoord, prevPointerPos, pointerPos);
 
   if (pointerDown) {
     new_height += rippleStrength * exp(-dist/rippleRadius);
@@ -137,6 +145,7 @@ export function RippleGL({
 
   const pointer = usePointerPosition(glCanvas) || new Vector2(-1000, -1000);
   const prevPointer = useRef<Vector2>(new Vector2(-1000, -1000));
+  const prevPointerMoved = useRef<boolean>(false);
 
   useAnimationLoop((dt, t) => {
     if (
@@ -194,6 +203,8 @@ export function RippleGL({
     };
     const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
 
+    const pointerMoved = pointer.distSq(prevPointer.current) > 1;
+
     // Ripple pass and swap
     gl.useProgram(rippleProgramInfo.program);
     twgl.setBuffersAndAttributes(gl, rippleProgramInfo, bufferInfo);
@@ -202,7 +213,8 @@ export function RippleGL({
       time: t,
       dt: dt,
       pointerPos: pointer.div(SCALE_DOWN).a,
-      pointerDown: pointer.distSq(prevPointer.current) > 1,
+      prevPointerPos: prevPointer.current.div(SCALE_DOWN).a,
+      pointerDown: prevPointerMoved.current,
       resolution: [glCanvas.width, glCanvas.height],
       rippleStrength: options.rippleStrength,
       rippleDamping: options.rippleDamping,
@@ -215,6 +227,7 @@ export function RippleGL({
     rippleTexRef.current = [rippleTex2, rippleTex1];
 
     prevPointer.current = pointer;
+    prevPointerMoved.current = pointerMoved;
   });
 
   const setCanvas = useCallback(
