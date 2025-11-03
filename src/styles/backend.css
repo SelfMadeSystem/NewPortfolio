@@ -6,7 +6,7 @@
 }
 
 .fancy-thingamajig canvas {
-  filter: hue-rotate(-90deg);
+  filter: hue-rotate(-90deg) brightness(20%);
 }
 
 .fancy-thingamajig::after {
@@ -15,10 +15,5 @@
   inset: 0;
   z-index: 10;
   background: radial-gradient(circle at center, #0000 20%, #000 20%) 4px 4px /
-    8px 8px fixed;
-}
-
-.fancy-bg {
-  background: radial-gradient(circle at center, #0000 30%, #000 30%) 4px 4px /
     8px 8px fixed;
 }
