@@ -10,6 +10,7 @@ export class ShuffleText extends HTMLElement {
   private startIndex: number = 0;
   private endIndex: number = 0;
   private maxLength: number = 40;
+  private started: boolean = false;
   private charChangeInterval: number = 250;
   private cancelInterval: () => void = () => {};
 
@@ -34,6 +35,7 @@ export class ShuffleText extends HTMLElement {
 
     if (!this.noShuffle)
       this.addEventListener('mouseenter', () => {
+        if (!this.started) return;
         this.stopShuffling();
         this.startShuffling();
       });
@@ -54,13 +56,17 @@ export class ShuffleText extends HTMLElement {
         (rect.top / window.innerHeight) * 1000 +
           (rect.left / window.innerWidth) * 500,
       );
-      setTimeout(() => this.startShuffling(), delay);
+      setTimeout(() => {
+        this.started = true;
+        this.startShuffling();
+      }, delay);
       return;
     }
 
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
+          this.started = true;
           this.startShuffling();
           observer.disconnect();
         }
