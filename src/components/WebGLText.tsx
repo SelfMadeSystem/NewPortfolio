@@ -14,7 +14,7 @@ const defaultOptions = {
   maxThreshold: 0.6,
   minThreshold: 0.1,
   colorBoost: 0.2,
-  colorBoostBlue: 0.5,
+  colorBoostBlue: 0.3,
 };
 
 type WebGLTextOptions = typeof defaultOptions;
@@ -239,13 +239,10 @@ export function WebGLText({
 
     const charSize = new Vector2(text.metrics.width, text.lineHeight);
 
-    const topLeft = new Vector2(text.pos.x, text.pos.y - window.scrollY).div(
-      new Vector2(glCanvas.width, glCanvas.height),
-    );
-    const bottomRight = new Vector2(
-      text.pos.x + text.size.x,
-      text.pos.y + text.size.y - window.scrollY,
-    ).div(new Vector2(glCanvas.width, glCanvas.height));
+    const topLeft = text.pos.div(new Vector2(glCanvas.width, glCanvas.height));
+    const bottomRight = text.pos
+      .add(text.size)
+      .div(new Vector2(glCanvas.width, glCanvas.height));
 
     const arrays = {
       position: {

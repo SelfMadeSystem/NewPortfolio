@@ -226,7 +226,7 @@ export function RippleGL({
   );
 
   return (
-    <div class="pointer-events-none fixed inset-0 z-50 opacity-10">
+    <div class="fancy-thingamajig pointer-events-none fixed inset-0 -z-50 opacity-100">
       <canvas
         ref={setCanvas}
         className="pointer-events-none absolute inset-[-50%] h-[200%] w-[200%] -scale-y-100"
