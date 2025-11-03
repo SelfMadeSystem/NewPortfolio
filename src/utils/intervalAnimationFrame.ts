@@ -9,6 +9,7 @@ export function intervalAnimationFrame(
   callback: (t: number, dt: number) => void,
   interval: number,
 ): () => void {
+  const maxCallsPerFrame = 4;
   let startTime = performance.now();
   let lastTime = performance.now();
   let accumulatedTime = 0;
@@ -20,7 +21,9 @@ export function intervalAnimationFrame(
     lastTime = now;
     accumulatedTime += deltaTime;
 
-    while (accumulatedTime >= interval) {
+    let i = 0;
+    while (accumulatedTime >= interval && i < maxCallsPerFrame) {
+      i++;
       callback(now - startTime, deltaTime);
       accumulatedTime -= interval;
     }
