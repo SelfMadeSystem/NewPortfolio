@@ -9,9 +9,12 @@ import backend from '../assets/backend.png';
 import game from '../assets/game.png';
 import web from '../assets/web.png';
 import Image from 'astro/components/Image.astro';
+
+const description =
+  "I've launched e-commerce sites that tripled sales, scaled Discord bots to millions, and delivered mission-critical military applications. Let's build something amazing together.";
 ---
 
-<Layout doUnloaded>
+<Layout description={description} doUnloaded>
   <SlideInLoader client:load />
   <div class="relative">
     <div class="h-screen relative flex items-start">
@@ -41,9 +44,7 @@ import Image from 'astro/components/Image.astro';
           <span class="hand-wave">👋</span>
         </h1>
         <div class="text-xl max-w-lg mx-auto text-center">
-          I've built Discord bots serving 2+ million users, e-commerce sites
-          that tripled sales, and military-grade applications used in real-world
-          operations.
+          {description}
         </div>
         <div class="text-lg block max-w-lg mx-auto text-center mt-4 opacity-80">
           Let's build something amazing together.
