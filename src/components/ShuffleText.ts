@@ -1,4 +1,5 @@
 import '../styles/shuffleText.css';
+import { intervalAnimationFrame } from '../utils/intervalAnimationFrame';
 import { randSubsetOfChars, textButRandom } from '../utils/textUtils';
 import { getLines } from '../utils/wordWrap';
 
@@ -9,7 +10,8 @@ export class ShuffleText extends HTMLElement {
   private startIndex: number = 0;
   private endIndex: number = 0;
   private maxLength: number = 40;
-  private intervalId: number | null = null;
+  private charChangeInterval: number = 250;
+  private cancelInterval: () => void = () => {};
 
   constructor() {
     super();
@@ -87,8 +89,15 @@ export class ShuffleText extends HTMLElement {
 
   private startShuffling() {
     this.startIndex = 0;
-    const characters = randSubsetOfChars(3);
-    this.intervalId = window.setInterval(() => {
+    let characters = randSubsetOfChars(3);
+    let lastCharChange = performance.now();
+
+    this.cancelInterval = intervalAnimationFrame(t => {
+      if (t - lastCharChange > this.charChangeInterval) {
+        characters = randSubsetOfChars(3);
+        lastCharChange = t;
+      }
+
       const { start, end } = this.getStartEndIndices();
       const shuffled = textButRandom(
         this.originalText.substring(start, end),
@@ -110,11 +119,8 @@ export class ShuffleText extends HTMLElement {
   }
 
   private stopShuffling() {
-    if (this.intervalId !== null) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-      this.innerText = this.originalText;
-    }
+    this.cancelInterval();
+    this.innerText = this.originalText;
   }
 }
 
