@@ -3,10 +3,12 @@ import { randSubsetOfChars, textButRandom } from '../utils/textUtils';
 import { getLines } from '../utils/wordWrap';
 
 export class ShuffleText extends HTMLElement {
+  private noShuffle: boolean = false;
   private originalText: string = '';
   private isSmall: boolean = false;
   private startIndex: number = 0;
   private endIndex: number = 0;
+  private maxLength: number = 40;
   private intervalId: number | null = null;
 
   constructor() {
@@ -14,12 +16,13 @@ export class ShuffleText extends HTMLElement {
   }
 
   connectedCallback() {
+    this.noShuffle = this.hasAttribute('no-shuffle');
     const lines = getLines(this);
     if (lines.length > 1) {
       this.outerHTML = lines
         .map(
           line =>
-            `<shuffle-text style="display: block;">${line}</shuffle-text>`,
+            `<shuffle-text style="display: block;" ${this.noShuffle ? 'no-shuffle' : ''}>${line}</shuffle-text>`,
         )
         .join('');
       return;
@@ -27,10 +30,11 @@ export class ShuffleText extends HTMLElement {
     this.originalText = this.innerText;
     this.isSmall = this.originalText.length < 10;
 
-    this.addEventListener('mouseenter', () => {
-      this.stopShuffling();
-      this.startShuffling();
-    });
+    if (!this.noShuffle)
+      this.addEventListener('mouseenter', () => {
+        this.stopShuffling();
+        this.startShuffling();
+      });
 
     this.innerText = '\u00A0'; // prevent layout shift
     this.classList.add('loaded');
@@ -92,10 +96,11 @@ export class ShuffleText extends HTMLElement {
       );
       this.innerText = this.originalText.substring(0, start) + shuffled;
 
-      if (end >= this.originalText.length) {
-        this.startIndex++;
-      } else {
+      if (end < this.originalText.length) {
         this.endIndex++;
+      }
+      if (end >= this.originalText.length || end - start > this.maxLength) {
+        this.startIndex++;
       }
 
       if (start >= this.originalText.length) {

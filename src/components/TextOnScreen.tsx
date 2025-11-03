@@ -86,7 +86,6 @@ export function TextOnScreenElement({
   style?: CSSProperties;
 }>) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const observerRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -94,12 +93,21 @@ export function TextOnScreenElement({
     // initial report
     setOnScreenText(createTextOnScreen(ref));
 
-    const observer = new ResizeObserver(() => {
+    const resizeObserver = new ResizeObserver(() => {
       if (!ref.current) return;
       setOnScreenText(createTextOnScreen(ref));
     });
-    observer.observe(ref.current);
-    observerRef.current = observer;
+    resizeObserver.observe(ref.current);
+
+    const mutationObserver = new MutationObserver(() => {
+      if (!ref.current) return;
+      setOnScreenText(createTextOnScreen(ref));
+    });
+    mutationObserver.observe(ref.current, {
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
 
     const onWindowResize = () => {
       if (!ref.current) return;
@@ -108,7 +116,8 @@ export function TextOnScreenElement({
     window.addEventListener('resize', onWindowResize);
 
     return () => {
-      if (observerRef.current) observerRef.current.disconnect();
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
       window.removeEventListener('resize', onWindowResize);
     };
     // only subscribe once; callers may provide a stable callback or useCallback

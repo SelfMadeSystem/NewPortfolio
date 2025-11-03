@@ -1,15 +1,27 @@
 /**
- * Wraps every word in the given element in a span. Assumes the element contains
- * only text nodes and no child elements.
+ * Wraps every character in the given element in a span. Recursively processes
+ * child elements.
  */
 export function wrapText(element: HTMLElement): void {
-  if (element.hasAttribute('data-wrapped')) return;
-  const text = element.innerText;
-  const words = text.split('');
-  element.innerHTML = words
-    .map(word => `<span class="wrapped-text">${word}</span>`)
-    .join('');
-  element.setAttribute('data-wrapped', 'true');
+  if (element.querySelector(':scope > span.wrapped-text')) {
+    // already wrapped
+    return;
+  }
+  for (const child of Array.from(element.childNodes)) {
+    if (child.nodeType === Node.ELEMENT_NODE) {
+      wrapText(child as HTMLElement);
+    } else if (child.nodeType === Node.TEXT_NODE) {
+      const text = child.textContent || '';
+      const fragment = document.createDocumentFragment();
+      for (const char of text) {
+        const span = document.createElement('span');
+        span.className = 'wrapped-text';
+        span.textContent = char;
+        fragment.appendChild(span);
+      }
+      element.replaceChild(fragment, child);
+    }
+  }
 }
 
 /**
