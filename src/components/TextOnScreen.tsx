@@ -1,9 +1,9 @@
 import { getCachedMetrics } from '../utils/canvasUtils';
 import { Vector2 } from '../utils/vec';
 import { getLines } from '../utils/wordWrap';
-import type { CSSProperties } from 'preact';
-import type { PropsWithChildren } from 'preact/compat';
-import { type MutableRef, useEffect, useRef } from 'preact/hooks';
+import type { PropsWithChildren } from 'react';
+import type { CSSProperties } from 'react';
+import { type MutableRef, useEffect, useRef } from 'react';
 
 export type TextOnScreen = {
   lines: string[];

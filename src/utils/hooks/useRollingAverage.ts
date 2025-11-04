@@ -1,5 +1,5 @@
 import { Vector2 } from '../vec';
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Hook that calculates the rolling average of a numeric value over a specified window size.

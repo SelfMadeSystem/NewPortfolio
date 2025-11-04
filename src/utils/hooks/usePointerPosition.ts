@@ -1,7 +1,7 @@
 import { Vector2 } from '../vec';
 import { useWindowEvent } from './useWindowEvent';
-import type { RefObject } from 'preact';
-import { useState } from 'preact/hooks';
+import type { RefObject } from 'react';
+import { useState } from 'react';
 
 function getEl(element: RefObject<HTMLElement | null> | HTMLElement | null) {
   if (element && 'current' in element) {

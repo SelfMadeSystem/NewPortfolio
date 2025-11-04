@@ -1,8 +1,8 @@
 import { useCanvas } from '../utils/hooks/useCanvas';
 import { randSubsetOfChars, textButRandom } from '../utils/textUtils';
 import { type TextOnScreen, TextOnScreenElement } from './TextOnScreen';
-import type { PropsWithChildren } from 'preact/compat';
-import { useEffect, useState } from 'preact/hooks';
+import type { PropsWithChildren } from 'react';
+import { useEffect, useState } from 'react';
 
 const options = {
   randChars: 3,
@@ -125,17 +125,17 @@ export function ScreenText({
   }, [rCtx, rCanvas, text, chars]);
 
   return (
-    <div class="relative">
+    <div className="relative">
       <TextOnScreenElement setOnScreenText={setText}>
         {children}
       </TextOnScreenElement>
       <canvas
         ref={setTCanvas}
-        class="pointer-events-none invisible absolute inset-0 z-100 h-full w-full"
+        className="pointer-events-none invisible absolute inset-0 z-100 h-full w-full"
       />
       <canvas
         ref={setRCanvas}
-        class="pointer-events-none invisible absolute inset-0 z-100 h-full w-full"
+        className="pointer-events-none invisible absolute inset-0 z-100 h-full w-full"
       />
     </div>
   );

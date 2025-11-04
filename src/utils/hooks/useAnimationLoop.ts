@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef } from 'react';
 
 /**
  * A custom hook that provides an animation loop using `requestAnimationFrame`.

@@ -6,13 +6,13 @@ Flat, material-styled portfolio site with animated aquatic theme, including wave
 
 ## Web Dev page
 
-Apple Liquid Glass & AirBnB Lava inspired design.
+Actually I think I want more of an overly animated "modern" design like motion.dev.
 
 Inspiration:
 
-- [Fluid Glass](https://chiuhans111.github.io/fluidglass/)
-- [Liquid Glass](https://kube.io/blog/liquid-glass-css-svg/)
-- [AirBnB Lava](https://airbnb.design/lava/)
+- https://motion.dev/
+- https://www.blinkpath.com
+
 
 ## Backend Dev page
 
@@ -25,6 +25,7 @@ Inspiration:
 - https://rosehip.griflan.com/
 - [8 bit snake game](https://codepen.io/filipz/full/JoogyPM)
 - https://lcd.ertdfgcvb.xyz/
+- https://orage.studio
 
 I think [scanning effect](https://tympanus.net/Development/ScanEffect/effect1/) would be cool here too.
 

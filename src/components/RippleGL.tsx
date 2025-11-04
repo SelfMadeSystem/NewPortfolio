@@ -4,7 +4,7 @@ import { useCanvas } from '../utils/hooks/useCanvas';
 import { usePointerPosition } from '../utils/hooks/usePointerPosition';
 import { Vector2 } from '../utils/vec';
 import { rippleCanvasStore } from './canvasStore';
-import { useCallback, useRef } from 'preact/hooks';
+import { useCallback, useRef } from 'react';
 
 const defaultOptions = {
   rippleStrength: 5.0,
@@ -239,7 +239,7 @@ export function RippleGL({
   );
 
   return (
-    <div class="fancy-thingamajig pointer-events-none fixed inset-0 -z-50 opacity-100">
+    <div className="fancy-thingamajig pointer-events-none fixed inset-0 -z-50 opacity-100">
       <canvas
         ref={setCanvas}
         className="pointer-events-none absolute inset-[-50%] h-[200%] w-[200%] -scale-y-100"

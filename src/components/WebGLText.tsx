@@ -7,8 +7,8 @@ import { SCALE_DOWN } from './RippleGL';
 import { ScreenText } from './ScreenText';
 import { type TextOnScreen, TextOnScreenElement } from './TextOnScreen';
 import { rippleCanvasStore } from './canvasStore';
-import type { PropsWithChildren } from 'preact/compat';
-import { useRef, useState } from 'preact/hooks';
+import type { PropsWithChildren } from 'react';
+import { useRef, useState } from 'react';
 
 const defaultOptions = {
   maxThreshold: 0.6,
@@ -283,7 +283,7 @@ export function WebGLText({
 
   // Only render the WebGL canvas, since text/rand canvases are managed globally
   return (
-    <div class="relative">
+    <div className="relative">
       <ScreenText
         text={text}
         setText={setText}

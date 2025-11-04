@@ -1,6 +1,6 @@
 import '../styles/hashVisible.css';
-import type { ComponentProps, PropsWithChildren } from 'preact/compat';
-import { useEffect, useState } from 'preact/hooks';
+import type { ComponentProps, PropsWithChildren } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * An element that's only visible when the URL hash matches its ID.

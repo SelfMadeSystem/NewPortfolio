@@ -1,6 +1,6 @@
 import { clamp, isInView, random, wrapNumber } from '../utils/mathUtils';
 import { getComputedColor } from '../utils/styleUtils';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef } from 'react';
 
 /**
  * Adapted for React from https://github.com/SelfMadeSystem/Portfolio/blob/main/src/utils/MathUtils.ts

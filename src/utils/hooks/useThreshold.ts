@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Hook that returns a new unique value when the accumulated `add` value crosses the specified `threshold`.

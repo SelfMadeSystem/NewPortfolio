@@ -11,7 +11,7 @@ import {
 } from '../utils/mathUtils';
 import { getComputedColor } from '../utils/styleUtils';
 import { Vector2 } from '../utils/vec';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef } from 'react';
 
 function isNeon() {
   return false;

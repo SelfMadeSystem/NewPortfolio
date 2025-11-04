@@ -1,6 +1,6 @@
 import '../styles/SlideInLoader.css';
 import clsx from 'clsx';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'react';
 
 export function SlideInLoader() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -30,7 +30,7 @@ export function SlideInLoader() {
         xmlns="http://www.w3.org/2000/svg"
       >
         <circle
-          class="active"
+          className="active"
           pathLength="360"
           fill="transparent"
           stroke-width="32"
@@ -39,7 +39,7 @@ export function SlideInLoader() {
           r="176"
         ></circle>
         <circle
-          class="track"
+          className="track"
           pathLength="360"
           fill="transparent"
           stroke-width="32"

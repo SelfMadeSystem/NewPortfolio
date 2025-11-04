@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect } from 'react';
 
 // Yoinked from:
 // https://github.com/mantinedev/mantine/blob/ac3b2922e7d3a2026a44c1b3fd549886d5a2174d/packages/%40mantine/hooks/src/use-window-event/use-window-event.ts

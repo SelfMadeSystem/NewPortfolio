@@ -1,7 +1,7 @@
 import { Seaweed } from '../utils/seaweed';
 import { getComputedColor } from '../utils/styleUtils';
 import { Vector2 } from '../utils/vec';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef } from 'react';
 
 function isNeon() {
   return false;
@@ -12,7 +12,7 @@ interface SeaWeedProps {
 }
 
 /**
- * Preact version of the original SeaWeed LitElement.
+ * React version of the original SeaWeed LitElement.
  * Keeps the same canvas-based procedural animation and cleanup behavior.
  */
 export default function SeaWeed({ color = 'blue' }: SeaWeedProps) {
