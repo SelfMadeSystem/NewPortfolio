@@ -16,7 +16,7 @@ const description =
   <script src="../components/ShuffleText.ts"></script>
 
   <div class="min-h-screen text-gray-100 font-mono flex flex-col">
-    <header class="outline outline-white backdrop-rainbow">
+    <header class="border-b border-white backdrop-rainbow">
       <shuffle-text class="left-2 top-2">Shoghi Simon's Portfolio</shuffle-text>
       <h1 class="text-4xl md:text-5xl w-fit pt-2 pb-4">
         <shuffle-text>Backend Development</shuffle-text>
@@ -25,8 +25,10 @@ const description =
         <shuffle-text class="p-2">← Back</shuffle-text>
       </a>
     </header>
-    <main class="flex flex-row grow">
-      <aside class="border-r border-white p-2 backdrop-rainbow">
+    <main class="flex flex-col md:flex-row grow">
+      <aside
+        class="max-md:border-b md:border-r border-white p-2 backdrop-rainbow"
+      >
         <nav class="flex flex-col space-y-4 text-lg">
           <a href="#projects" class="text-indigo-400 hover:underline"
             ><shuffle-text>Projects</shuffle-text></a
