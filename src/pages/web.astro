@@ -1,0 +1,12 @@
+---
+import Layout from '../layout/Layout.astro';
+import WebPage from '../components/WebPage';
+
+const description =
+  'Showcase of web development projects and animated experiments using React, Tailwind, and motion.';
+---
+
+<Layout description={description}>
+  <!-- Hydrate the React component on load so animations run in the browser -->
+  <WebPage client:load />
+</Layout>
