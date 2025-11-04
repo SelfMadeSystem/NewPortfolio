@@ -1,8 +1,12 @@
-@import "https://fonts.googleapis.com/css2?family=Onest:wght@400;700&display=swap";
-@import "tailwindcss";
+@import 'https://fonts.googleapis.com/css2?family=Onest:wght@400;700&display=swap';
+@import 'tailwindcss';
+
+body:has(.noscroll) {
+  overflow: hidden;
+}
 
 @theme {
-  --font-onest: "Onest", sans-serif;
+  --font-onest: 'Onest', sans-serif;
   --font-sans: var(--font-onest);
   --color-primary: #525aff;
 }

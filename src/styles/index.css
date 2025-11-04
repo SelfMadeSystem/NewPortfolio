@@ -27,7 +27,7 @@ body.unloaded .load-in {
 }
 
 .goto-card {
-  @apply relative flex flex-col items-center gap-2 overflow-hidden rounded-3xl bg-white/20 p-6 pt-4 text-center text-2xl font-bold text-white backdrop-blur-md backdrop-filter transition transform-3d;
+  @apply relative flex flex-col items-center gap-2 overflow-hidden rounded-3xl bg-white/20 p-6 pt-4 text-center text-2xl font-bold text-white backdrop-blur-md backdrop-filter transition-all transform-3d;
 
   &::before {
     content: '';
@@ -40,5 +40,9 @@ body.unloaded .load-in {
     background: radial-gradient(circle, #fff, transparent 40%);
     opacity: calc(var(--active) * 0.5);
     mix-blend-mode: color-burn;
+  }
+
+  &.clicked {
+    @apply rounded-none bg-black font-mono text-white;
   }
 }

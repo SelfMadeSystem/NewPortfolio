@@ -6,6 +6,7 @@ export function SlideInLoader() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
     window.scrollTo(0, 0);
 
@@ -16,13 +17,13 @@ export function SlideInLoader() {
 
   return (
     <div
-      class={clsx(
+      className={clsx(
         'z-50 flex items-center justify-center bg-white transition-all duration-1000 ease-in-out',
         isLoaded ? 'h-0 w-full' : 'fixed inset-0 h-screen',
       )}
     >
       <svg
-        class={clsx(
+        className={clsx(
           'loader transition-opacity duration-500 ease-in-out',
           isLoaded && 'opacity-0',
         )}
@@ -33,7 +34,7 @@ export function SlideInLoader() {
           className="active"
           pathLength="360"
           fill="transparent"
-          stroke-width="32"
+          strokeWidth="32"
           cx="192"
           cy="192"
           r="176"
@@ -42,7 +43,7 @@ export function SlideInLoader() {
           className="track"
           pathLength="360"
           fill="transparent"
-          stroke-width="32"
+          strokeWidth="32"
           cx="192"
           cy="192"
           r="176"

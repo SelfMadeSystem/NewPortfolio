@@ -10,6 +10,7 @@ import game from '../assets/game.png';
 import web from '../assets/web.png';
 import Image from 'astro/components/Image.astro';
 import CursorFollowCard from '../components/CursorFollowCard';
+import BackendCard from '../components/BackendCard';
 ---
 
 <Layout doUnloaded>
@@ -75,25 +76,18 @@ import CursorFollowCard from '../components/CursorFollowCard';
               />
             </div>
           </CursorFollowCard>
-          <CursorFollowCard client:load className="h-full">
-            <a href="/backend" class="goto-card h-full">
-              Backend Development
-              <Image
-                src={backend}
-                alt="Backend Development"
-                class="my-auto w-64 invisible"
-              />
-            </a>
-            <div
-              class="absolute bottom-6 left-6 top-14 translate-z-[calc(var(--active)*20px)] flex items-center pointer-events-none"
-            >
-              <Image
-                src={backend}
-                alt="Backend Development"
-                class="my-auto w-64 rounded-lg shadow-lg"
-              />
-            </div>
-          </CursorFollowCard>
+          <BackendCard
+            client:load
+            className="h-full"
+            image="TypeScript doesn't recognize slotted content"
+          >
+            <Image
+              slot="image"
+              src={backend}
+              alt="Backend Development"
+              class="my-auto w-64 rounded-lg shadow-lg"
+            />
+          </BackendCard>
           <CursorFollowCard client:load className="h-full">
             <a href="/game" class="goto-card">
               Game Development

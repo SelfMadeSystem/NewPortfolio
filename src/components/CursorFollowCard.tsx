@@ -63,6 +63,7 @@ export default function CursorFollowCard({ ...props }: HTMLMotionProps<'div'>) {
             transformStyle: 'preserve-3d',
           } as React.CSSProperties
         }
+        layout
         {...props}
       >
         {props.children}
