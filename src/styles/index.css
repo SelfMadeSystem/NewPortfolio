@@ -12,7 +12,9 @@ body.unloaded .load-in {
 .load-in {
   opacity: 1;
   transform: translateY(0px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
 }
 
 @layer components {
@@ -25,8 +27,18 @@ body.unloaded .load-in {
 }
 
 .goto-card {
-  @apply bg-white/20 hover:bg-white/30 transition
-    backdrop-filter backdrop-blur-md hover:scale-105 transform-gpu
-    text-white p-6 pt-4 rounded-3xl text-2xl font-bold text-center
-    flex flex-col items-center gap-2;
+  @apply relative flex flex-col items-center gap-2 overflow-hidden rounded-3xl bg-white/20 p-6 pt-4 text-center text-2xl font-bold text-white backdrop-blur-md backdrop-filter transition transform-3d;
+
+  &::before {
+    content: '';
+    @apply absolute;
+    top: calc(50% + var(--y) * 50%);
+    left: calc(50% + var(--x) * 50%);
+    width: 32em;
+    height: 32em;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, #fff, transparent 40%);
+    opacity: calc(var(--active) * 0.5);
+    mix-blend-mode: color-burn;
+  }
 }

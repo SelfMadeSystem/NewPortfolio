@@ -9,6 +9,7 @@ import backend from '../assets/backend.png';
 import game from '../assets/game.png';
 import web from '../assets/web.png';
 import Image from 'astro/components/Image.astro';
+import CursorFollowCard from '../components/CursorFollowCard';
 ---
 
 <Layout doUnloaded>
@@ -55,30 +56,63 @@ import Image from 'astro/components/Image.astro';
         <section
           class="flex flex-row flex-wrap justify-center items-stretch p-8 gap-8"
         >
-          <a href="/web" class="goto-card w-fit">
-            Web Development
-            <Image
-              src={web}
-              alt="Web Development"
-              class="my-auto w-64 rounded-lg shadow-lg"
-            />
-          </a>
-          <a href="/backend" class="goto-card">
-            Backend Development
-            <Image
-              src={backend}
-              alt="Backend Development"
-              class="my-auto w-64 rounded-lg shadow-lg"
-            />
-          </a>
-          <a href="/game" class="goto-card">
-            Game Development
-            <Image
-              src={game}
-              alt="Game Development"
-              class="my-auto w-64 rounded-lg shadow-lg"
-            />
-          </a>
+          <CursorFollowCard client:load className="h-full">
+            <a href="/web" class="goto-card w-fit h-full">
+              Web Development
+              <Image
+                src={web}
+                alt="Web Development"
+                class="my-auto w-64 invisible"
+              />
+            </a>
+            <div
+              class="absolute bottom-6 left-6 top-14 translate-z-[calc(var(--active)*20px)] flex items-center pointer-events-none"
+            >
+              <Image
+                src={web}
+                alt="Web Development"
+                class="my-auto w-64 rounded-lg shadow-lg"
+              />
+            </div>
+          </CursorFollowCard>
+          <CursorFollowCard client:load className="h-full">
+            <a href="/backend" class="goto-card h-full">
+              Backend Development
+              <Image
+                src={backend}
+                alt="Backend Development"
+                class="my-auto w-64 invisible"
+              />
+            </a>
+            <div
+              class="absolute bottom-6 left-6 top-14 translate-z-[calc(var(--active)*20px)] flex items-center pointer-events-none"
+            >
+              <Image
+                src={backend}
+                alt="Backend Development"
+                class="my-auto w-64 rounded-lg shadow-lg"
+              />
+            </div>
+          </CursorFollowCard>
+          <CursorFollowCard client:load className="h-full">
+            <a href="/game" class="goto-card">
+              Game Development
+              <Image
+                src={game}
+                alt="Game Development"
+                class="my-auto w-64 invisible"
+              />
+            </a>
+            <div
+              class="absolute bottom-6 left-6 top-14 translate-z-[calc(var(--active)*20px)] flex items-center pointer-events-none"
+            >
+              <Image
+                src={game}
+                alt="Game Development"
+                class="my-auto w-64 rounded-lg shadow-lg"
+              />
+            </div>
+          </CursorFollowCard>
         </section>
         <section
           class="text-center text-white font-medium p-8 mx-auto max-w-xl backdrop-blur-md bg-white/20 rounded-3xl"
