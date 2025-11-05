@@ -92,7 +92,7 @@ export default function WebPage() {
               Projects
             </motion.h2>
 
-            <div className="space-y-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((p, idx) => (
                 <ProjectCard key={idx} project={p} />
               ))}
@@ -150,7 +150,7 @@ function ProjectCard({ project }: { project: Project }) {
       href={project.url}
       target="_blank"
       rel="noreferrer"
-      className="block rounded-lg border border-white/8 bg-linear-to-br from-white/3 to-white/2 p-4"
+      className="flex flex-col rounded-lg border border-white/8 bg-linear-to-br from-white/3 to-white/2 p-4"
       style={{
         x,
         y,
@@ -158,7 +158,7 @@ function ProjectCard({ project }: { project: Project }) {
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex grow items-start justify-between">
         <div>
           <h4 className="text-lg font-semibold">{project.title}</h4>
           <p className="mt-1 text-sm text-white/80">{project.description}</p>

@@ -26,6 +26,7 @@ function getParentOfType(elem: Element): Element | null {
 
 const defaultSize = 24;
 const textSize = 8;
+const boxGrow = 8;
 
 const spring: SpringOptions = {
   stiffness: 800,
@@ -89,8 +90,8 @@ export default function FancyCursor() {
       const parentElem = getParentOfType(element) as HTMLElement;
       if (parentElem) {
         const rect = parentElem.getBoundingClientRect();
-        pointerWidth.set(rect.width);
-        pointerHeight.set(rect.height);
+        pointerWidth.set(rect.width + boxGrow * 2);
+        pointerHeight.set(rect.height + boxGrow * 2);
 
         const ptrX = pointerPos.x - rect.left - rect.width / 2;
         const ptrY = pointerPos.y - rect.top - rect.height / 2;
