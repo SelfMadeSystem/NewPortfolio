@@ -1,7 +1,17 @@
-import { motion } from 'motion/react';
+import { usePointerPosition } from '../utils/hooks/usePointerPosition';
+import FancyCursor from './FancyCursor';
+import { motion, useMotionValue, useSpring } from 'motion/react';
+import { useEffect, useRef } from 'react';
+
+type Project = {
+  title: string;
+  description: string;
+  tech: string[];
+  url: string;
+};
 
 export default function WebPage() {
-  const projects = [
+  const projects: Project[] = [
     {
       title: 'Métro Montréal',
       description:
@@ -40,140 +50,125 @@ export default function WebPage() {
   ];
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-linear-to-b from-slate-900 via-[#00111a] to-slate-800 px-6 py-16 text-white">
-      <motion.header
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="relative z-10 mx-auto max-w-6xl"
-      >
-        <motion.h1
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-          className="mb-4 text-4xl font-extrabold tracking-tight md:text-6xl"
-        >
-          Web Development
-        </motion.h1>
-
-        <motion.p
+    <>
+      <div className="relative min-h-screen w-full cursor-none! overflow-hidden bg-linear-to-b from-slate-900 via-[#00111a] to-slate-800 px-6 py-16 text-white">
+        <FancyCursor />
+        <motion.header
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="max-w-2xl text-lg text-white/80"
+          transition={{ duration: 1 }}
+          className="relative z-10 mx-auto max-w-6xl"
         >
-          I've been crafting web experiences since 2018, from simple business
-          sites to complex applications that serve millions. Each project taught
-          me something new and pushed the boundaries of what's possible on the
-          web.
-        </motion.p>
-      </motion.header>
-
-      <main className="relative z-10 mx-auto mt-12 flex max-w-6xl flex-col gap-8">
-        <section className="col-span-1 rounded-xl border border-white/10 bg-white/3 p-6 md:col-span-2">
-          <motion.h2
-            className="mb-4 text-2xl font-semibold"
-            initial={{ y: 10, opacity: 0 }}
+          <motion.h1
+            initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="mb-4 text-4xl font-extrabold tracking-tight md:text-6xl"
           >
-            Technologies
-          </motion.h2>
+            Web Development
+          </motion.h1>
 
-          <motion.div
-            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="max-w-2xl text-lg text-white/80"
           >
-            <div className="rounded-lg bg-white/4 p-4">
-              <h4 className="mb-2 font-semibold">Languages</h4>
-              <ul className="text-sm text-white/80">
-                <li>HTML / CSS</li>
-                <li>JavaScript</li>
-                <li>TypeScript</li>
-                <li>Java</li>
-                <li>C#</li>
-                <li>PHP</li>
-                <li>Kotlin</li>
-              </ul>
-            </div>
+            I've been crafting web experiences since 2018, from simple business
+            sites to complex applications that serve millions. Each project
+            taught me something new and pushed the boundaries of what's possible
+            on the web.
+          </motion.p>
+        </motion.header>
 
-            <div className="rounded-lg bg-white/4 p-4">
-              <h4 className="mb-2 font-semibold">Frameworks</h4>
-              <ul className="text-sm text-white/80">
-                <li>React</li>
-                <li>Next.JS</li>
-                <li>Remix</li>
-                <li>SvelteKit</li>
-                <li>Lit.JS</li>
-              </ul>
-            </div>
+        <main className="relative z-10 mx-auto mt-12 flex max-w-6xl flex-col gap-8">
+          <section className="col-span-1 rounded-xl border border-white/10 bg-white/3 p-6">
+            <motion.h2
+              className="mb-3 text-xl font-semibold"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.35 }}
+            >
+              Projects
+            </motion.h2>
 
-            <div className="rounded-lg bg-white/4 p-4">
-              <h4 className="mb-2 font-semibold">Services</h4>
-              <ul className="text-sm text-white/80">
-                <li>Cloudflare</li>
-                <li>Nginx</li>
-                <li>Apache2</li>
-                <li>Linux</li>
-              </ul>
+            <div className="space-y-4">
+              {projects.map((p, idx) => (
+                <ProjectCard key={idx} project={p} />
+              ))}
             </div>
+          </section>
+        </main>
+
+        <footer className="relative z-10 mx-auto mt-20 max-w-6xl pb-20 text-white/70">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.4, duration: 0.8 }}
+            className="text-sm"
+          >
+            Built with React + Tailwind + motion. This page demonstrates many
+            micro-animations; strip them down for production.
           </motion.div>
-        </section>
+        </footer>
+      </div>
+    </>
+  );
+}
 
-        <section className="col-span-1 rounded-xl border border-white/10 bg-white/3 p-6">
-          <motion.h2
-            className="mb-3 text-xl font-semibold"
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.35 }}
-          >
-            Projects
-          </motion.h2>
+function ProjectCard({ project }: { project: Project }) {
+  const aRef = useRef<HTMLAnchorElement>(null);
+  const pointerPos = usePointerPosition(aRef, {
+    onlyInside: true,
+    keepLast: false,
+  });
 
-          <div className="space-y-4">
-            {projects.map((p, idx) => (
-              <motion.a
-                key={p.title}
-                href={p.url}
-                target="_blank"
-                rel="noreferrer"
-                className="block rounded-lg border border-white/8 bg-linear-to-br from-white/3 to-white/2 p-4"
-                whileHover={{ y: -6, scale: 1.01 }}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="text-lg font-semibold">{p.title}</h4>
-                    <p className="mt-1 text-sm text-white/80">
-                      {p.description}
-                    </p>
-                  </div>
-                </div>
+  const posX = useMotionValue(0);
+  const posY = useMotionValue(0);
 
-                <div className="mt-3 text-xs text-white/70">
-                  <strong className="mr-2">Tech:</strong>
-                  {p.tech.join(' · ')}
-                </div>
-              </motion.a>
-            ))}
-          </div>
-        </section>
-      </main>
+  const x = useSpring(posX, { stiffness: 500, damping: 50 });
+  const y = useSpring(posY, { stiffness: 500, damping: 50 });
 
-      <footer className="relative z-10 mx-auto mt-20 max-w-6xl pb-20 text-white/70">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.4, duration: 0.8 }}
-          className="text-sm"
-        >
-          Built with React + Tailwind + motion. This page demonstrates many
-          micro-animations; strip them down for production.
-        </motion.div>
-      </footer>
-    </div>
+  useEffect(() => {
+    if (!pointerPos || !aRef.current) {
+      posX.set(0);
+      posY.set(0);
+      return;
+    }
+    const rect = aRef.current.getBoundingClientRect();
+    const x = pointerPos.x - rect.width / 2;
+    const y = pointerPos.y - rect.height / 2;
+
+    posX.set(x * 0.1);
+    posY.set(y * 0.1);
+  }, [pointerPos, posX, posY]);
+
+  return (
+    <motion.a
+      ref={aRef}
+      key={project.title}
+      href={project.url}
+      target="_blank"
+      rel="noreferrer"
+      className="block rounded-lg border border-white/8 bg-linear-to-br from-white/3 to-white/2 p-4"
+      style={{
+        x,
+        y,
+      }}
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <h4 className="text-lg font-semibold">{project.title}</h4>
+          <p className="mt-1 text-sm text-white/80">{project.description}</p>
+        </div>
+      </div>
+
+      <div className="mt-3 text-xs text-white/70">
+        <strong className="mr-2">Tech:</strong>
+        {project.tech.join(' · ')}
+      </div>
+    </motion.a>
   );
 }
