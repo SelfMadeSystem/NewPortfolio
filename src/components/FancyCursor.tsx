@@ -1,5 +1,6 @@
 import { isOverText } from '../utils/domUtils';
 import { useViewportPointer } from '../utils/hooks/useViewportPointer';
+import clsx from 'clsx';
 import { animate } from 'motion';
 import {
   type SpringOptions,
@@ -8,7 +9,7 @@ import {
   useSpring,
   useTransform,
 } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function getParentOfType(elem: Element): Element | null {
   let current: Element = elem;
@@ -25,7 +26,7 @@ function getParentOfType(elem: Element): Element | null {
 }
 
 const defaultSize = 24;
-const textSize = 8;
+const textSize = 4;
 const boxGrow = 8;
 
 const spring: SpringOptions = {
@@ -37,12 +38,14 @@ const spring: SpringOptions = {
 
 const COLOR = '#ffffffa0';
 const HOVER_COLOR = '#ffffff30';
-const TEXT_COLOR = '#ff0000a0';
+const TEXT_COLOR = '#ffffffff';
 
 export default function FancyCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
 
   const pointerPos = useViewportPointer();
+
+  const [usingMobile, setUsingMobile] = useState(false);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -137,8 +140,23 @@ export default function FancyCursor() {
     y,
   ]);
 
+  useEffect(() => {
+    const handleTouchStart = () => {
+      setUsingMobile(true);
+    };
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, []);
+
   return (
-    <div className="pointer-events-none fixed inset-0 z-1000 overflow-hidden">
+    <div
+      className={clsx(
+        'pointer-events-none fixed inset-0 z-1000 overflow-hidden',
+        usingMobile && 'hidden',
+      )}
+    >
       <motion.div
         ref={cursorRef}
         className="shadow-lg"
