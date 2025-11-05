@@ -30,11 +30,11 @@ const description =
         class="max-md:border-b md:border-r border-white p-2 backdrop-rainbow"
       >
         <nav class="flex flex-col space-y-4 text-lg">
+          <a href="#case-studies" class="text-indigo-400 hover:underline"
+            ><shuffle-text>Case Studies</shuffle-text></a
+          >
           <a href="#projects" class="text-indigo-400 hover:underline"
             ><shuffle-text>Projects</shuffle-text></a
-          >
-          <a href="#technologies" class="text-indigo-400 hover:underline"
-            ><shuffle-text>Technologies</shuffle-text></a
           >
         </nav>
       </aside>
@@ -46,8 +46,122 @@ const description =
         </div>
         <HashVisible
           client:load
-          id="projects"
+          id="case-studies"
           defaultVisible
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+        >
+          <!-- Countryvia -->
+          <div
+            class="border p-8 flex flex-col justify-between backdrop-rainbow"
+          >
+            <h3 class="text-3xl mb-2">
+              <shuffle-text>Countryvia</shuffle-text>
+            </h3>
+            <p class="text-sm mb-4">
+              <shuffle-text>Scale and Reliability</shuffle-text>
+            </p>
+            <p class="text-lg mb-4">
+              <shuffle-text>
+                Took over a high-traffic Discord bot serving 2M users across 65k
+                servers. Implemented sharding, optimized database queries, and
+                introduced caching layers to handle load, all while using
+                limited resources. The result was a 40% reduction in latency and
+                zero downtime during peak usage.
+              </shuffle-text>
+            </p>
+            <ul class="text-base mb-4 text-left">
+              <li><shuffle-text>99.9% uptime</shuffle-text></li>
+              <li><shuffle-text>40% lower average latency</shuffle-text></li>
+              <li><shuffle-text>Reduced server costs by 25%</shuffle-text></li>
+            </ul>
+            <a
+              href="https://discord.gg/4vSs3KJUNN"
+              target="_blank"
+              class="inline-block mt-auto text-white"
+            >
+              <shuffle-text
+                class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
+                >Join the Discord</shuffle-text
+              >
+            </a>
+          </div>
+          <!-- Logbook 34 Sigs -->
+          <div
+            class="border p-8 flex flex-col justify-between backdrop-rainbow"
+          >
+            <h3 class="text-3xl mb-2">
+              <shuffle-text>Logbook 34 Sigs</shuffle-text>
+            </h3>
+            <p class="text-sm mb-4">
+              <shuffle-text>PWA for field operations</shuffle-text>
+            </p>
+            <p class="text-lg mb-4">
+              <shuffle-text>
+                Developed a Progressive Web App and native Tauri app for the
+                Canadian Armed Forces' 34th Signal Regiment to log radio
+                communications during field exercises. Features include offline
+                support, real-time multi-tab sync, CSV/Excel export, and
+                auditing. The app has been successfully used in real military
+                operations.
+              </shuffle-text>
+            </p>
+            <ul class="text-base mb-4 text-left">
+              <li><shuffle-text>Offline-first functionality</shuffle-text></li>
+              <li>
+                <shuffle-text>Real-time multi-tab synchronization</shuffle-text>
+              </li>
+              <li><shuffle-text>CSV and Excel export</shuffle-text></li>
+            </ul>
+            <a
+              href="https://logbook.shoghisimon.ca/"
+              target="_blank"
+              class="inline-block mt-auto text-white"
+            >
+              <shuffle-text
+                class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
+                >Visit</shuffle-text
+              >
+            </a>
+          </div>
+          <!-- Live JSX Editor -->
+          <div
+            class="border p-8 flex flex-col justify-between backdrop-rainbow"
+          >
+            <h3 class="text-3xl mb-2">
+              <shuffle-text>Live JSX Editor</shuffle-text>
+            </h3>
+            <p class="text-sm mb-4">
+              <shuffle-text>Tooling and DX</shuffle-text>
+            </p>
+            <p class="text-lg mb-4">
+              <shuffle-text>
+                Created a real-time JSX editor with live preview, multi-file
+                support, NPM package imports, and advanced tooling. Built with
+                custom esbuild integration and TailwindCSS v4 support, it
+                provides a seamless development experience for prototyping and
+                sharing React components quickly.
+              </shuffle-text>
+            </p>
+            <ul class="text-base mb-4 text-left">
+              <li><shuffle-text>Real-time JSX editing</shuffle-text></li>
+              <li><shuffle-text>NPM package imports</shuffle-text></li>
+              <li><shuffle-text>TailwindCSS v4 support</shuffle-text></li>
+            </ul>
+            <a
+              href="https://live-jsx-app.shoghisimon.ca/"
+              target="_blank"
+              class="inline-block mt-auto text-white"
+            >
+              <shuffle-text
+                class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
+                >Visit</shuffle-text
+              >
+            </a>
+          </div>
+        </HashVisible>
+        <HashVisible
+          client:load
+          id="projects"
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
         >
           <!-- Countryvia -->
@@ -81,7 +195,7 @@ const description =
               >
             </a>
           </div>
-          <!-- Countryvia -->
+          <!-- Logbook 34 Sigs -->
           <div
             class="border p-8 flex flex-col justify-between backdrop-rainbow"
           >
@@ -210,74 +324,6 @@ const description =
                 >Visit</shuffle-text
               >
             </a>
-          </div>
-        </HashVisible>
-        <HashVisible
-          client:load
-          id="technologies"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 text-center"
-        >
-          <div>
-            <h2 class="text-2xl mb-2">
-              <shuffle-text>Languages</shuffle-text>
-            </h2>
-            <ul class="space-y-1">
-              <li><shuffle-text>TypeScript</shuffle-text></li>
-              <li><shuffle-text>Java</shuffle-text></li>
-              <li><shuffle-text>Rust</shuffle-text></li>
-              <li><shuffle-text>C#</shuffle-text></li>
-              <li><shuffle-text>GDScript</shuffle-text></li>
-              <li><shuffle-text>PHP</shuffle-text></li>
-              <li><shuffle-text>Python</shuffle-text></li>
-            </ul>
-          </div>
-          <div class="border-x">
-            <h2 class="text-2xl mb-2">
-              <shuffle-text>Frameworks</shuffle-text>
-            </h2>
-            <ul class="space-y-1">
-              <li><shuffle-text>Next.JS</shuffle-text></li>
-              <li><shuffle-text>Node.JS</shuffle-text></li>
-              <li><shuffle-text>Bun.JS</shuffle-text></li>
-              <li><shuffle-text>ASP.NET</shuffle-text></li>
-              <li><shuffle-text>Express.JS</shuffle-text></li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="text-2xl mb-2"><shuffle-text>Tools</shuffle-text></h2>
-            <ul class="space-y-1">
-              <li><shuffle-text>Google</shuffle-text></li>
-              <li><shuffle-text>Git</shuffle-text></li>
-              <li><shuffle-text>VSCode</shuffle-text></li>
-              <li><shuffle-text>Fish</shuffle-text></li>
-              <li><shuffle-text>Bash</shuffle-text></li>
-              <li><shuffle-text>Nix</shuffle-text></li>
-            </ul>
-          </div>
-          <div class="border-x">
-            <h2 class="text-2xl mb-2">
-              <shuffle-text>Systems</shuffle-text>
-            </h2>
-            <ul class="space-y-1">
-              <li><shuffle-text>Nginx</shuffle-text></li>
-              <li><shuffle-text>Linux</shuffle-text></li>
-              <li><shuffle-text>Apache2</shuffle-text></li>
-              <li><shuffle-text>Podman</shuffle-text></li>
-              <li><shuffle-text>Docker</shuffle-text></li>
-            </ul>
-          </div>
-          <div>
-            <h2 class="text-2xl mb-2">
-              <shuffle-text>Services</shuffle-text>
-            </h2>
-            <ul class="space-y-1">
-              <li><shuffle-text>libSQL</shuffle-text></li>
-              <li><shuffle-text>PostgreSQL</shuffle-text></li>
-              <li><shuffle-text>MySQL</shuffle-text></li>
-              <li><shuffle-text>MinIO</shuffle-text></li>
-              <li><shuffle-text>MariaDB</shuffle-text></li>
-              <li><shuffle-text>SQLite</shuffle-text></li>
-            </ul>
           </div>
         </HashVisible>
       </section>
