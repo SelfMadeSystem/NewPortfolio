@@ -111,13 +111,25 @@ export function RippleGL({
     },
 
     resize: (gl, canvas) => {
-      canvas.width = canvas.clientWidth / SCALE_DOWN;
-      canvas.height = canvas.clientHeight / SCALE_DOWN;
+      const oldWidth = canvas.width;
+      const oldHeight = canvas.height;
+
+      canvas.width = Math.ceil(canvas.clientWidth / SCALE_DOWN);
+      canvas.height = Math.ceil(canvas.clientHeight / SCALE_DOWN);
+
+      // If size hasn't actually changed, skip resize
+      if (canvas.width === oldWidth && canvas.height === oldHeight) {
+        return;
+      }
+
       gl.viewport(0, 0, canvas.width, canvas.height);
 
       if (!rippleProgramRef.current) {
         return;
       }
+
+      // Save old texture if it exists
+      const oldTex = rippleTexRef.current?.[0];
 
       const tex1 = twgl.createTexture(gl, {
         width: canvas.width,
@@ -131,6 +143,28 @@ export function RippleGL({
         mag: gl.LINEAR,
         min: gl.LINEAR,
       });
+
+      // Copy old texture data into the new texture (if present)
+      if (oldTex && oldWidth > 0 && oldHeight > 0) {
+        // Bind an FBO with the old texture as the source, then copy from that FBO
+        const readFbo = twgl.createFramebufferInfo(
+          gl,
+          [{ attachment: oldTex }],
+          oldWidth,
+          oldHeight,
+        );
+        twgl.bindFramebufferInfo(gl, readFbo);
+
+        // Bind the newly created texture as the destination and copy from the bound FBO
+        gl.bindTexture(gl.TEXTURE_2D, tex1);
+        const copyW = Math.min(canvas.width, oldWidth);
+        const copyH = Math.min(canvas.height, oldHeight);
+        // copyTexImage2D reads from the currently bound framebuffer
+        gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, copyW, copyH, 0);
+
+        twgl.bindFramebufferInfo(gl, null);
+      }
+
       rippleTexRef.current = [tex1, tex2];
 
       const fbo = twgl.createFramebufferInfo(
@@ -145,7 +179,7 @@ export function RippleGL({
 
   const pointer = usePointerPosition(glCanvas) || new Vector2(-1000, -1000);
   const prevPointer = useRef<Vector2>(new Vector2(-1000, -1000));
-  const prevPointerMoved = useRef<boolean>(false);
+  const prevPointerMoved = useRef<number>(0);
 
   useAnimationLoop((dt, t) => {
     if (
@@ -214,7 +248,7 @@ export function RippleGL({
       dt: dt,
       pointerPos: pointer.div(SCALE_DOWN).a,
       prevPointerPos: prevPointer.current.div(SCALE_DOWN).a,
-      pointerDown: prevPointerMoved.current,
+      pointerDown: t - prevPointerMoved.current < 100,
       resolution: [glCanvas.width, glCanvas.height],
       rippleStrength: options.rippleStrength,
       rippleDamping: options.rippleDamping,
@@ -226,8 +260,8 @@ export function RippleGL({
     twgl.drawBufferInfo(gl, bufferInfo);
     rippleTexRef.current = [rippleTex2, rippleTex1];
 
+    if (pointerMoved) prevPointerMoved.current = t;
     prevPointer.current = pointer;
-    prevPointerMoved.current = pointerMoved;
   });
 
   const setCanvas = useCallback(
