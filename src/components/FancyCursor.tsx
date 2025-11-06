@@ -1,7 +1,6 @@
 import { isOverText } from '../utils/domUtils';
 import { useViewportPointer } from '../utils/hooks/useViewportPointer';
 import clsx from 'clsx';
-import { animate } from 'motion';
 import {
   type SpringOptions,
   motion,
@@ -38,7 +37,7 @@ const spring: SpringOptions = {
 
 const COLOR = '#ffffffa0';
 const HOVER_COLOR = '#ffffff30';
-const TEXT_COLOR = '#ffffffff';
+const TEXT_COLOR = '#ffffff00';
 
 export default function FancyCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
@@ -63,6 +62,7 @@ export default function FancyCursor() {
     [0, 1, 2],
     [HOVER_COLOR, COLOR, TEXT_COLOR],
   );
+  const invertFilter = useTransform(color, [0, 1, 2], [0, 0, 1]);
 
   useEffect(() => {
     if (!pointerPos) {
@@ -166,6 +166,10 @@ export default function FancyCursor() {
           width: useTransform(() => Math.abs(pointerWidth.get())),
           height: useTransform(() => Math.abs(pointerHeight.get())),
           borderRadius: defaultSize / 2,
+          backdropFilter: useTransform(
+            () =>
+              `invert(${invertFilter.get()}) saturate(${1 - invertFilter.get()}) contrast(${invertFilter.get() * 3 + 1})`,
+          ),
           x: useTransform(
             () => x.get() * (1 - hovering.get()) + boxX.get() * hovering.get(),
           ),

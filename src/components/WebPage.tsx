@@ -1,3 +1,4 @@
+import { useMagnet } from '../utils/hooks/useMagnet';
 import { usePointerPosition } from '../utils/hooks/usePointerPosition';
 import FancyCursor from './FancyCursor';
 import { motion, useMotionValue, useSpring } from 'motion/react';
@@ -116,44 +117,19 @@ export default function WebPage() {
 }
 
 function ProjectCard({ project }: { project: Project }) {
-  const aRef = useRef<HTMLAnchorElement>(null);
-  const pointerPos = usePointerPosition(aRef, {
-    onlyInside: true,
-    keepLast: false,
+  const aRef = useMagnet<HTMLAnchorElement>({
+    spring: {
+      stiffness: 800,
+      damping: 50,
+      mass: 0.5,
+      bounce: 0,
+    },
   });
 
-  const posX = useMotionValue(0);
-  const posY = useMotionValue(0);
-
-  const x = useSpring(posX, { stiffness: 500, damping: 50 });
-  const y = useSpring(posY, { stiffness: 500, damping: 50 });
-
-  useEffect(() => {
-    if (!pointerPos || !aRef.current) {
-      posX.set(0);
-      posY.set(0);
-      return;
-    }
-    const rect = aRef.current.getBoundingClientRect();
-    const x = pointerPos.x - rect.width / 2;
-    const y = pointerPos.y - rect.height / 2;
-
-    posX.set(x * 0.1);
-    posY.set(y * 0.1);
-  }, [pointerPos, posX, posY]);
-
   return (
-    <motion.a
-      ref={aRef}
+    <motion.div
       key={project.title}
-      href={project.url}
-      target="_blank"
-      rel="noreferrer"
       className="flex flex-col rounded-lg border border-white/8 bg-linear-to-br from-white/3 to-white/2 p-4"
-      style={{
-        x,
-        y,
-      }}
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
     >
@@ -168,6 +144,16 @@ function ProjectCard({ project }: { project: Project }) {
         <strong className="mr-2">Tech:</strong>
         {project.tech.join(' · ')}
       </div>
-    </motion.a>
+
+      <motion.a
+        ref={aRef}
+        href={project.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mx-auto mt-4 inline-block w-fit text-sm font-medium text-blue-400 hover:underline"
+      >
+        Visit Site &rarr;
+      </motion.a>
+    </motion.div>
   );
 }
