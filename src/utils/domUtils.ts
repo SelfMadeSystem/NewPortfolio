@@ -1,22 +1,15 @@
-export function isOverText(elem: Element, x: number, y: number): boolean {
-  if (elem.nodeType === elem.TEXT_NODE) {
-    const range = elem.ownerDocument.createRange();
-    range.selectNodeContents(elem);
-    const rect = range.getBoundingClientRect();
-    range.detach();
-
-    return (
-      rect.left <= x && rect.right >= x && rect.top <= y && rect.bottom >= y
-    );
+function isOverTextNode(node: ChildNode, x: number, y: number): boolean {
+  if (node.nodeType !== node.TEXT_NODE) {
+    return false;
   }
 
-  for (let i = 0; i < elem.childNodes.length; i++) {
-    const child = elem.childNodes[i];
-    if (!child.ownerDocument) continue;
-    const range = child.ownerDocument.createRange();
-    range.selectNodeContents(child);
-    const rect = range.getBoundingClientRect();
+  const textNode = node as Text;
+  const range = textNode.ownerDocument!.createRange();
+  range.selectNodeContents(textNode);
+  const rects = range.getClientRects();
 
+  for (let i = 0; i < rects.length; i++) {
+    const rect = rects[i];
     if (
       rect.left <= x &&
       rect.right >= x &&
@@ -24,9 +17,24 @@ export function isOverText(elem: Element, x: number, y: number): boolean {
       rect.bottom >= y
     ) {
       range.detach();
-      return isOverText(child as Element, x, y);
+      return true;
     }
-    range.detach();
+  }
+
+  range.detach();
+  return false;
+}
+
+export function isOverText(elem: Element, x: number, y: number): boolean {
+  if (elem.nodeType === elem.TEXT_NODE) {
+    return isOverTextNode(elem, x, y);
+  }
+
+  for (let i = 0; i < elem.childNodes.length; i++) {
+    const child = elem.childNodes[i];
+    if (isOverTextNode(child, x, y)) {
+      return true;
+    }
   }
 
   return false;

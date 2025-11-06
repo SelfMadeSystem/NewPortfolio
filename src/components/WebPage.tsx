@@ -105,10 +105,9 @@ export default function WebPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.4, duration: 0.8 }}
-            className="text-sm"
+            className="mx-auto w-fit text-sm"
           >
-            Built with React + Tailwind + motion. This page demonstrates many
-            micro-animations; strip them down for production.
+            © {new Date().getFullYear()} Shoghi Simon. All rights reserved.
           </motion.div>
         </footer>
       </div>
