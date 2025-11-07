@@ -1,8 +1,9 @@
 import { useMagnet } from '../utils/hooks/useMagnet';
-import { usePointerPosition } from '../utils/hooks/usePointerPosition';
+import { mod } from '../utils/mathUtils';
 import FancyCursor from './FancyCursor';
-import { motion, useMotionValue, useSpring } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import SlideShow from './SlideShow';
+import { AnimatePresence, motion } from 'motion/react';
+import { use, useRef, useState } from 'react';
 
 type Project = {
   title: string;
@@ -93,11 +94,7 @@ export default function WebPage() {
               Projects
             </motion.h2>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.map((p, idx) => (
-                <ProjectCard key={idx} project={p} />
-              ))}
-            </div>
+            <SlideShow projects={projects} />
           </section>
         </main>
 
@@ -127,11 +124,9 @@ function ProjectCard({ project }: { project: Project }) {
   });
 
   return (
-    <motion.div
+    <div
       key={project.title}
-      className="flex flex-col rounded-lg border border-white/8 bg-linear-to-br from-white/3 to-white/2 p-4"
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      className="flex h-full flex-col rounded-lg border border-white/8 bg-linear-to-br from-white/3 to-white/2 p-4"
     >
       <div className="flex grow items-start justify-between">
         <div>
@@ -154,6 +149,6 @@ function ProjectCard({ project }: { project: Project }) {
       >
         Visit Site &rarr;
       </motion.a>
-    </motion.div>
+    </div>
   );
 }
