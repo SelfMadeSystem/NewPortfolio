@@ -1,0 +1,168 @@
+---
+import Wave from '../components/Wave';
+import Layout from '../layout/Layout.astro';
+import Aquarium from '../components/Aquarium.tsx';
+import SeaWeed from '../components/SeaWeed.tsx';
+import '../styles/index.css';
+import { SlideInLoader } from '../components/SlideInLoader';
+import backend from '../assets/backend.png';
+import game from '../assets/game.png';
+import web from '../assets/web.png';
+import Image from 'astro/components/Image.astro';
+import CursorFollowCard from '../components/CursorFollowCard';
+import BackendCard from '../components/BackendCard';
+import AquariumGL from '../components/AquariumGL';
+---
+
+<Layout doUnloaded>
+  <SlideInLoader client:load />
+  <div class="relative">
+    <div class="h-screen relative flex items-start">
+      <div class="absolute inset-0 w-full h-full -scale-y-100 bg-primary">
+        <Wave
+          client:load
+          id="wave1"
+          neonEmpty
+          neonClipped
+          speed={[0.01, 0.03]}
+          waveWidth={[2, 4] satisfies [number, number]}
+          waveHeight={1}
+          amount={3}
+          opacity={0.6}
+          fill="#ffffff"
+        />
+      </div>
+      <header
+        class="load-in relative flex flex-col items-center gap-4
+              backdrop-filter backdrop-blur-md
+              bg-white/25 text-gray-900 w-fit mx-auto
+              rounded-4xl p-16 max-md:px-8 mt-16 z-6 overflow-hidden"
+      >
+        <h1 class="text-6xl font-bold text-center">
+          <span>Hi, I'm</span>
+          <span>Shoghi Simon</span>
+          <span class="hand-wave">👋</span>
+        </h1>
+        <div class="text-xl max-w-lg mx-auto text-center">
+          I've deployed mission-critical military applications, launched
+          e-commerce sites that tripled sales, and scaled Discord bots to
+          millions.
+        </div>
+        <div class="text-lg block max-w-lg mx-auto text-center mt-4 opacity-80">
+          Let's build something amazing together.
+        </div>
+      </header>
+    </div>
+    <main class="min-h-screen bg-primary">
+      <div class="flex flex-col gap-16 relative z-15">
+        <section
+          class="flex flex-row flex-wrap justify-center items-stretch p-8 gap-8"
+        >
+          <CursorFollowCard client:load className="h-full">
+            <a href="/web" class="goto-card w-fit h-full">
+              Web Development
+              <Image
+                src={web}
+                alt="Web Development"
+                class="my-auto w-64 invisible"
+              />
+            </a>
+            <div
+              class="absolute bottom-6 left-6 top-14 translate-z-[calc(var(--active)*20px)] flex items-center pointer-events-none"
+            >
+              <Image
+                src={web}
+                alt="Web Development"
+                class="my-auto w-64 rounded-lg shadow-lg"
+              />
+            </div>
+          </CursorFollowCard>
+          <BackendCard
+            client:load
+            className="h-full"
+            image="TypeScript doesn't recognize slotted content"
+          >
+            <Image
+              slot="image"
+              src={backend}
+              alt="Backend Development"
+              class="my-auto w-64 rounded-lg shadow-lg"
+            />
+          </BackendCard>
+          <CursorFollowCard client:load className="h-full">
+            <a href="/game" class="goto-card">
+              Game Development
+              <Image
+                src={game}
+                alt="Game Development"
+                class="my-auto w-64 invisible"
+              />
+            </a>
+            <div
+              class="absolute bottom-6 left-6 top-14 translate-z-[calc(var(--active)*20px)] flex items-center pointer-events-none"
+            >
+              <Image
+                src={game}
+                alt="Game Development"
+                class="my-auto w-64 rounded-lg shadow-lg"
+              />
+            </div>
+          </CursorFollowCard>
+        </section>
+        <section
+          class="text-center text-white font-medium p-8 mx-auto max-w-xl backdrop-blur-md bg-white/20 rounded-3xl"
+        >
+          <h2 class="text-3xl font-bold mb-8">Contact Me</h2>
+          <p class="text-xl">
+            Interested in working together or have any questions? <br /> Feel free
+            to reach out via email at <a
+              class="text-white"
+              href="mailto:sms@shoghisimon.ca">sms@shoghisimon.ca</a
+            > or send me a message on
+            <a
+              class="text-white"
+              href="https://discord.com/users/299298175825739776">Discord</a
+            >.
+          </p>
+        </section>
+      </div>
+    </main>
+    <div class="absolute inset-0 z-5 pointer-events-none">
+      <AquariumGL client:load color="#fff" />
+    </div>
+    <div class="h-48 bg-primary"></div>
+    <div class="h-0 relative z-6">
+      <div class="h-48 absolute bottom-full left-0 right-0 z-6">
+        <Wave client:load id="wave1" neonEmpty neonClipped fill="#242424" />
+      </div>
+    </div>
+    <div class="bg-[#242424] relative z-10">
+      <div class="py-4 relative z-15">
+        <footer
+          class="text-white bg-[#242424a0] text-center px-8 py-4 w-fit mx-auto backdrop-blur-md rounded-3xl"
+        >
+          <p class="text-center">
+            Made by <a href="https://github.com/SelfMadeSystem/" target="_blank"
+              >Shoghi Simon</a
+            > with
+            <a href="https://astro.build/" target="_blank">Astro</a>,
+            <a href="https://react.dev/" target="_blank">React</a>,
+            <a href="https://tailwindcss.com/" target="_blank">Tailwind CSS</a>,
+            <a href="https://www.typescriptlang.org/" target="_blank"
+              >TypeScript</a
+            >, and ❤️
+          </p>
+          <p class="text-center">
+            <a
+              href="https://github.com/SelfMadeSystem/Portfolio"
+              target="_blank">Source code</a
+            >
+          </p>
+        </footer>
+      </div>
+      <div class="absolute bottom-0 left-0 right-0 h-screen z-10">
+        <SeaWeed client:load color="#fff" />
+      </div>
+    </div>
+  </div>
+</Layout>
