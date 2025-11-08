@@ -567,10 +567,6 @@ class School implements UpdateAndRender {
 
 type PointerState = [pos: Vector2, clickState: PointerClickState];
 
-const LAG_CHECK_TIME = 1000; // ms
-const LAG_MAX_TIME = 45; // ms
-const LAG_CHECK_COUNT = LAG_CHECK_TIME / LAG_MAX_TIME; // if we lag more than this many times, stop drawing
-
 function getTopInDocument(elem: HTMLElement) {
   let top = 0;
   do {
@@ -598,8 +594,6 @@ export default function Aquarium({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const animationFrameRef = useRef<number>(0);
-  const startTimeRef = useRef<number>(0);
-  const lagCounterRef = useRef<number>(0);
 
   useEffect(() => {
     if (localStorage.getItem('disable-animations') === 'true') return;
@@ -631,9 +625,6 @@ export default function Aquarium({
         return;
       }
 
-      startTimeRef.current = performance.now();
-      lagCounterRef.current = 0;
-
       const ctx = canvas.getContext('2d')!;
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d')!;
@@ -656,11 +647,17 @@ export default function Aquarium({
       const fishies: UpdateAndRender[] = [];
       fishies.push(new School(10, color, new Vector2(width, height)));
       fishies.push(new School(10, color, new Vector2(width, height)));
-      for (let i = 0; i < 5; i++)
+      fishies.push(new School(10, color, new Vector2(width, height)));
+      fishies.push(new School(10, color, new Vector2(width, height)));
+      fishies.push(new School(10, color, new Vector2(width, height)));
+      fishies.push(new School(10, color, new Vector2(width, height)));
+      for (let i = 0; i < 25; i++)
         fishies.push(new BasicFish(color, new Vector2(width, height)));
 
       const pointerStates: Map<number, PointerState> = new Map();
       let lastTime = performance.now();
+      let fps = -1;
+      const fpsSmoothing = 0.999;
 
       const onScroll = () => {
         const top = getTopInDocument(canvas);
@@ -704,23 +701,10 @@ export default function Aquarium({
         let delta = now - lastTime;
         lastTime = now;
 
-        // lag detection logic (kept from original)
-        if (startTimeRef.current + LAG_CHECK_TIME >= now) {
-          lagCounterRef.current++;
-        } else {
-          const frameDelay =
-            (now - startTimeRef.current) / lagCounterRef.current;
-          if (lagCounterRef.current < LAG_CHECK_COUNT) {
-            console.warn(
-              'Lag detected, stopping drawing. Average frame delay: ',
-              frameDelay,
-            );
-            ctx.clearRect(0, 0, width, height);
-            return;
-          }
-          lagCounterRef.current = 0;
-          startTimeRef.current = now;
-        }
+        const nowFps = 1000 / delta;
+        if (fps < 0 || !isFinite(fps) || Math.abs(nowFps - fps) > 400)
+          fps = nowFps;
+        else fps = fps * fpsSmoothing + nowFps * (1 - fpsSmoothing);
 
         if (delta > 32) delta = 32;
 
@@ -781,6 +765,15 @@ export default function Aquarium({
             ctx.drawImage(tempCanvas, 0, 0, width, height);
           }
         }
+
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.textBaseline = 'hanging';
+        const text = fps.toFixed(1) + ' FPS 2D';
+        ctx.lineWidth = 4;
+        ctx.strokeText(text, 10, 10);
+        ctx.fillText(text, 10, 10);
 
         animationFrameRef.current = requestAnimationFrame(redraw);
       };
