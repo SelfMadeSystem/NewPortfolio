@@ -789,10 +789,12 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
         let delta = now - lastTime;
         lastTime = now;
 
-        const nowFps = 1000 / delta;
-        if (fps < 0 || Math.abs(fps - nowFps) > maxFpsDist || !isFinite(fps))
-          fps = nowFps;
-        else fps = fps * fpsSmoothing + nowFps * (1 - fpsSmoothing);
+        if (delta > 0) {
+          const nowFps = 1000 / delta;
+          if (fps < 0 || Math.abs(fps - nowFps) > maxFpsDist || !isFinite(fps))
+            fps = nowFps;
+          else fps = fps * fpsSmoothing + nowFps * (1 - fpsSmoothing);
+        }
 
         if (delta > 32) delta = 32;
 

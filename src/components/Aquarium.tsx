@@ -701,10 +701,12 @@ export default function Aquarium({
         let delta = now - lastTime;
         lastTime = now;
 
-        const nowFps = 1000 / delta;
-        if (fps < 0 || !isFinite(fps) || Math.abs(nowFps - fps) > 400)
-          fps = nowFps;
-        else fps = fps * fpsSmoothing + nowFps * (1 - fpsSmoothing);
+        if (delta > 0) {
+          const nowFps = 1000 / delta;
+          if (fps < 0 || !isFinite(fps) || Math.abs(nowFps - fps) > 400)
+            fps = nowFps;
+          else fps = fps * fpsSmoothing + nowFps * (1 - fpsSmoothing);
+        }
 
         if (delta > 32) delta = 32;
 
