@@ -567,30 +567,11 @@ class School implements UpdateAndRender {
 
 type PointerState = [pos: Vector2, clickState: PointerClickState];
 
-function getTopInDocument(elem: HTMLElement) {
-  let top = 0;
-  do {
-    top += elem.offsetTop || 0;
-    elem = elem.offsetParent as HTMLElement;
-  } while (elem);
-  return top;
-}
-
 type AquariumProps = {
   color?: string;
-  maskId?: string | null;
-  maskInverse?: boolean;
-  flipMaskX?: boolean;
-  flipMaskY?: boolean;
 };
 
-export default function Aquarium({
-  color = 'blue',
-  maskId = null,
-  maskInverse = false,
-  flipMaskX = false,
-  flipMaskY = false,
-}: AquariumProps) {
+export default function Aquarium({ color = 'blue' }: AquariumProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const animationFrameRef = useRef<number>(0);
@@ -603,14 +584,7 @@ export default function Aquarium({
     // Start on next paint (and optionally another frame to let mask render)
     requestAnimationFrame(() => {
       if (!mounted) return;
-      if (maskId) {
-        requestAnimationFrame(() => {
-          if (!mounted) return;
-          startDraw();
-        });
-      } else {
-        startDraw();
-      }
+      startDraw();
     });
 
     return () => {
@@ -641,8 +615,6 @@ export default function Aquarium({
       const ro = new ResizeObserver(setCanvasSize);
       ro.observe(canvas);
 
-      let prevTop = 0; //getTopInDocument(canvas);
-
       // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
       const fishies: UpdateAndRender[] = [];
       fishies.push(new School(10, color, new Vector2(width, height)));
@@ -661,47 +633,6 @@ export default function Aquarium({
 
       let topY = 0;
 
-      const onScroll = () => {
-        const top = window.scrollY; //getTopInDocument(canvas);
-        if (top !== prevTop) {
-          const diff = top - prevTop;
-          for (const f of fishies)
-            f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
-          topY += diff;
-          prevTop = top;
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = requestAnimationFrame(() => {
-            canvas.style.transform = `translateY(${topY}px)`;
-            redraw();
-          });
-        }
-      };
-
-      const onCustomScroll = (e: Event) => {
-        const detail = (e as CustomEvent).detail;
-        if (detail && typeof detail.diffY === 'number') {
-          const diff = detail.diffY;
-          for (const f of fishies)
-            f.moveDiff(new Vector2(0, diff), new Vector2(width, height));
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = requestAnimationFrame(redraw);
-        }
-      };
-
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('custom-scroll', onCustomScroll as EventListener);
-
-      const mask: HTMLCanvasElement | null = (() => {
-        if (!maskId) return null;
-        const maskElem = document.getElementById(
-          maskId,
-        ) as HTMLCanvasElement | null;
-        if (!maskElem) return null;
-        return maskElem as HTMLCanvasElement | null;
-      })();
-
-      const ctxToUse = mask == null ? ctx : tempCtx;
-
       const redraw = () => {
         const now = performance.now();
         let delta = now - lastTime;
@@ -716,6 +647,15 @@ export default function Aquarium({
 
         if (delta > 32) delta = 32;
 
+        const newTopY = window.scrollY;
+        const diff = newTopY - topY;
+
+        for (const f of fishies)
+          f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
+
+        topY = newTopY;
+        canvas.style.transform = `translateY(${topY}px)`;
+
         for (const f of fishies)
           f.update(new Vector2(width, height), delta, [
             ...pointerStates.values(),
@@ -726,8 +666,8 @@ export default function Aquarium({
           return;
         }
 
-        ctxToUse.clearRect(0, 0, width, height);
-        for (const f of fishies) f.draw(ctxToUse, canvas);
+        ctx.clearRect(0, 0, width, height);
+        for (const f of fishies) f.draw(ctx, canvas);
 
         // advance pointer click states
         for (const [, pointer] of pointerStates) {
@@ -736,51 +676,13 @@ export default function Aquarium({
             pointer[1] = PointerClickState.HELD;
         }
 
-        if (mask != null) {
-          if (isInView(mask)) {
-            ctx.clearRect(0, 0, width, height);
-
-            const maskRect = mask.getBoundingClientRect();
-            const thisRect = canvas.getBoundingClientRect();
-            const maskHeight = thisRect.bottom - maskRect.top;
-
-            ctx.save();
-            ctx.translate(0, height - maskHeight);
-            if (flipMaskX) {
-              ctx.translate(width, 0);
-              ctx.scale(-1, 1);
-            }
-            if (flipMaskY) {
-              ctx.translate(0, mask.height);
-              ctx.scale(1, -1);
-            }
-            ctx.drawImage(mask, 0, 0);
-            ctx.restore();
-
-            ctx.save();
-            if (!maskInverse) {
-              ctx.fillStyle = 'white';
-              ctx.fillRect(0, 0, width, Math.ceil(height - maskHeight));
-            }
-
-            ctx.globalCompositeOperation = maskInverse
-              ? 'source-out'
-              : 'source-in';
-            ctx.drawImage(tempCanvas, 0, 0, width, height);
-            ctx.restore();
-          } else {
-            ctx.clearRect(0, 0, width, height);
-            ctx.drawImage(tempCanvas, 0, 0, width, height);
-          }
-        }
-
         ctx.font = 'bold 24px sans-serif';
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'black';
         ctx.textBaseline = 'hanging';
         const text = fps.toFixed(1) + ' FPS 2D';
         ctx.lineWidth = 4;
-        const textTop = 0.25 * canvas.height + 10;
+        const textTop = 0.05 * canvas.height + 10;
         ctx.strokeText(text, 10, textTop);
         ctx.fillText(text, 10, textTop);
 
@@ -826,11 +728,6 @@ export default function Aquarium({
       const cleanup = () => {
         cancelAnimationFrame(animationFrameRef.current);
         ro.disconnect();
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener(
-          'custom-scroll',
-          onCustomScroll as EventListener,
-        );
         window.removeEventListener('pointerdown', pointerDown);
         window.removeEventListener('pointermove', pointerMove);
         window.removeEventListener('pointerup', pointerUp);
@@ -843,17 +740,18 @@ export default function Aquarium({
       (animationFrameRef as any).cleanup = cleanup;
     }
     // Intentionally only restart when maskId or core visual props change
-  }, [maskId, color, maskInverse, flipMaskX, flipMaskY]);
+  }, [color]);
 
   return (
     <div className="absolute inset-0 overflow-hidden">
       <canvas
         ref={canvasRef}
         style={{
+          willChange: 'transform',
           position: 'absolute',
           width: '100%',
-          height: '200vh',
-          top: '-50vh',
+          height: '120vh',
+          top: '-10vh',
         }}
       />
     </div>

@@ -602,15 +602,6 @@ class School implements UpdateAndRender {
 
 type PointerState = [pos: Vector2, clickState: PointerClickState];
 
-function getTopInDocument(elem: HTMLElement) {
-  let top = 0;
-  do {
-    top += elem.offsetTop || 0;
-    elem = elem.offsetParent as HTMLElement;
-  } while (elem);
-  return top;
-}
-
 const vertSrc = /* glsl */ `
   attribute vec2 a_position;
   attribute vec2 a_texcoord;
@@ -699,8 +690,6 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       const ro = new ResizeObserver(setCanvasSize);
       ro.observe(canvas);
 
-      let prevTop = 0;
-
       // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
       const fishies: UpdateAndRender[] = [];
       fishies.push(new School(10, color, new Vector2(width, height)));
@@ -720,36 +709,6 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       const maxFpsDist = 300;
 
       let topY = 0;
-
-      const onScroll = () => {
-        const top = window.scrollY; //getTopInDocument(canvas);
-        if (top !== prevTop) {
-          const diff = top - prevTop;
-          for (const f of fishies)
-            f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
-          topY += diff;
-          prevTop = top;
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = requestAnimationFrame(() => {
-            canvas.style.transform = `translateY(${topY}px)`;
-            redraw();
-          });
-        }
-      };
-
-      const onCustomScroll = (e: Event) => {
-        const detail = (e as CustomEvent).detail;
-        if (detail && typeof detail.diffY === 'number') {
-          const diff = detail.diffY;
-          for (const f of fishies)
-            f.moveDiff(new Vector2(0, diff), new Vector2(width, height));
-          cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = requestAnimationFrame(redraw);
-        }
-      };
-
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('custom-scroll', onCustomScroll as EventListener);
 
       const programInfo = twgl.createProgramInfo(gl, [vertSrc, fragSrc]);
       const bufferInfo = twgl.createBufferInfoFromArrays(gl, {
@@ -803,6 +762,15 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
         }
 
         if (delta > 32) delta = 32;
+
+        const newTopY = window.scrollY;
+        const diff = newTopY - topY;
+
+        for (const f of fishies)
+          f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
+
+        topY = newTopY;
+        canvas.style.transform = `translateY(${topY}px)`;
 
         for (const f of fishies)
           f.update(new Vector2(width, height), delta, [
@@ -970,11 +938,6 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       const cleanup = () => {
         cancelAnimationFrame(animationFrameRef.current);
         ro.disconnect();
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener(
-          'custom-scroll',
-          onCustomScroll as EventListener,
-        );
         window.removeEventListener('pointerdown', pointerDown);
         window.removeEventListener('pointermove', pointerMove);
         window.removeEventListener('pointerup', pointerUp);
@@ -994,10 +957,11 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       <canvas
         ref={canvasRef}
         style={{
+          willChange: 'transform',
           position: 'absolute',
           width: '100%',
-          height: '200vh',
-          top: '-50vh',
+          height: '120vh',
+          top: '-10vh',
         }}
       />
       <canvas
