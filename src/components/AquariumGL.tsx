@@ -14,10 +14,6 @@ import { getComputedColor } from '../utils/styleUtils';
 import { Vector2 } from '../utils/vec';
 import { useEffect, useRef } from 'react';
 
-function isNeon() {
-  return false;
-}
-
 if (!('Path2D' in globalThis)) {
   (globalThis as any).Path2D = class {};
 }
@@ -33,9 +29,8 @@ const fishUpscale = 2;
 function createColoredFishCanvas(
   color: string,
   fishScale: number,
-  neon: boolean,
 ): HTMLCanvasElement {
-  const cacheKey = `${color}-${fishScale}-${neon}`;
+  const cacheKey = `${color}-${fishScale}`;
   if (fishCanvasCache.has(cacheKey)) {
     return fishCanvasCache.get(cacheKey)!;
   }
@@ -49,16 +44,8 @@ function createColoredFishCanvas(
 
   ctx.scale(fishScale, fishScale);
 
-  if (neon) {
-    ctx.fillStyle = '#242424';
-    ctx.fill(FISH_SVG_PATH);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = (3 / fishScale) * fishUpscale;
-    ctx.stroke(FISH_SVG_PATH);
-  } else {
-    ctx.fillStyle = color;
-    ctx.fill(FISH_SVG_PATH);
-  }
+  ctx.fillStyle = color;
+  ctx.fill(FISH_SVG_PATH);
 
   fishCanvasCache.set(cacheKey, canvas);
   return canvas;
@@ -120,9 +107,7 @@ abstract class BaseFish implements UpdateAndRender {
     const size = this.getSize();
     const color = getComputedColor(this.getColor(), element);
 
-    const neon = isNeon();
-
-    const fishTexture = createColoredFishCanvas(color, size, neon);
+    const fishTexture = createColoredFishCanvas(color, size);
 
     const halfWidth = 12 * size;
     const halfHeight = 12 * size;
@@ -147,46 +132,6 @@ abstract class BaseFish implements UpdateAndRender {
         texture: fishTexture,
       },
     ];
-
-    // ctx.save();
-    // ctx.translate(x, y);
-    // // ctx.scale(size, size);
-    // ctx.rotate(rotation * DEG2RAD);
-    // ctx.translate(-12 * size, -12 * size);
-
-    // if (neon) {
-    //   const fishNeonCanvas = createColoredFishCanvas(color, size, true);
-    //   ctx.drawImage(
-    //     fishNeonCanvas,
-    //     0,
-    //     0,
-    //     fishNeonCanvas.width / fishUpscale,
-    //     fishNeonCanvas.height / fishUpscale,
-    //   );
-    // } else {
-    //   const fishFillCanvas = createColoredFishCanvas(color, size, false);
-    //   ctx.drawImage(
-    //     fishFillCanvas,
-    //     0,
-    //     0,
-    //     fishFillCanvas.width / fishUpscale,
-    //     fishFillCanvas.height / fishUpscale,
-    //   );
-    // }
-
-    // // if (neon) {
-    // //     ctx.fillStyle = '#242424'; // TODO: Make this customizable.
-    // //     ctx.strokeStyle = getColor(color, element);
-    // //     ctx.lineWidth = 3 / size;
-
-    // //     ctx.fill(FISH_SVG_PATH);
-    // //     ctx.stroke(FISH_SVG_PATH);
-    // // } else {
-    // //     ctx.fillStyle = getColor(color, element);
-    // //     ctx.fill(FISH_SVG_PATH);
-    // // }
-
-    // ctx.restore();
   }
 
   abstract moveDiff(diff: Vector2, canvasSize: Vector2): void;
@@ -323,7 +268,6 @@ class Fish extends BaseFish {
   ): void {
     for (const pointer of pointers) {
       const [pointerPos, clickState] = pointer;
-      // console.log(clickState);
       if (clickState == PointerClickState.CLICKED) {
         // See if the pointer is close enough to the fish to run away
         if (
@@ -363,18 +307,6 @@ class Fish extends BaseFish {
       );
     }
   }
-
-  // override draw(ctx: CanvasRenderingContext2D, element: HTMLElement): void {
-  //     super.draw(ctx, element);
-
-  //     if (this.runAwayTime > 0) {
-  //         ctx.strokeStyle = "red";
-  //         ctx.beginPath();
-  //         ctx.moveTo(this.position.x, this.position.y);
-  //         ctx.lineTo(this.runAwayFrom.x, this.runAwayFrom.y);
-  //         ctx.stroke();
-  //     }
-  // }
 }
 
 /**
@@ -513,17 +445,6 @@ class MiniFish extends Fish {
       );
     }
   }
-
-  // override draw(ctx: CanvasRenderingContext2D, element: HTMLElement): void {
-  //     super.draw(ctx, element);
-
-  //     const pos = this.school.position.add(this.offset);
-
-  //     ctx.fillStyle = "green";
-  //     ctx.beginPath();
-  //     ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-  //     ctx.fill();
-  // }
 }
 
 /**
@@ -557,11 +478,6 @@ class School implements UpdateAndRender {
     }
 
     return draws;
-
-    // ctx.fillStyle = "red";
-    // ctx.beginPath();
-    // ctx.arc(this.position.x, this.position.y, 5, 0, Math.PI * 2);
-    // ctx.fill();
   }
 
   update(
@@ -588,7 +504,6 @@ class School implements UpdateAndRender {
     } else {
       this.rotationChange = (Math.random() - 0.5) * 50;
     }
-    // console.log(this.rotationChange);
   }
 
   moveDiff(diff: Vector2, canvasSize: Vector2) {
@@ -625,6 +540,14 @@ const fragSrc = /* glsl */ `
     gl_FragColor = color;
   }
 `;
+
+const MAX_RIPPLES = 8;
+// Ripple parameters (ms / px units tuned by eye)
+const RIPPLE_LIFE = 1800; // ms before a ripple is removed
+const RIPPLE_SPEED = 0.3; // px per ms (radius growth)
+const RIPPLE_WAVELENGTH = 80; // px
+const RIPPLE_AMPLITUDE = 40; // max pixel displacement at source
+const RIPPLE_DECAY = 1000; // ms - exponential decay
 
 type AquariumProps = {
   color?: string;
@@ -692,12 +615,8 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
 
       // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
       const fishies: UpdateAndRender[] = [];
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
+      for (let i = 0; i < 6; i++)
+        fishies.push(new School(10, color, new Vector2(width, height)));
       for (let i = 0; i < 25; i++)
         fishies.push(new BasicFish(color, new Vector2(width, height)));
 
@@ -734,6 +653,11 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       twgl.setBuffersAndAttributes(gl, programInfo, bufferInfo);
 
       const textures: Map<HTMLCanvasElement, WebGLTexture> = new Map();
+
+      let ripples: {
+        center: Vector2;
+        startTime: number;
+      }[] = [];
 
       const getTextureForCanvas = (canvas: HTMLCanvasElement) => {
         if (textures.has(canvas)) {
@@ -793,24 +717,61 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
 
         const groups: Map<HTMLCanvasElement, number[]> = new Map();
 
+        // prune expired ripples
+        ripples = ripples.filter(r => now - r.startTime < RIPPLE_LIFE);
+
+        // helper: apply ripple displacement to a vertex
+        const applyRipplesToVertex = (v: Vector2) => {
+          let displaced = v.clone();
+          for (const r of ripples) {
+            const age = now - r.startTime; // ms
+            const t = age; // keep in ms for speed constant
+            const radius = t * RIPPLE_SPEED;
+            const toV = v.sub(r.center);
+            const dist = toV.length();
+
+            // compute wave phase based on distance from ripplefront
+            // we want waves where the traveling front is at 'radius'
+            const phase = ((dist - radius) / RIPPLE_WAVELENGTH) * Math.PI * 2;
+
+            // attenuation: exponential by age and by distance
+            const ageAtt = Math.exp(-age / RIPPLE_DECAY);
+            const distAtt = 1 / (1 + dist * 0.01);
+
+            // radial direction (guard against zero-length)
+            const dir = dist === 0 ? new Vector2(0, -1) : toV.normalize();
+
+            const wave = Math.sin(phase);
+            const amplitude = RIPPLE_AMPLITUDE * ageAtt * distAtt * wave;
+
+            displaced = displaced.add(dir.mult(amplitude));
+          }
+          return displaced;
+        };
+
         for (const fishDraw of fishDraws) {
           const { vertices, texture } = fishDraw;
+          // apply ripples in screen-space (pixels), then convert to clip space
+          const sv0 = applyRipplesToVertex(vertices[0]);
+          const sv1 = applyRipplesToVertex(vertices[1]);
+          const sv2 = applyRipplesToVertex(vertices[2]);
+          const sv3 = applyRipplesToVertex(vertices[3]);
 
           const v0 = new Vector2(
-            (2 * vertices[0].x) / width - 1,
-            1 - (2 * vertices[0].y) / height,
+            (2 * sv0.x) / width - 1,
+            1 - (2 * sv0.y) / height,
           );
           const v1 = new Vector2(
-            (2 * vertices[1].x) / width - 1,
-            1 - (2 * vertices[1].y) / height,
+            (2 * sv1.x) / width - 1,
+            1 - (2 * sv1.y) / height,
           );
           const v2 = new Vector2(
-            (2 * vertices[2].x) / width - 1,
-            1 - (2 * vertices[2].y) / height,
+            (2 * sv2.x) / width - 1,
+            1 - (2 * sv2.y) / height,
           );
           const v3 = new Vector2(
-            (2 * vertices[3].x) / width - 1,
-            1 - (2 * vertices[3].y) / height,
+            (2 * sv3.x) / width - 1,
+            1 - (2 * sv3.y) / height,
           );
 
           const positions = [
@@ -913,6 +874,13 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
           pointerToLocal(e),
           PointerClickState.CLICKED,
         ]);
+        // add a ripple (cap to MAX_RIPPLES)
+        const center = pointerToLocal(e);
+        if (ripples.length >= MAX_RIPPLES) ripples.shift();
+        ripples.push({
+          center,
+          startTime: performance.now(),
+        });
       };
       const pointerMove = (e: PointerEvent) => {
         const current = pointerStates.get(e.pointerId);
@@ -949,7 +917,6 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       // to be safe, attach it to the ref so other code could call it if extended
       (animationFrameRef as any).cleanup = cleanup;
     }
-    // Intentionally only restart when maskId or core visual props change
   }, [color]);
 
   return (

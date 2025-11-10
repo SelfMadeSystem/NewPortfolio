@@ -142,18 +142,6 @@ abstract class BaseFish implements UpdateAndRender {
       );
     }
 
-    // if (neon) {
-    //     ctx.fillStyle = '#242424'; // TODO: Make this customizable.
-    //     ctx.strokeStyle = getColor(color, element);
-    //     ctx.lineWidth = 3 / size;
-
-    //     ctx.fill(FISH_SVG_PATH);
-    //     ctx.stroke(FISH_SVG_PATH);
-    // } else {
-    //     ctx.fillStyle = getColor(color, element);
-    //     ctx.fill(FISH_SVG_PATH);
-    // }
-
     ctx.restore();
   }
 
@@ -617,12 +605,8 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
 
       // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
       const fishies: UpdateAndRender[] = [];
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
-      fishies.push(new School(10, color, new Vector2(width, height)));
+      for (let i = 0; i < 6; i++)
+        fishies.push(new School(10, color, new Vector2(width, height)));
       for (let i = 0; i < 25; i++)
         fishies.push(new BasicFish(color, new Vector2(width, height)));
 
