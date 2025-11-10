@@ -682,7 +682,7 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
         ctx.textBaseline = 'hanging';
         const text = fps.toFixed(1) + ' FPS 2D';
         ctx.lineWidth = 4;
-        const textTop = 0.05 * canvas.height + 10;
+        const textTop = 0.1 * window.innerHeight + 10;
         ctx.strokeText(text, 10, textTop);
         ctx.fillText(text, 10, textTop);
 
