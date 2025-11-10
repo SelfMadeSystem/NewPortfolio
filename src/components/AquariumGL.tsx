@@ -748,7 +748,7 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
         }
       };
 
-      window.addEventListener('scroll', onScroll, { passive: false });
+      window.addEventListener('scroll', onScroll, { passive: true });
       window.addEventListener('custom-scroll', onCustomScroll as EventListener);
 
       const programInfo = twgl.createProgramInfo(gl, [vertSrc, fragSrc]);
