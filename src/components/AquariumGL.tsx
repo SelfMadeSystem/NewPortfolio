@@ -728,12 +728,12 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
           for (const f of fishies)
             f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
           topY += diff;
-          console.log('scroll', diff, topY);
-          canvas.style.transform = `translateY(${topY}px)`;
           prevTop = top;
           cancelAnimationFrame(animationFrameRef.current);
-          redraw();
-          // animationFrameRef.current = requestAnimationFrame(redraw);
+          animationFrameRef.current = requestAnimationFrame(() => {
+            canvas.style.transform = `translateY(${topY}px)`;
+            redraw();
+          });
         }
       };
 
