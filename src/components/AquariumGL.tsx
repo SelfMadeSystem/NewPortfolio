@@ -699,7 +699,7 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       const ro = new ResizeObserver(setCanvasSize);
       ro.observe(canvas);
 
-      let prevTop = getTopInDocument(canvas);
+      let prevTop = 0;
 
       // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
       const fishies: UpdateAndRender[] = [];
@@ -716,18 +716,24 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       let lastTime = performance.now();
       let fps = -1;
       let prevFps = -1;
-      const fpsSmoothing = 0.999;
+      const fpsSmoothing = 0.99;
       const maxFpsDist = 300;
 
+      let topY = 0;
+
       const onScroll = () => {
-        const top = getTopInDocument(canvas);
+        const top = window.scrollY; //getTopInDocument(canvas);
         if (top !== prevTop) {
           const diff = top - prevTop;
           for (const f of fishies)
             f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
+          topY += diff;
+          console.log('scroll', diff, topY);
+          canvas.style.transform = `translateY(${topY}px)`;
           prevTop = top;
           cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = requestAnimationFrame(redraw);
+          redraw();
+          // animationFrameRef.current = requestAnimationFrame(redraw);
         }
       };
 
@@ -742,7 +748,7 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
         }
       };
 
-      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('scroll', onScroll, { passive: false });
       window.addEventListener('custom-scroll', onCustomScroll as EventListener);
 
       const programInfo = twgl.createProgramInfo(gl, [vertSrc, fragSrc]);
@@ -984,15 +990,14 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
   }, [color]);
 
   return (
-    <>
+    <div className="absolute inset-0 overflow-hidden">
       <canvas
         ref={canvasRef}
         style={{
-          position: 'sticky',
+          position: 'absolute',
           width: '100%',
-          height: '100vh',
-          top: 0,
-          display: 'block',
+          height: '200vh',
+          top: '-50vh',
         }}
       />
       <canvas
@@ -1008,6 +1013,6 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
           zIndex: 10,
         }}
       />
-    </>
+    </div>
   );
 }

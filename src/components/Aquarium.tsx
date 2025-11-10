@@ -641,7 +641,7 @@ export default function Aquarium({
       const ro = new ResizeObserver(setCanvasSize);
       ro.observe(canvas);
 
-      let prevTop = getTopInDocument(canvas);
+      let prevTop = 0; //getTopInDocument(canvas);
 
       // fishies and other shared state - these rely on the other classes (School, BasicFish, etc.)
       const fishies: UpdateAndRender[] = [];
@@ -657,17 +657,23 @@ export default function Aquarium({
       const pointerStates: Map<number, PointerState> = new Map();
       let lastTime = performance.now();
       let fps = -1;
-      const fpsSmoothing = 0.999;
+      const fpsSmoothing = 0.99;
+
+      let topY = 0;
 
       const onScroll = () => {
-        const top = getTopInDocument(canvas);
+        const top = window.scrollY; //getTopInDocument(canvas);
         if (top !== prevTop) {
           const diff = top - prevTop;
           for (const f of fishies)
             f.moveDiff(new Vector2(0, -diff), new Vector2(width, height));
+          topY += diff;
+          console.log('scroll', diff, topY);
+          canvas.style.transform = `translateY(${topY}px)`;
           prevTop = top;
           cancelAnimationFrame(animationFrameRef.current);
-          animationFrameRef.current = requestAnimationFrame(redraw);
+          redraw();
+          // animationFrameRef.current = requestAnimationFrame(redraw);
         }
       };
 
@@ -774,8 +780,9 @@ export default function Aquarium({
         ctx.textBaseline = 'hanging';
         const text = fps.toFixed(1) + ' FPS 2D';
         ctx.lineWidth = 4;
-        ctx.strokeText(text, 10, 10);
-        ctx.fillText(text, 10, 10);
+        const textTop = 0.25 * canvas.height + 10;
+        ctx.strokeText(text, 10, textTop);
+        ctx.fillText(text, 10, textTop);
 
         animationFrameRef.current = requestAnimationFrame(redraw);
       };
@@ -839,14 +846,16 @@ export default function Aquarium({
   }, [maskId, color, maskInverse, flipMaskX, flipMaskY]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'sticky',
-        width: '100%',
-        height: '100vh',
-        top: 0,
-      }}
-    />
+    <div className="absolute inset-0 overflow-hidden">
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '200vh',
+          top: '-50vh',
+        }}
+      />
+    </div>
   );
 }
