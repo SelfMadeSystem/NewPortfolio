@@ -1,4 +1,5 @@
 import * as twgl from 'twgl.js';
+import { useFps } from '../utils/hooks/useFps';
 import {
   DEG2RAD,
   RAD2DEG,
@@ -556,6 +557,7 @@ type AquariumProps = {
 export default function AquariumGL({ color = 'blue' }: AquariumProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const overlayRef = useRef<HTMLCanvasElement | null>(null);
+  const { fps, countFrame } = useFps();
 
   const animationFrameRef = useRef<number>(0);
 
@@ -622,10 +624,6 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
 
       const pointerStates: Map<number, PointerState> = new Map();
       let lastTime = performance.now();
-      let fps = -1;
-      let prevFps = -1;
-      const fpsSmoothing = 0.99;
-      const maxFpsDist = 300;
 
       let topY = 0;
 
@@ -678,14 +676,9 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
         let delta = now - lastTime;
         lastTime = now;
 
-        if (delta > 0) {
-          const nowFps = 1000 / delta;
-          if (fps < 0 || Math.abs(fps - nowFps) > maxFpsDist || !isFinite(fps))
-            fps = nowFps;
-          else fps = fps * fpsSmoothing + nowFps * (1 - fpsSmoothing);
-        }
+        countFrame();
 
-        if (delta > 32) delta = 32;
+        if (delta > 35) delta = 35;
 
         const newTopY = window.scrollY;
         const diff = newTopY - topY;
@@ -836,26 +829,20 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
             pointer[1] = PointerClickState.HELD;
         }
 
-        const roundedFps = Math.round(fps * 10) / 10;
-
-        if (roundedFps !== prevFps) {
-          prevFps = roundedFps;
-
-          octx.clearRect(
-            0,
-            0,
-            overlayRef.current!.width,
-            overlayRef.current!.height,
-          );
-          octx.font = 'bold 24px sans-serif';
-          octx.fillStyle = 'white';
-          octx.strokeStyle = 'black';
-          octx.textBaseline = 'hanging';
-          const text = fps.toFixed(1) + ' FPS GL';
-          octx.lineWidth = 4;
-          octx.strokeText(text, 10, 10);
-          octx.fillText(text, 10, 10);
-        }
+        octx.clearRect(
+          0,
+          0,
+          overlayRef.current!.width,
+          overlayRef.current!.height,
+        );
+        octx.font = 'bold 24px sans-serif';
+        octx.fillStyle = 'white';
+        octx.strokeStyle = 'black';
+        octx.textBaseline = 'hanging';
+        const text = fps.current.toFixed(1) + ' FPS GL';
+        octx.lineWidth = 4;
+        octx.strokeText(text, 10, 10);
+        octx.fillText(text, 10, 10);
 
         animationFrameRef.current = requestAnimationFrame(redraw);
       };
@@ -917,7 +904,7 @@ export default function AquariumGL({ color = 'blue' }: AquariumProps) {
       // to be safe, attach it to the ref so other code could call it if extended
       (animationFrameRef as any).cleanup = cleanup;
     }
-  }, [color]);
+  }, [color, countFrame, fps]);
 
   return (
     <div className="absolute inset-0 overflow-hidden">

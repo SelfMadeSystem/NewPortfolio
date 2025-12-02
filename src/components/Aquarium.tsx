@@ -1,3 +1,4 @@
+import { useFps } from '../utils/hooks/useFps';
 import {
   DEG2RAD,
   RAD2DEG,
@@ -561,6 +562,7 @@ type AquariumProps = {
 
 export default function Aquarium({ color = 'blue' }: AquariumProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { fps, countFrame } = useFps();
 
   const animationFrameRef = useRef<number>(0);
 
@@ -588,15 +590,13 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
       }
 
       const ctx = canvas.getContext('2d')!;
-      const tempCanvas = document.createElement('canvas');
-      const tempCtx = tempCanvas.getContext('2d')!;
 
-      let width = (tempCanvas.width = canvas.width = canvas.clientWidth);
-      let height = (tempCanvas.height = canvas.height = canvas.clientHeight);
+      let width = (canvas.width = canvas.clientWidth);
+      let height = (canvas.height = canvas.clientHeight);
 
       const setCanvasSize = () => {
-        width = tempCanvas.width = canvas.width = canvas.clientWidth;
-        height = tempCanvas.height = canvas.height = canvas.clientHeight;
+        width = canvas.width = canvas.clientWidth;
+        height = canvas.height = canvas.clientHeight;
       };
       setCanvasSize();
 
@@ -612,8 +612,6 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
 
       const pointerStates: Map<number, PointerState> = new Map();
       let lastTime = performance.now();
-      let fps = -1;
-      const fpsSmoothing = 0.99;
 
       let topY = 0;
 
@@ -622,14 +620,9 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
         let delta = now - lastTime;
         lastTime = now;
 
-        if (delta > 0) {
-          const nowFps = 1000 / delta;
-          if (fps < 0 || !isFinite(fps) || Math.abs(nowFps - fps) > 400)
-            fps = nowFps;
-          else fps = fps * fpsSmoothing + nowFps * (1 - fpsSmoothing);
-        }
+        countFrame();
 
-        if (delta > 32) delta = 32;
+        if (delta > 35) delta = 35;
 
         const newTopY = window.scrollY;
         const diff = newTopY - topY;
@@ -664,7 +657,7 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'black';
         ctx.textBaseline = 'hanging';
-        const text = fps.toFixed(1) + ' FPS 2D';
+        const text = fps.current.toFixed(1) + ' FPS 2D';
         ctx.lineWidth = 4;
         const textTop = 0.1 * window.innerHeight + 10;
         ctx.strokeText(text, 10, textTop);
@@ -724,7 +717,7 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
       (animationFrameRef as any).cleanup = cleanup;
     }
     // Intentionally only restart when maskId or core visual props change
-  }, [color]);
+  }, [color, countFrame, fps]);
 
   return (
     <div className="absolute inset-0 overflow-hidden">
