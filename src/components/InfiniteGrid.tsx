@@ -235,6 +235,7 @@ export default function InfiniteGrid({
 
   useEffect(() => {
     function onScroll(e: WheelEvent) {
+      if (performance.now() < startDelay) return;
       const scrollSpeed = new Vector2(-1, 1);
       setScroll(prev =>
         prev.add(new Vector2(e.deltaX, e.deltaY).mult(scrollSpeed)),
@@ -255,7 +256,7 @@ export default function InfiniteGrid({
         }
       }
 
-      if (e.buttons === 1) {
+      if (e.buttons === 1 && performance.now() > startDelay) {
         const scrollSpeed = new Vector2(1, -1).div(window.devicePixelRatio);
         setScroll(prev =>
           prev.add(new Vector2(e.movementX, e.movementY).mult(scrollSpeed)),
@@ -289,9 +290,13 @@ export default function InfiniteGrid({
       if (e.touches.length === 1 && prevTouchPos) {
         const t = e.touches[0];
         const currTouchPos = new Vector2(t.clientX, t.clientY);
-        const delta = currTouchPos.sub(prevTouchPos);
-        const scrollSpeed = new Vector2(1, -1);
-        setScroll(prev => prev.add(delta.mult(scrollSpeed)));
+
+        if (performance.now() > startDelay) {
+          const delta = currTouchPos.sub(prevTouchPos);
+          const scrollSpeed = new Vector2(1, -1);
+          setScroll(prev => prev.add(delta.mult(scrollSpeed)));
+        }
+
         prevTouchPos = currTouchPos;
         e.preventDefault();
 
@@ -335,7 +340,7 @@ export default function InfiniteGrid({
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, []);
+  }, [startDelay]);
 
   useEffect(() => {
     const keys: Record<string, boolean> = {};
