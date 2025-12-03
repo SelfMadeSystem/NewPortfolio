@@ -187,7 +187,7 @@ function GridColumn({
   const numCells =
     Math.ceil(
       ('window' in globalThis ? window.innerHeight : 1080) / heightPerRow,
-    ) + 1;
+    ) + 2;
   const startIndex = Math.ceil(-offsetY / heightPerRow) - 1;
 
   return (
@@ -441,14 +441,14 @@ export default function InfiniteGrid({
   const numCols =
     Math.ceil(
       ('window' in globalThis ? window.innerWidth : 1920) / widthPerCol,
-    ) + 1;
+    ) + 2;
 
   const startIndex = Math.ceil(-scroll.x / widthPerCol) - 1;
 
   const numRows =
     Math.ceil(
       ('window' in globalThis ? window.innerHeight : 1080) / heightPerRow,
-    ) + 1;
+    ) + 2;
 
   const colArr = [...Array(numCols).keys()];
   const rowArr = [...Array(numRows).keys()];
@@ -459,7 +459,7 @@ export default function InfiniteGrid({
         className="pointer-events-none flex"
         style={{
           gap: padding,
-          transform: `translateX(${mod(scroll.x, widthPerCol) - widthPerCol}px)`,
+          transform: `translateX(${mod(scroll.x, widthPerCol) - widthPerCol - cellSize.x / 2 - padding / 2}px) translateY(${-cellSize.y / 2 - padding / 2}px)`,
         }}
       >
         {colArr.map(i => {
@@ -489,7 +489,7 @@ export default function InfiniteGrid({
             key={i}
             className="absolute top-0 -translate-x-1/2 bg-white"
             style={{
-              left: i * widthPerCol - padding * 0.5,
+              left: (i - 0.5) * widthPerCol - padding * 0.5,
               width: padding * 0.25,
             }}
             initial={{
@@ -511,7 +511,7 @@ export default function InfiniteGrid({
             key={i}
             className="absolute left-0 -translate-y-1/2 bg-white"
             style={{
-              top: i * heightPerRow - padding * 0.5,
+              top: (i - 0.5) * heightPerRow - padding * 0.5,
               height: padding * 0.25,
             }}
             initial={{
