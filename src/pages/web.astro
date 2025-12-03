@@ -1,110 +1,99 @@
 ---
 import Layout from '../layout/Layout.astro';
-import udemHacks2025 from '../assets/web/udemhacks-2025.png';
-import udemHacks2026 from '../assets/web/udemhacks-2026.png';
 import abacuscleaning from '../assets/web/abacuscleaning.png';
+import abacuscleaning1 from '../assets/web/abacuscleaning1.png';
+import abacuscleaning2 from '../assets/web/abacuscleaning2.png';
+import abacuscleaning3 from '../assets/web/abacuscleaning3.png';
 import blanco from '../assets/web/blanco.png';
+import blanco1 from '../assets/web/blanco1.png';
+import blanco2 from '../assets/web/blanco2.png';
+import blanco3 from '../assets/web/blanco3.png';
 import meadsimon from '../assets/web/meadsimon.png';
+import meadsimon1 from '../assets/web/meadsimon1.png';
+import meadsimon2 from '../assets/web/meadsimon2.png';
+import meadsimon3 from '../assets/web/meadsimon3.png';
+import meadsimon4 from '../assets/web/meadsimon4.png';
 import metromtl from '../assets/web/metromtl.png';
+import metromtl1 from '../assets/web/metromtl1.png';
+import metromtl2 from '../assets/web/metromtl2.png';
 import sillyNans from '../assets/web/silly-nans.png';
+import sillyNans1 from '../assets/web/silly-nans1.png';
+import sillyNans2 from '../assets/web/silly-nans2.png';
+import sillyNans3 from '../assets/web/silly-nans3.png';
+import udemHacks2025 from '../assets/web/udemhacks-2025.png';
+import udemHacks20251 from '../assets/web/udemhacks-2025-1.png';
+import udemHacks20252 from '../assets/web/udemhacks-2025-2.png';
+import udemHacks2026 from '../assets/web/udemhacks-2026.png';
+import udemHacks20261 from '../assets/web/udemhacks-2026-1.png';
+import udemHacks20262 from '../assets/web/udemhacks-2026-2.png';
+import udemHacks20263 from '../assets/web/udemhacks-2026-3.png';
 import '../styles/web.css';
-import FancyCursor from '../components/FancyCursor';
-import FancyImage from '../components/FancyImage';
-import { Magnetized } from '../components/Magnetized';
+import { Image } from 'astro:assets';
+import type { InfiniteImagesType } from '../components/InfiniteGrid';
+import InfiniteGrid from '../components/InfiniteGrid';
 
 const description =
   'Showcase of websites and web applications I have developed.';
 
-const stuff = [
+const images: InfiniteImagesType[] = [
   {
-    title: 'UdemHacks 2025',
-    image: udemHacks2025,
-    link: 'https://2025.udemhacks.com',
-    tech: ['React', 'TailwindCSS', 'WebGL'],
-  },
-  {
-    title: 'UdemHacks 2026',
-    image: udemHacks2026,
-    link: 'https://udemhacks.com',
-    tech: ['Astro', 'TailwindCSS', 'WebGL', 'Motion One'],
-  },
-  {
-    title: 'Abacus Cleaning',
-    image: abacuscleaning,
+    name: 'Abacus Cleaning',
+    images: [abacuscleaning, abacuscleaning1, abacuscleaning2, abacuscleaning3],
+    tech: ['HTML', 'CSS', 'JavaScript'],
+    description: 'A professional website for a cleaning service company.',
     link: 'https://abacuscleaninginc.com',
-    tech: ['HTML', 'CSS', 'TypeScript'],
   },
   {
-    title: 'ByBlanco',
-    image: blanco,
+    name: 'Blanco',
+    images: [blanco, blanco1, blanco2, blanco3],
+    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+    description: 'A retro-themed portfolio website for a Dutch artist.',
     link: 'https://blanco-cq6.pages.dev',
-    tech: ['Astro', 'TailwindCSS', 'TypeScript'],
   },
   {
-    title: 'Mead Simon',
-    image: meadsimon,
+    name: 'Mead Simon',
+    images: [meadsimon, meadsimon1, meadsimon2, meadsimon3, meadsimon4],
+    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+    description:
+      'A modern portfolio website for the fashion designer Mead Simon.',
     link: 'https://meadsimon.ca',
-    tech: ['Astro', 'TailwindCSS', 'TypeScript'],
   },
   {
-    title: 'Metro MTL',
-    image: metromtl,
+    name: 'Metro MTL',
+    images: [metromtl, metromtl1, metromtl2],
+    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+    description: 'A sleek website for a Montreal-based transportation service.',
     link: 'https://metromtl.ca',
-    tech: ['Astro', 'TailwindCSS', 'TypeScript'],
   },
   {
-    title: 'My Silly Nans',
-    image: sillyNans,
+    name: 'Silly Nans',
+    images: [sillyNans, sillyNans1, sillyNans2, sillyNans3],
+    tech: ['Astro', 'Tailwind CSS', 'TypeScript', 'WebGL'],
+    description:
+      'An interactive website showcasing a collection of fancy effects and animations I made over the years.',
     link: 'https://shenanigans.shoghisimon.ca',
-    tech: ['Astro', 'TailwindCSS', 'TypeScript', 'WebGL'],
+  },
+  {
+    name: 'UdemHacks 2025',
+    images: [udemHacks2025, udemHacks20251, udemHacks20252],
+    tech: ['React', 'Tailwind CSS', 'TypeScript'],
+    description:
+      "The inaugural website for UdemHacks, the University of Montreal's hackathon event.",
+    link: 'https://2025.udemhacks.ca',
+  },
+  {
+    name: 'UdemHacks 2026',
+    images: [udemHacks2026, udemHacks20261, udemHacks20262, udemHacks20263],
+    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+    description:
+      "The website for UdemHacks, the University of Montreal's annual hackathon event.",
+    link: 'https://udemhacks.ca',
   },
 ];
 ---
 
 <Layout description={description}>
-  <div
-    class="relative min-h-screen w-full cursor-none bg-slate-50 px-6 py-16 text-slate-900"
-  >
-    <FancyCursor client:load />
-    <div
-      class="flex flex-row flex-wrap justify-around items-stretch p-8 gap-8 overflow-hidden"
-    >
-      {
-        stuff.map(item => (
-          <div class="w-128 group relative">
-            <Magnetized
-              client:load
-              className="group w-128 relative"
-              force={0.025}
-            >
-              <div>
-                <FancyImage src={item.image.src} alt={item.title} client:load />
-              </div>
-            </Magnetized>
-            <Magnetized
-              client:load
-              className="transition-[scale] group-hover:scale-100 scale-0 rounded-md absolute inset-1/6 bg-black/50 flex flex-col"
-              onlyInside={false}
-              force={0.2}
-            >
-              <h3 class="mx-auto text-center text-white text-2xl font-semibold px-4 py-2">
-                {item.title}
-              </h3>
-              <p class="mx-auto text-center text-white px-4">
-                {item.tech.join(' • ')}
-              </p>
-              <a
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mx-auto mt-auto mb-4 px-4 py-2 bg-white text-black font-semibold rounded hover:bg-gray-200 transition"
-              >
-                Visit Site
-              </a>
-            </Magnetized>
-          </div>
-        ))
-      }
-    </div>
+  <div class="bg-black text-white min-h-screen">
+    <InfiniteGrid images={images} client:load />
   </div>
 </Layout>
