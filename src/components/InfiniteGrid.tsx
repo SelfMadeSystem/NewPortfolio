@@ -80,9 +80,35 @@ function GridColumn({
   images: ImageCell[];
   scroll: Vector2;
 }) {
-  const [scrollSpeed] = useState(random(0.5, 1));
+  const [scrollSpeed] = useState(() => random(0.5, 1));
+  const [autoScrollSpeed] = useState(() => random(10, 30));
+  const [autoScrollDirection] = useState(() => (Math.random() < 0.5 ? 1 : -1));
+  const [autoScrollOffset, setAutoScrollOffset] = useState(0);
 
-  const offsetY = -scroll.y * scrollSpeed;
+  useEffect(() => {
+    let rafId = 0;
+    let lastTime: number | null = null;
+
+    function frame(time: number) {
+      if (lastTime === null) lastTime = time;
+      const dt = Math.min(64, time - lastTime); // ms, clamp
+      lastTime = time;
+
+      setAutoScrollOffset(
+        prev => prev + autoScrollDirection * autoScrollSpeed * (dt / 1000),
+      );
+
+      rafId = requestAnimationFrame(frame);
+    }
+
+    rafId = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+    };
+  }, [autoScrollDirection, autoScrollSpeed]);
+
+  const offsetY = -scroll.y * scrollSpeed + autoScrollOffset;
 
   const heightPerCell = 288 + 16;
 
@@ -90,7 +116,7 @@ function GridColumn({
     Math.ceil(
       ('window' in globalThis ? window.innerHeight : 1080) / heightPerCell,
     ) + 2;
-  const startIndex = Math.floor(-offsetY / heightPerCell);
+  const startIndex = Math.ceil(-offsetY / heightPerCell) - 1;
 
   return (
     <div
@@ -122,7 +148,7 @@ export default function InfiniteGrid({
   images: InfiniteImagesType[];
 }) {
   const cells = useMemo(() => mapImagesToCells(images), [images]);
-  const [scroll, setScroll] = useState(new Vector2(-1000, -1000));
+  const [scroll, setScroll] = useState(new Vector2(0, 0));
 
   useEffect(() => {
     function onScroll(e: WheelEvent) {
@@ -142,12 +168,146 @@ export default function InfiniteGrid({
       }
     }
 
+    let prevTouchPos: Vector2 | null = null;
+
+    function onTouchStart(e: TouchEvent) {
+      if (e.touches.length === 1) {
+        const t = e.touches[0];
+        prevTouchPos = new Vector2(t.clientX, t.clientY);
+      }
+    }
+
+    function onTouchMove(e: TouchEvent) {
+      if (e.touches.length === 1 && prevTouchPos) {
+        const t = e.touches[0];
+        const currTouchPos = new Vector2(t.clientX, t.clientY);
+        const delta = currTouchPos.sub(prevTouchPos);
+        const scrollSpeed = new Vector2(1, -1);
+        setScroll(prev => prev.add(delta.mult(scrollSpeed)));
+        prevTouchPos = currTouchPos;
+        e.preventDefault();
+      }
+    }
+
+    function onTouchEnd(e: TouchEvent) {
+      if (e.touches.length === 0) {
+        prevTouchPos = null;
+      }
+    }
+
     window.addEventListener('wheel', onScroll);
     window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('touchstart', onTouchStart, { passive: false });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
 
     return () => {
       window.removeEventListener('wheel', onScroll);
       window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
+
+  useEffect(() => {
+    const keys: Record<string, boolean> = {};
+    const keysRef = { current: keys };
+    let lastTime: number | null = null;
+    let rafId = 0;
+
+    function onKeyDown(e: KeyboardEvent) {
+      // support arrows, WASD
+      const k = e.key;
+      const handled = [
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'a',
+        'd',
+        'w',
+        's',
+      ].includes(k);
+      if (handled) {
+        e.preventDefault();
+      }
+
+      // directional keys: maintain held state for acceleration
+      if (
+        [
+          'ArrowLeft',
+          'ArrowRight',
+          'ArrowUp',
+          'ArrowDown',
+          'a',
+          'd',
+          'w',
+          's',
+        ].includes(k)
+      ) {
+        keysRef.current[k] = true;
+        return;
+      }
+    }
+
+    function onKeyUp(e: KeyboardEvent) {
+      delete keysRef.current[e.key];
+    }
+
+    // velocity (px/s) and queued page movement (px) stored in refs so the RAF loop can mutate
+    const velocity = { current: new Vector2(0, 0) };
+
+    function frame(time: number) {
+      if (lastTime === null) lastTime = time;
+      const dt = Math.min(64, time - lastTime); // ms, clamp
+      lastTime = time;
+
+      // physics params (tweak to taste)
+      const accel = 3000; // px/s^2 for arrow keys
+      const maxSpeed = 50000; // px/s
+      const friction = 3; // damping per second
+
+      let vx = velocity.current.x;
+      let vy = velocity.current.y;
+
+      const k = keysRef.current;
+      // keep same directional sign mapping as before
+      if (k['ArrowLeft'] || k['a']) vx += accel * (dt / 1000);
+      if (k['ArrowRight'] || k['d']) vx -= accel * (dt / 1000);
+      if (k['ArrowUp'] || k['w']) vy -= accel * (dt / 1000);
+      if (k['ArrowDown'] || k['s']) vy += accel * (dt / 1000);
+
+      // clamp speeds
+      vx = Math.max(Math.min(vx, maxSpeed), -maxSpeed);
+      vy = Math.max(Math.min(vy, maxSpeed), -maxSpeed);
+
+      // exponential damping
+      const damping = Math.exp(-friction * (dt / 1000));
+      vx *= damping;
+      vy *= damping;
+
+      velocity.current = new Vector2(vx, vy);
+
+      // displacement in CSS pixels (account for devicePixelRatio if desired)
+      const dx = vx * (dt / 1000) * window.devicePixelRatio;
+      const dy = vy * (dt / 1000) * window.devicePixelRatio;
+
+      if (dx !== 0 || dy !== 0) {
+        setScroll(prev => prev.add(new Vector2(dx, dy)));
+      }
+
+      rafId = requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('keydown', onKeyDown, { passive: false });
+    window.addEventListener('keyup', onKeyUp);
+    rafId = requestAnimationFrame(frame);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -157,7 +317,7 @@ export default function InfiniteGrid({
       ('window' in globalThis ? window.innerWidth : 1920) / widthPerColumn,
     ) + 2;
 
-  const startIndex = Math.floor(-scroll.x / widthPerColumn);
+  const startIndex = Math.ceil(-scroll.x / widthPerColumn) - 1;
 
   return (
     <div className="fixed top-0 left-0 flex h-full w-full items-start justify-start overflow-hidden px-8 py-8 select-none">
