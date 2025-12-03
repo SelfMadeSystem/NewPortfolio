@@ -1,3 +1,26 @@
-/* a {
-  cursor: none;
-} */
+@reference "./global.css";
+
+body {
+  background: #fff;
+}
+
+.goto-card {
+  @apply relative flex flex-col items-center gap-2 overflow-hidden rounded-3xl bg-linear-30 from-blue-200 to-indigo-200 p-6 pt-4 text-center text-2xl font-bold text-black backdrop-blur-md backdrop-filter transition-all transform-3d;
+
+  &::before {
+    content: '';
+    @apply absolute;
+    top: calc(50% + var(--y) * 50%);
+    left: calc(50% + var(--x) * 50%);
+    width: 32em;
+    height: 32em;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, #fff, transparent 40%);
+    opacity: calc(var(--active) * 0.5);
+    mix-blend-mode: color-burn;
+  }
+
+  &.clicked {
+    @apply rounded-none bg-black font-mono text-white;
+  }
+}

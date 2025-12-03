@@ -1,13 +1,110 @@
 ---
 import Layout from '../layout/Layout.astro';
-import WebPage from '../components/WebPage';
+import udemHacks2025 from '../assets/web/udemhacks-2025.png';
+import udemHacks2026 from '../assets/web/udemhacks-2026.png';
+import abacuscleaning from '../assets/web/abacuscleaning.png';
+import blanco from '../assets/web/blanco.png';
+import meadsimon from '../assets/web/meadsimon.png';
+import metromtl from '../assets/web/metromtl.png';
+import sillyNans from '../assets/web/silly-nans.png';
 import '../styles/web.css';
+import FancyCursor from '../components/FancyCursor';
+import FancyImage from '../components/FancyImage';
+import { Magnetized } from '../components/Magnetized';
 
 const description =
-  'Showcase of web development projects and animated experiments using React, Tailwind, and motion.';
+  'Showcase of websites and web applications I have developed.';
+
+const stuff = [
+  {
+    title: 'UdemHacks 2025',
+    image: udemHacks2025,
+    link: 'https://2025.udemhacks.com',
+    tech: ['React', 'TailwindCSS', 'WebGL'],
+  },
+  {
+    title: 'UdemHacks 2026',
+    image: udemHacks2026,
+    link: 'https://udemhacks.com',
+    tech: ['Astro', 'TailwindCSS', 'WebGL', 'Motion One'],
+  },
+  {
+    title: 'Abacus Cleaning',
+    image: abacuscleaning,
+    link: 'https://abacuscleaninginc.com',
+    tech: ['HTML', 'CSS', 'TypeScript'],
+  },
+  {
+    title: 'ByBlanco',
+    image: blanco,
+    link: 'https://blanco-cq6.pages.dev',
+    tech: ['Astro', 'TailwindCSS', 'TypeScript'],
+  },
+  {
+    title: 'Mead Simon',
+    image: meadsimon,
+    link: 'https://meadsimon.ca',
+    tech: ['Astro', 'TailwindCSS', 'TypeScript'],
+  },
+  {
+    title: 'Metro MTL',
+    image: metromtl,
+    link: 'https://metromtl.ca',
+    tech: ['Astro', 'TailwindCSS', 'TypeScript'],
+  },
+  {
+    title: 'My Silly Nans',
+    image: sillyNans,
+    link: 'https://shenanigans.shoghisimon.ca',
+    tech: ['Astro', 'TailwindCSS', 'TypeScript', 'WebGL'],
+  },
+];
 ---
 
 <Layout description={description}>
-  <!-- Hydrate the React component on load so animations run in the browser -->
-  <WebPage client:load />
+  <div
+    class="relative min-h-screen w-full cursor-none bg-slate-50 px-6 py-16 text-slate-900"
+  >
+    <FancyCursor client:load />
+    <div
+      class="flex flex-row flex-wrap justify-around items-stretch p-8 gap-8 overflow-hidden"
+    >
+      {
+        stuff.map(item => (
+          <div class="w-128 group relative">
+            <Magnetized
+              client:load
+              className="group w-128 relative"
+              force={0.025}
+            >
+              <div>
+                <FancyImage src={item.image.src} alt={item.title} client:load />
+              </div>
+            </Magnetized>
+            <Magnetized
+              client:load
+              className="transition-[scale] group-hover:scale-100 scale-0 rounded-md absolute inset-1/6 bg-black/50 flex flex-col"
+              onlyInside={false}
+              force={0.2}
+            >
+              <h3 class="mx-auto text-center text-white text-2xl font-semibold px-4 py-2">
+                {item.title}
+              </h3>
+              <p class="mx-auto text-center text-white px-4">
+                {item.tech.join(' • ')}
+              </p>
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="mx-auto mt-auto mb-4 px-4 py-2 bg-white text-black font-semibold rounded hover:bg-gray-200 transition"
+              >
+                Visit Site
+              </a>
+            </Magnetized>
+          </div>
+        ))
+      }
+    </div>
+  </div>
 </Layout>

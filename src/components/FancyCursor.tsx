@@ -35,12 +35,13 @@ const spring: SpringOptions = {
   bounce: 0,
 };
 
-const COLOR = '#ffffffa0';
+const COLOR = '#000000a0';
 const HOVER_COLOR = '#ffffff30';
-const TEXT_COLOR = '#ffffff00';
+const TEXT_COLOR = '#00000000';
 
 export default function FancyCursor() {
   const cursorRef = useRef<HTMLDivElement | null>(null);
+  const animationRef = useRef<number>(0);
 
   const pointerPos = useViewportPointer();
 
@@ -70,11 +71,14 @@ export default function FancyCursor() {
       pointerHeight.set(0);
       return;
     }
+    cancelAnimationFrame(animationRef.current);
 
     x.set(pointerPos.x);
     y.set(pointerPos.y);
 
     const recheck = () => {
+      cancelAnimationFrame(animationRef.current);
+
       const defaultCase = () => {
         boxX.set(pointerPos.x);
         boxY.set(pointerPos.y);
@@ -92,18 +96,24 @@ export default function FancyCursor() {
 
       const parentElem = getParentOfType(element) as HTMLElement;
       if (parentElem) {
-        const rect = parentElem.getBoundingClientRect();
-        pointerWidth.set(rect.width + boxGrow * 2);
-        pointerHeight.set(rect.height + boxGrow * 2);
+        const stuff = () => {
+          const rect = parentElem.getBoundingClientRect();
+          pointerWidth.set(rect.width + boxGrow * 2);
+          pointerHeight.set(rect.height + boxGrow * 2);
 
-        const ptrX = pointerPos.x - rect.left - rect.width / 2;
-        const ptrY = pointerPos.y - rect.top - rect.height / 2;
+          const ptrX = pointerPos.x - rect.left - rect.width / 2;
+          const ptrY = pointerPos.y - rect.top - rect.height / 2;
 
-        boxX.set(rect.left + rect.width / 2 + ptrX * 0.1);
-        boxY.set(rect.top + rect.height / 2 + ptrY * 0.1);
+          boxX.set(rect.left + rect.width / 2 + ptrX * 0.1);
+          boxY.set(rect.top + rect.height / 2 + ptrY * 0.1);
 
-        hovering.set(1);
-        color.set(0);
+          hovering.set(1);
+          color.set(0);
+
+          cancelAnimationFrame(animationRef.current);
+          animationRef.current = requestAnimationFrame(stuff);
+        };
+        stuff();
         return;
       }
 

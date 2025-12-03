@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Recursive:MONO@1&display=swap');
 @reference "./global.css";
 
+body {
+  background: #000;
+}
+
 :root {
   --font-mono: 'Recursive', monospace;
 }

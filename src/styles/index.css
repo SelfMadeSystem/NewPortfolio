@@ -1,5 +1,9 @@
 @reference "./global.css";
 
+body {
+  background: #fff;
+}
+
 body.unloaded {
   overflow: hidden;
 }

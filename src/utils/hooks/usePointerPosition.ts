@@ -10,6 +10,31 @@ function getEl(element: RefObject<HTMLElement | null> | HTMLElement | null) {
   return element;
 }
 
+function boundingBoxUnTransformed(el: HTMLElement) {
+  let rect = el.getBoundingClientRect();
+  const style = window.getComputedStyle(el);
+  const transform = style.transform;
+
+  if (transform && transform !== 'none') {
+    // For now, assume just `translate3d(x, y, z)` transforms
+    const match = transform.match(
+      /translate3d\((-?\d+\.?\d*)px,\s*(-?\d+\.?\d*)px,\s*(-?\d+\.?\d*)px\)/,
+    );
+    if (match) {
+      const tx = parseFloat(match[1]);
+      const ty = parseFloat(match[2]);
+      rect = new DOMRect(
+        rect.left - tx,
+        rect.top - ty,
+        rect.width,
+        rect.height,
+      );
+    }
+  }
+
+  return rect;
+}
+
 /**
  * Custom React hook that tracks the current pointer (mouse or touch) position
  * on the screen relative to a given element.
@@ -27,7 +52,7 @@ export function usePointerPosition(
   useWindowEvent('pointermove', e => {
     const el = getEl(element);
     if (!el) return;
-    const rect = el.getBoundingClientRect();
+    const rect = boundingBoxUnTransformed(el);
     if (
       onlyInside &&
       (e.clientX < rect.left ||
@@ -45,7 +70,7 @@ export function usePointerPosition(
   useWindowEvent('touchmove', e => {
     const el = getEl(element);
     if (!el) return;
-    const rect = el.getBoundingClientRect();
+    const rect = boundingBoxUnTransformed(el);
     if (onlyInside) {
       let inside = false;
       for (let i = 0; i < e.touches.length; i++) {

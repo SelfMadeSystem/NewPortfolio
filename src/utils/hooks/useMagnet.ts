@@ -63,6 +63,9 @@ export function useMagnet<T extends HTMLElement>({
       }
 
       element.style.transform = `translate3d(${vx}px, ${vy}px, 0)`;
+      element.style.willChange = 'transform';
+      element.style.setProperty('--magnet-x', `${vx}`);
+      element.style.setProperty('--magnet-y', `${vy}`);
     };
 
     const unsubscribeX = x.on('change', update);
