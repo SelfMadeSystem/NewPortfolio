@@ -399,11 +399,6 @@ export default function InfiniteGrid({
         keysRef.current[k] = true;
         return;
       }
-
-      if (k === ' ') {
-        // spacebar: toggle pause
-        setPaused(prev => !prev);
-      }
     }
 
     function onKeyUp(e: KeyboardEvent) {
@@ -490,6 +485,17 @@ export default function InfiniteGrid({
 
   return (
     <div className="fixed top-0 left-0 flex h-full w-full items-start justify-start overflow-hidden select-none">
+      <motion.a
+        href="/"
+        className="absolute top-4 left-4 z-50 rounded bg-black/50 p-2 text-blue-400 hover:underline"
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: 1,
+          transition: { duration: 0.6, delay: 1 },
+        }}
+      >
+        ← Back
+      </motion.a>
       <div
         className="pointer-events-none flex"
         style={{
