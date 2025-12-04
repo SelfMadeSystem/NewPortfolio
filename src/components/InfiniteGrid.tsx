@@ -1,8 +1,8 @@
 import { mod, random, randomBool } from '../utils/mathUtils';
 import { Vector2 } from '../utils/vec';
 import type { ImageMetadata } from 'astro';
-import { motion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const cellSize = new Vector2(512, 288);
 const padding = 16;
@@ -17,39 +17,15 @@ export type InfiniteImagesType = {
   link: string;
 };
 
-type ImageCell = {
-  name: string;
-  image: ImageMetadata;
-  tech: string[];
-  description: string;
-  link: string;
-};
-
-function mapImagesToCells(images: InfiniteImagesType[]): ImageCell[] {
-  const cells: ImageCell[] = [];
-  images.forEach(item => {
-    item.images.forEach(img => {
-      cells.push({
-        name: item.name,
-        image: img,
-        tech: item.tech,
-        description: item.description,
-        link: item.link,
-      });
-    });
-  });
-  return cells;
-}
-
 // deterministic 2D -> int hash (returns unsigned 32-bit)
 function hash2Ints(x: number, y: number): number {
   // combine coordinates into one seed
-  let h = ((x | 0) * 0x9e3869b1) ^ (y | 0);
+  let h = ((x | 0) * 0x9e3769b1) ^ (y | 0);
   // mix (Wang/Jenkins style) to spread bits
   h = h ^ 61 ^ (h >>> 16);
   h = h + (h << 3);
   h = h ^ (h >>> 4);
-  h = Math.imul(h, 0x27d4eb3d);
+  h = Math.imul(h, 0x27d4db3d);
   h = h ^ (h >>> 15);
   return h >>> 0;
 }
@@ -61,59 +37,62 @@ function deterministicIndex(x: number, y: number, n: number): number {
 }
 
 function GridCell({
-  name,
-  image,
-  tech,
-  description,
-  link,
-  startDelay,
+  pos,
+  image: imageT,
+  loaded,
+  paused,
   suppressClickRef,
-}: ImageCell & {
-  startDelay: number;
+  onClick,
+}: {
+  pos: Vector2;
+  image: InfiniteImagesType;
+  loaded: boolean;
+  paused: boolean;
   suppressClickRef: React.RefObject<boolean>;
+  onClick: (
+    image: InfiniteImagesType,
+    index: number,
+    element: HTMLButtonElement,
+  ) => void;
 }) {
-  const [loaded, setLoaded] = useState(false);
+  const { name, images } = imageT;
+  const [clicked, setClicked] = useState(false);
+  const imgIndex = useMemo(
+    () => deterministicIndex(pos.x, pos.y, images.length),
+    [pos.x, pos.y, images.length],
+  );
+  const image = useMemo(() => images[imgIndex], [images, imgIndex]);
+  const delay = useMemo(() => {
+    const h = hash2Ints(pos.x, pos.y);
+    return (h % 1000) / 1000; // [0, 1)
+  }, [pos.x, pos.y]);
 
   useEffect(() => {
-    if (performance.now() > startDelay) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLoaded(true);
-      return;
+    if (!paused) {
+      requestAnimationFrame(() => setClicked(false));
     }
-
-    let timeoutId: number;
-
-    timeoutId = window.setTimeout(
-      () => {
-        setLoaded(true);
-      },
-      startDelay - Math.random() * 1000,
-    );
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [startDelay]);
+  }, [paused]);
 
   return (
-    <a
-      href={link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="relative block overflow-hidden rounded select-none [user-drag:none]"
+    <button
+      className="relative block cursor-pointer overflow-hidden rounded select-none [user-drag:none]"
       draggable={false}
       style={{
         width: cellSize.x,
         height: cellSize.y,
         opacity: loaded ? 1 : 0,
         pointerEvents: loaded ? 'auto' : 'none',
-        transition: 'opacity 0.5s ease',
+        transition: `opacity 0.5s ${delay}s ease`,
+        visibility: clicked ? 'hidden' : 'visible',
       }}
       onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
         if (suppressClickRef.current) {
           suppressClickRef.current = false;
-          e.preventDefault();
-          e.stopPropagation();
+        } else {
+          onClick(imageT, imgIndex, e.currentTarget);
+          setClicked(true);
         }
       }}
     >
@@ -123,7 +102,7 @@ function GridCell({
         className="h-full w-full select-none [user-drag:none]"
         draggable={false}
       />
-    </a>
+    </button>
   );
 }
 
@@ -131,13 +110,21 @@ function GridColumn({
   col,
   images,
   scroll,
-  startDelay,
+  loaded,
+  paused,
+  onClick,
   suppressClickRef,
 }: {
   col: number;
-  images: ImageCell[];
+  images: InfiniteImagesType[];
   scroll: Vector2;
-  startDelay: number;
+  loaded: boolean;
+  paused: boolean;
+  onClick: (
+    image: InfiniteImagesType,
+    index: number,
+    element: HTMLButtonElement,
+  ) => void;
   suppressClickRef: React.RefObject<boolean>;
 }) {
   const [scrollSpeed] = useState(() => random(0.5, 1));
@@ -154,13 +141,21 @@ function GridColumn({
       if (lastTime === null) lastTime = time;
       const dt = Math.min(64, time - lastTime); // ms, clamp
 
-      // ramp up auto-scroll speed over 0.5 seconds after time has passed startDelay
-      if (time > startDelay) {
+      if (loaded && !paused) {
         setAutoScrollSpeed(prev => {
           const target = realAutoScrollSpeed;
           const delta = (target / 0.5) * (dt / 1000); // linear ramp over 0.5s
           if (prev < target) {
             return Math.min(prev + delta, target);
+          }
+          return prev;
+        });
+      } else if (paused) {
+        setAutoScrollSpeed(prev => {
+          const target = 0;
+          const delta = (realAutoScrollSpeed / 0.5) * (dt / 1000); // linear ramp over 0.5s
+          if (prev > target) {
+            return Math.max(prev - delta, target);
           }
           return prev;
         });
@@ -180,7 +175,13 @@ function GridColumn({
     return () => {
       cancelAnimationFrame(rafId);
     };
-  }, [autoScrollDirection, autoScrollSpeed, realAutoScrollSpeed, startDelay]);
+  }, [
+    autoScrollDirection,
+    autoScrollSpeed,
+    loaded,
+    paused,
+    realAutoScrollSpeed,
+  ]);
 
   const offsetY = -scroll.y * scrollSpeed + autoScrollOffset;
 
@@ -208,8 +209,11 @@ function GridColumn({
         return (
           <div key={`${col}-${startIndex + i}`}>
             <GridCell
-              {...cell}
-              startDelay={startDelay}
+              pos={new Vector2(col, startIndex + i)}
+              image={cell}
+              loaded={loaded}
+              paused={paused}
+              onClick={onClick}
               suppressClickRef={suppressClickRef}
             />
           </div>
@@ -224,9 +228,13 @@ export default function InfiniteGrid({
 }: {
   images: InfiniteImagesType[];
 }) {
-  const cells = useMemo(() => mapImagesToCells(images), [images]);
   const [scroll, setScroll] = useState(new Vector2(0, 0));
-  const [startDelay] = useState(2000);
+  const [loaded, setLoaded] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [openedImage, setOpenedImage] = useState<{
+    image: InfiniteImagesType;
+    index: number;
+  } | null>(null);
 
   const suppressNextClickRef = useRef(false);
   const startPointerRef = useRef<Vector2 | null>(null);
@@ -234,8 +242,18 @@ export default function InfiniteGrid({
   const touchDraggingRef = useRef(false);
 
   useEffect(() => {
+    let loadTimeout = setTimeout(() => {
+      setLoaded(true);
+    }, 1000);
+
+    return () => {
+      clearTimeout(loadTimeout);
+    };
+  }, []);
+
+  useEffect(() => {
     function onScroll(e: WheelEvent) {
-      if (performance.now() < startDelay) return;
+      if (!loaded || paused) return;
       const scrollSpeed = new Vector2(-1, 1);
       setScroll(prev =>
         prev.add(new Vector2(e.deltaX, e.deltaY).mult(scrollSpeed)),
@@ -256,7 +274,7 @@ export default function InfiniteGrid({
         }
       }
 
-      if (e.buttons === 1 && performance.now() > startDelay) {
+      if (e.buttons === 1 && loaded && !paused) {
         const scrollSpeed = new Vector2(1, -1).div(window.devicePixelRatio);
         setScroll(prev =>
           prev.add(new Vector2(e.movementX, e.movementY).mult(scrollSpeed)),
@@ -291,7 +309,7 @@ export default function InfiniteGrid({
         const t = e.touches[0];
         const currTouchPos = new Vector2(t.clientX, t.clientY);
 
-        if (performance.now() > startDelay) {
+        if (loaded && !paused) {
           const delta = currTouchPos.sub(prevTouchPos);
           const scrollSpeed = new Vector2(1, -1);
           setScroll(prev => prev.add(delta.mult(scrollSpeed)));
@@ -340,7 +358,7 @@ export default function InfiniteGrid({
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [startDelay]);
+  }, [loaded, paused]);
 
   useEffect(() => {
     const keys: Record<string, boolean> = {};
@@ -381,6 +399,11 @@ export default function InfiniteGrid({
         keysRef.current[k] = true;
         return;
       }
+
+      if (k === ' ') {
+        // spacebar: toggle pause
+        setPaused(prev => !prev);
+      }
     }
 
     function onKeyUp(e: KeyboardEvent) {
@@ -394,6 +417,13 @@ export default function InfiniteGrid({
       if (lastTime === null) lastTime = time;
       const dt = Math.min(64, time - lastTime); // ms, clamp
       lastTime = time;
+
+      if (!loaded || paused) {
+        // reset velocity when paused
+        velocity.current = new Vector2(0, 0);
+        rafId = requestAnimationFrame(frame);
+        return;
+      }
 
       // physics params (tweak to taste)
       const accel = 3000; // px/s^2 for arrow keys
@@ -441,7 +471,7 @@ export default function InfiniteGrid({
       window.removeEventListener('keyup', onKeyUp);
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [loaded, paused]);
 
   const numCols =
     Math.ceil(
@@ -479,9 +509,76 @@ export default function InfiniteGrid({
             >
               <GridColumn
                 col={colIndex}
-                images={cells}
+                images={images}
                 scroll={scroll}
-                startDelay={startDelay}
+                loaded={loaded}
+                paused={paused}
+                onClick={(image, index, elem) => {
+                  setPaused(true);
+                  setOpenedImage({
+                    image,
+                    index,
+                  });
+
+                  const dupe = elem.cloneNode(true) as HTMLButtonElement;
+                  const rect = elem.getBoundingClientRect();
+                  dupe.style.position = 'fixed';
+                  dupe.style.left = `${rect.left}px`;
+                  dupe.style.top = `${rect.top}px`;
+                  dupe.style.margin = '0';
+                  dupe.style.zIndex = '1000';
+                  dupe.style.pointerEvents = 'none';
+                  document.body.appendChild(dupe);
+
+                  const aspectRatio = 16 / 9;
+                  const maxWidth = window.innerWidth * 0.8;
+                  const maxHeight = window.innerHeight * 0.7;
+                  let targetWidth = maxWidth;
+                  let targetHeight = maxHeight;
+
+                  if (targetWidth / targetHeight > aspectRatio) {
+                    targetWidth = targetHeight * aspectRatio;
+                  } else {
+                    targetHeight = targetWidth / aspectRatio;
+                  }
+
+                  const targetX = window.innerWidth / 2 - targetWidth / 2;
+                  const targetY = window.innerHeight / 2 - targetHeight / 2;
+
+                  const scaleFactor = targetWidth / rect.width;
+
+                  console.log('Animating to', {
+                    targetX,
+                    targetY,
+                    scaleFactor,
+                    targetWidth,
+                    targetHeight,
+                  });
+
+                  dupe.animate(
+                    [
+                      {
+                        transform: 'translate(0, 0) scale(1)',
+                        left: `${rect.left}px`,
+                        top: `${rect.top}px`,
+                      },
+                      {
+                        left: `50%`,
+                        top: `50%`,
+                        transform: `translate(-50%, -50%) scale(${scaleFactor})`,
+                      },
+                    ],
+                    {
+                      duration: 600,
+                      easing: 'ease-in-out',
+                      fill: 'forwards',
+                    },
+                  );
+
+                  setTimeout(() => {
+                    document.body.removeChild(dupe);
+                  }, 600);
+                }}
                 suppressClickRef={suppressNextClickRef}
               />
             </div>
@@ -534,6 +631,128 @@ export default function InfiniteGrid({
           />
         ))}
       </div>
+      <AnimatePresence>
+        {openedImage && (
+          <OpenedImage
+            openedImage={openedImage}
+            setOpenedImage={setOpenedImage}
+            setPaused={setPaused}
+          />
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+function OpenedImage({
+  openedImage,
+  setOpenedImage,
+  setPaused,
+}: {
+  openedImage: { image: InfiniteImagesType; index: number };
+  setOpenedImage: React.Dispatch<
+    React.SetStateAction<{ image: InfiniteImagesType; index: number } | null>
+  >;
+  setPaused: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const { image, index: initialIndex } = openedImage;
+
+  const [index, setIndex] = useState(initialIndex);
+
+  const nextImage = useCallback(() => {
+    setIndex(prev => (prev + 1) % image.images.length);
+  }, [image.images.length]);
+
+  const prevImage = useCallback(() => {
+    setIndex(prev => (prev - 1 + image.images.length) % image.images.length);
+  }, [image.images.length]);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') {
+        nextImage();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      } else if (e.key === 'Escape') {
+        setOpenedImage(null);
+        setPaused(false);
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [nextImage, prevImage, setOpenedImage, setPaused]);
+
+  return (
+    <motion.div
+      className="bg-opacity-80 fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center bg-black p-8"
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: 1,
+        transition: { duration: 0.6 },
+      }}
+      exit={{ opacity: 0 }}
+    >
+      <div
+        className="select-auto"
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
+        <button
+          className="absolute top-0 right-0 z-50 cursor-pointer p-4 text-3xl font-bold text-white select-none"
+          onClick={() => {
+            setOpenedImage(null);
+            setPaused(false);
+          }}
+        >
+          &times;
+        </button>
+        <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2 text-center text-white">
+          <a href={image.link} target="_blank" rel="noopener noreferrer">
+            <h2 className="text-2xl font-bold hover:underline">{image.name}</h2>
+          </a>
+          <p className="mt-2 max-w-lg">{image.description}</p>
+        </div>
+        <button
+          className="absolute top-1/4 bottom-1/4 left-0 z-50 cursor-pointer px-4 text-3xl font-bold text-white select-none"
+          onClick={e => {
+            e.stopPropagation();
+            prevImage();
+          }}
+        >
+          &#8249;
+        </button>
+        <button
+          className="absolute top-1/4 right-0 bottom-1/4 z-50 cursor-pointer px-4 text-3xl font-bold text-white select-none"
+          onClick={e => {
+            e.stopPropagation();
+            nextImage();
+          }}
+        >
+          &#8250;
+        </button>
+        <div className="pointer-events-none absolute top-1/2 left-1/2 flex aspect-video h-screen max-h-[70vh] w-screen max-w-[80vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+          <motion.img
+            src={image.images[index].src}
+            alt={image.name}
+            className="h-full w-full object-contain"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: 1,
+              transition: { duration: 0, delay: 0.59 },
+            }}
+            exit={{ opacity: 0 }}
+          />
+        </div>
+        <div className="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 text-center text-white">
+          <p>
+            Image {index + 1} of {image.images.length}
+          </p>
+        </div>
+      </div>
+    </motion.div>
   );
 }
