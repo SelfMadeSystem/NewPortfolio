@@ -44,12 +44,12 @@ function mapImagesToCells(images: InfiniteImagesType[]): ImageCell[] {
 // deterministic 2D -> int hash (returns unsigned 32-bit)
 function hash2Ints(x: number, y: number): number {
   // combine coordinates into one seed
-  let h = ((x | 0) * 0x9e3769b1) ^ (y | 0);
+  let h = ((x | 0) * 0x9e3869b1) ^ (y | 0);
   // mix (Wang/Jenkins style) to spread bits
   h = h ^ 61 ^ (h >>> 16);
   h = h + (h << 3);
   h = h ^ (h >>> 4);
-  h = Math.imul(h, 0x27d4eb2d);
+  h = Math.imul(h, 0x27d4eb3d);
   h = h ^ (h >>> 15);
   return h >>> 0;
 }
