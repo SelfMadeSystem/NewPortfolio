@@ -96,11 +96,34 @@ export function createDocumentBoundaryWalls() {
   // Top wall
   addStaticBox(width / 2, -thickness / 2, Infinity, thickness);
   // Bottom wall
-  addStaticBox(width / 2, height + thickness / 2, Infinity, thickness);
+  const bottom = addStaticBox(
+    width / 2,
+    height + thickness / 2,
+    Infinity,
+    thickness,
+  );
   // Left wall
   addStaticBox(-thickness / 2, height / 2, thickness, Infinity);
   // Right wall
-  addStaticBox(width + thickness / 2, height / 2, thickness, Infinity);
+  const right = addStaticBox(
+    width + thickness / 2,
+    height / 2,
+    thickness,
+    Infinity,
+  );
+
+  window.addEventListener('resize', () => {
+    const newWidth = document.body.scrollWidth;
+    const newHeight = document.body.scrollHeight;
+
+    // Update bottom wall
+    bottom.position = new Vector2(newWidth / 2, newHeight + thickness / 2);
+    bottom.size = new Vector2(Infinity, thickness);
+
+    // Update right wall
+    right.position = new Vector2(newWidth + thickness / 2, newHeight / 2);
+    right.size = new Vector2(thickness, Infinity);
+  });
 }
 
 function checkAABBCollision(a: AABB, b: AABB): boolean {

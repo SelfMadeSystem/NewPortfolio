@@ -1,5 +1,6 @@
+import { Vector2 } from '../../utils/vec';
 import { type StaticBody, addStaticBox, removeBody } from './game';
-import { type Dispatch, useCallback, useRef } from 'react';
+import { type Dispatch, useCallback, useEffect, useRef } from 'react';
 
 const solids: Map<HTMLElement, StaticBody> = new Map();
 
@@ -30,6 +31,24 @@ export function useSolid(): Dispatch<HTMLElement | null> {
     );
     solids.set(element, body);
     prevBodyRef.current = body;
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      solids.forEach((body, element) => {
+        const rect = element.getBoundingClientRect();
+        body.position = new Vector2(
+          rect.left + rect.width / 2 + window.scrollX,
+          rect.top + rect.height / 2 + window.scrollY,
+        );
+        body.size = new Vector2(rect.width, rect.height);
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return setSolid;
