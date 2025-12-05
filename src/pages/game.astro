@@ -1,0 +1,21 @@
+---
+import Layout from '../layout/Layout.astro';
+import { Player } from '../components/game/Player';
+import { SolidElement } from '../components/game/SolidElement';
+---
+
+<Layout>
+  <div
+    class="w-screen h-screen flex flex-row justify-start items-start overflow-x-auto overflow-y-hidden"
+  >
+    <div
+      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center"
+    >
+      <h1 class="top-4 left-4 text-white text-2xl z-10">Game Demo</h1>
+      <SolidElement className="w-32 h-32 bg-red-600" client:load>
+        Hello, I'm a solid element!
+      </SolidElement>
+    </div>
+    <Player client:load />
+  </div>
+</Layout>

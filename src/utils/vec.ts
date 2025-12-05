@@ -145,6 +145,14 @@ export class Vector2 {
     this.y = args[1] ?? args[0];
   }
 
+  static X(x: number): Vector2 {
+    return new Vector2(x, 0);
+  }
+
+  static Y(y: number): Vector2 {
+    return new Vector2(0, y);
+  }
+
   static fromAngle(angle: number, magnitude: number = 1): Vector2 {
     return new Vector2(
       Math.cos(angle) * magnitude,
