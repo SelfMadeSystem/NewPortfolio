@@ -13,11 +13,30 @@ import { useEffect, useRef, useState } from 'react';
 // Top-down ship controls
 const TURN_SPEED = 2 * Math.PI; // radians per second
 const TURN_SPEED_SLOW = Math.PI; // rad/s * speed less turning
-const ACCEL = 800; // acceleration while thrusting (px/s^2)
-const REV_ACCEL = 400; // reverse acceleration (px/s^2)
-const TRACTION = 2000; // how quickly velocity aligns with facing direction (px/s^2)
+// const ACCEL = 800; // acceleration while thrusting (px/s^2)
+// const REV_ACCEL = 400; // reverse acceleration (px/s^2)
+const BRAKE_ACCEL = 800; // braking deceleration (px/s^2)
+const TRACTION = 3000; // how quickly velocity aligns with facing direction (px/s^2)
 const DRAG = 300; // linear drag (px/s^2), slows ship when not thrusting
-const MAX_SPEED = 700; // px/s
+const MAX_SPEED = 7000; // px/s
+
+type Gear = {
+  ratio: number;
+  speed: number;
+};
+
+const BACK_GEAR: Gear = { ratio: -0.5, speed: 800 };
+
+const GEARS: Gear[] = [
+  { ratio: 0.8, speed: 1000 },
+  { ratio: 0.4, speed: 800 },
+  { ratio: 0.25, speed: 600 },
+  { ratio: 0.1, speed: 400 },
+];
+
+const MAX_RPM = 8000;
+const RPM_UP = 5500;
+const RPM_DOWN = 2000;
 
 const PLAYER_SIZE = new Vector2(50, 50);
 
@@ -51,6 +70,9 @@ export function Player() {
   });
   const angleRef = useRef<number>(0);
   const bodyRef = useRef<DynamicBody | null>(null);
+  const gearRef = useRef<number>(0);
+  const [gear, setGear] = useState<number>(0);
+  const [rpm, setRpm] = useState<number>(0);
   const [drifting, setDrifting] = useState<boolean>(false);
 
   useEffect(() => {
@@ -114,13 +136,35 @@ export function Player() {
     // Keep angle simple but bounded via vec.simplify if needed. For now, keep it as-is.
     setAngle(angleRef.current);
 
-    // Thrust
     const forward = controls.forward ? 1 : 0;
     const reverse = controls.reverse ? 1 : 0;
 
     const accelDirection = forward - reverse;
-    if (accelDirection !== 0) {
-      const thrustMag = accelDirection > 0 ? ACCEL : -REV_ACCEL;
+
+    // Set RPM and handle gear shifting
+    const direction = Vector2.fromAngle(angleRef.current);
+    const latDirection = direction.cw90();
+    const fwdSpeed = velocity.dot(direction);
+    const latSpeed = velocity.dot(latDirection);
+    const wheelRPM = (fwdSpeed / (2 * Math.PI * 0.3)) * 60; // assuming wheel radius of 0.3m
+    const currentGear =
+      accelDirection >= 0 ? GEARS[gearRef.current] : BACK_GEAR;
+    const rpm = Math.abs(wheelRPM * currentGear.ratio);
+    setRpm(Math.round(rpm));
+
+    // Upshift
+    if (rpm > RPM_UP && gearRef.current < GEARS.length - 1) {
+      gearRef.current += 1;
+    }
+    // Downshift
+    else if (rpm < RPM_DOWN && gearRef.current > 0) {
+      gearRef.current -= 1;
+    }
+    setGear(gearRef.current);
+
+    // Thrust
+    if (forward || reverse) {
+      const thrustMag = getAccel(currentGear) * (accelDirection || forward);
       const thrust = Vector2.fromAngle(
         angleRef.current,
         thrustMag * (dt / 1000),
@@ -140,25 +184,32 @@ export function Player() {
       }
     }
 
+    if (reverse && fwdSpeed > 0) {
+      // Apply braking deceleration
+      const brakeDecel = BRAKE_ACCEL * (dt / 1000);
+      const newFwdSpeed = Math.max(0, fwdSpeed - brakeDecel);
+      const speedDiff = newFwdSpeed - fwdSpeed;
+      velocity = velocity.add(direction.mult(speedDiff));
+
+      if (velocity.lenSq() < 100) {
+        velocity = new Vector2(0, 0);
+      }
+    }
+
     // Apply traction to align velocity with facing direction
-    let desiredVelocity = Vector2.fromAngle(
-      angleRef.current,
-      velocity.length(),
-    );
-    if (controls.reverse && !controls.forward) {
+    let desiredVelocity = direction.mult(velocity.length());
+    if (reverse && fwdSpeed <= 0) {
       desiredVelocity = desiredVelocity.mult(-1);
     }
-    const tractionForce = desiredVelocity
-      .sub(velocity)
-      .setLength(TRACTION * (dt / 1000))
-      .clampLen(0, velocity.length());
-    velocity = velocity.add(tractionForce);
+    const tractionForce = desiredVelocity.sub(velocity);
+    const tractionAccel = tractionForce.clampLen(0, TRACTION * (dt / 1000));
+    velocity = velocity.add(tractionAccel);
 
-    const t =
-      tractionForce.dot(velocity) /
-      (tractionForce.length() * velocity.length());
+    const newLatSpeed = velocity.dot(latDirection);
 
-    const drifting = Math.abs(t) > 0.07 && velocity.length() > 100;
+    // Determine drifting state based on lateral speed
+    const driftingThreshold = 100; // px/s
+    const drifting = Math.abs(newLatSpeed) > driftingThreshold;
     setDrifting(drifting);
 
     // Clamp max speed
@@ -188,6 +239,11 @@ export function Player() {
       top: bodyPosition.y + PLAYER_SIZE.y / 2 - window.innerHeight / 2,
       behavior: 'auto',
     });
+
+    function getAccel(gear: Gear): number {
+      const rpmFactor = 1 - clamp(rpm / MAX_RPM, 0, 1);
+      return rpmFactor * gear.speed;
+    }
   });
 
   return (
@@ -205,6 +261,12 @@ export function Player() {
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" />
       </svg>
+      <div className="absolute inset-0 flex items-start justify-center text-white">
+        {gear}
+      </div>
+      <div className="absolute inset-0 flex items-end justify-center text-white">
+        {rpm}
+      </div>
     </div>
   );
 }
