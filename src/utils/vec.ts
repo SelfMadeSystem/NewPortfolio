@@ -197,6 +197,16 @@ export class Vector2 {
     );
   }
 
+  clampLen(min: number, max: number): Vector2 {
+    const length = this.length();
+    if (length < min) {
+      return this.setLength(min);
+    } else if (length > max) {
+      return this.setLength(max);
+    }
+    return this;
+  }
+
   directionTo(other: Vector2): Vector2 {
     return other.sub(this).normalize();
   }
@@ -219,6 +229,9 @@ export class Vector2 {
 
   normalize(): Vector2 {
     const length = this.length();
+    if (isNaN(length) || length === 0) {
+      return new Vector2(0, 0);
+    }
     return new Vector2(this.x / length, this.y / length);
   }
 

@@ -25,7 +25,7 @@ interface GameWorld {
 }
 
 const gameWorld: GameWorld = {
-  gravity: new Vector2(0, 1000),
+  gravity: new Vector2(0, 0),
   bodies: [],
   staticBodies: [],
   dynamicBodies: [],
