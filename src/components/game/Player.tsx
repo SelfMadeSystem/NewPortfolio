@@ -73,6 +73,7 @@ export function Player() {
   const gearRef = useRef<number>(0);
   const [gear, setGear] = useState<number>(0);
   const [rpm, setRpm] = useState<number>(0);
+  const [speed, setSpeed] = useState<number>(0);
   const [drifting, setDrifting] = useState<boolean>(false);
 
   useEffect(() => {
@@ -233,6 +234,9 @@ export function Player() {
       ),
     );
 
+    const newFwdSpeed = body.velocity.dot(direction);
+    setSpeed(Math.round(newFwdSpeed));
+
     // Center the viewport on the player
     window.scrollTo({
       left: bodyPosition.x + PLAYER_SIZE.x / 2 - window.innerWidth / 2,
@@ -265,7 +269,7 @@ export function Player() {
         {gear}
       </div>
       <div className="absolute inset-0 flex items-end justify-center text-white">
-        {rpm}
+        {speed}
       </div>
     </div>
   );
