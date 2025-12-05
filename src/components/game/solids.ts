@@ -22,10 +22,12 @@ export function useSolid(): Dispatch<HTMLElement | null> {
       return;
     }
 
+    const scrollable = document.getElementById('scrollable')!;
+
     const rect = element.getBoundingClientRect();
     const body = addStaticBox(
-      rect.left + rect.width / 2 + window.scrollX,
-      rect.top + rect.height / 2 + window.scrollY,
+      rect.left + rect.width / 2 + scrollable.scrollLeft,
+      rect.top + rect.height / 2 + scrollable.scrollTop,
       rect.width,
       rect.height,
     );

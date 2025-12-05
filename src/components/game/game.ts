@@ -90,8 +90,9 @@ export function addDynamicBox(
 
 export function createDocumentBoundaryWalls() {
   const thickness = 100;
-  const width = document.body.scrollWidth;
-  const height = document.body.scrollHeight;
+  const scrollable = document.getElementById('scrollable')!;
+  const width = scrollable.scrollWidth;
+  const height = scrollable.scrollHeight;
 
   // Top wall
   addStaticBox(width / 2, -thickness / 2, Infinity, thickness);
@@ -113,8 +114,8 @@ export function createDocumentBoundaryWalls() {
   );
 
   window.addEventListener('resize', () => {
-    const newWidth = document.body.scrollWidth;
-    const newHeight = document.body.scrollHeight;
+    const newWidth = scrollable.scrollWidth;
+    const newHeight = scrollable.scrollHeight;
 
     // Update bottom wall
     bottom.position = new Vector2(newWidth / 2, newHeight + thickness / 2);

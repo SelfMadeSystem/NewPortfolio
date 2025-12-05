@@ -1,6 +1,7 @@
 import { useAnimationLoop } from '../../utils/hooks/useAnimationLoop';
 import { clamp } from '../../utils/mathUtils';
 import { Vector2 } from '../../utils/vec';
+import { MobileControls } from './MobileControls';
 import {
   type DynamicBody,
   addDynamicBox,
@@ -40,7 +41,7 @@ const RPM_DOWN = 2000;
 
 const PLAYER_SIZE = new Vector2(50, 50);
 
-type Controls = {
+export type Controls = {
   left: boolean; // rotate left
   right: boolean; // rotate right
   forward: boolean; // main thrust
@@ -60,7 +61,7 @@ const controlsKeyMap: { [key: string]: keyof Controls } = {
 };
 
 export function Player() {
-  const [position, setPosition] = useState<Vector2>(new Vector2(500, 0));
+  const [position, setPosition] = useState<Vector2>(new Vector2(0, 0));
   const [angle, setAngle] = useState<number>(0);
   const controlsRef = useRef<Controls>({
     left: false,
@@ -238,9 +239,16 @@ export function Player() {
     setSpeed(Math.round(newFwdSpeed));
 
     // Center the viewport on the player
-    window.scrollTo({
-      left: bodyPosition.x + PLAYER_SIZE.x / 2 - window.innerWidth / 2,
-      top: bodyPosition.y + PLAYER_SIZE.y / 2 - window.innerHeight / 2,
+    const scrollable = document.getElementById('scrollable')!;
+    const viewportWidth = scrollable.clientWidth;
+    const viewportHeight = scrollable.clientHeight;
+
+    const targetScrollX = body.position.x - viewportWidth / 2;
+    const targetScrollY = body.position.y - viewportHeight / 2;
+
+    scrollable.scrollTo({
+      left: targetScrollX,
+      top: targetScrollY,
       behavior: 'auto',
     });
 
@@ -251,26 +259,29 @@ export function Player() {
   });
 
   return (
-    <div
-      className={`absolute rounded-full bg-blue-500 ${drifting ? 'opacity-70' : ''}`}
-      style={{
-        top: `${position.y}px`,
-        left: `${position.x}px`,
-        width: `${PLAYER_SIZE.x}px`,
-        height: `${PLAYER_SIZE.y}px`,
-        transform: `rotate(${(angle * 180) / Math.PI}deg)`,
-        transformOrigin: 'center',
-      }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" />
-      </svg>
-      <div className="absolute inset-0 flex items-start justify-center text-white">
-        {gear}
+    <>
+      <MobileControls controlsRef={controlsRef} />
+      <div
+        className={`absolute rounded-full bg-blue-500 ${drifting ? 'opacity-70' : ''}`}
+        style={{
+          top: `${position.y}px`,
+          left: `${position.x}px`,
+          width: `${PLAYER_SIZE.x}px`,
+          height: `${PLAYER_SIZE.y}px`,
+          transform: `rotate(${(angle * 180) / Math.PI}deg)`,
+          transformOrigin: 'center',
+        }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z" />
+        </svg>
+        <div className="absolute inset-0 flex items-start justify-center text-white">
+          {gear}
+        </div>
+        <div className="absolute inset-0 flex items-end justify-center text-white">
+          {speed}
+        </div>
       </div>
-      <div className="absolute inset-0 flex items-end justify-center text-white">
-        {speed}
-      </div>
-    </div>
+    </>
   );
 }
