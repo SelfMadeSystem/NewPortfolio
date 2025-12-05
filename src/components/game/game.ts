@@ -100,7 +100,7 @@ export function createDocumentBoundaryWalls() {
   // Left wall
   addStaticBox(-thickness / 2, height / 2, thickness, Infinity);
   // Right wall
-  // addStaticBox(width + thickness / 2, height / 2, thickness, Infinity);
+  addStaticBox(width + thickness / 2, height / 2, thickness, Infinity);
 }
 
 function checkAABBCollision(a: AABB, b: AABB): boolean {

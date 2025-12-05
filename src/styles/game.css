@@ -1,0 +1,5 @@
+@reference "./global.css";
+
+body {
+  overflow: hidden;
+}

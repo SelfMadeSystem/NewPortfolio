@@ -2,19 +2,108 @@
 import Layout from '../layout/Layout.astro';
 import { Player } from '../components/game/Player';
 import { SolidElement } from '../components/game/SolidElement';
+import '../styles/game.css';
 ---
 
 <Layout>
   <div
-    class="w-screen h-screen flex flex-row justify-start items-start overflow-x-auto overflow-y-hidden"
+    class="w-screen h-[200vh] relative flex flex-col flex-wrap justify-start items-start"
   >
     <div
-      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center"
+      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0 0 gap-4"
     >
-      <h1 class="top-4 left-4 text-white text-2xl z-10">Game Demo</h1>
-      <SolidElement className="w-32 h-32 bg-red-600" client:load>
-        Hello, I'm a solid element!
-      </SolidElement>
+      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo1</h1>
+      <div class="flex flex-row flex-wrap gap-20">
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a slightly longer solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm an even longer solid element than the last one!
+        </SolidElement>
+      </div>
+    </div>
+    <div
+      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
+    >
+      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo2</h1>
+      <div class="flex flex-row flex-wrap gap-20">
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a slightly longer solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm an even longer solid element than the last one!
+        </SolidElement>
+      </div>
+    </div>
+    <div
+      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
+    >
+      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo3</h1>
+      <div class="flex flex-row flex-wrap gap-20">
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a slightly longer solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm an even longer solid element than the last one!
+        </SolidElement>
+      </div>
+    </div>
+    <div
+      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
+    >
+      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo4</h1>
+      <div class="flex flex-row flex-wrap gap-20">
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a slightly longer solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm an even longer solid element than the last one!
+        </SolidElement>
+      </div>
+    </div>
+    <div
+      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
+    >
+      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo5</h1>
+      <div class="flex flex-row flex-wrap gap-20">
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a slightly longer solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm an even longer solid element than the last one!
+        </SolidElement>
+      </div>
+    </div>
+    <div
+      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
+    >
+      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo6</h1>
+      <div class="flex flex-row flex-wrap gap-20">
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm a slightly longer solid element!
+        </SolidElement>
+        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
+          Hello, I'm an even longer solid element than the last one!
+        </SolidElement>
+      </div>
     </div>
     <Player client:load />
   </div>

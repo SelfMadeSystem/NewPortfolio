@@ -14,23 +14,50 @@ const MOVE_ACCEL_AIR = 8;
 const MOVE_ACCEL_GROUND = 100;
 const MOVE_DECEL_AIR = 1;
 const MOVE_DECEL_GROUND = 50;
-const MOVE_SPEED = 600;
+const MOVE_SPEED = 300;
 const JUMP_STRENGTH = 500;
 
 const PLAYER_SIZE = new Vector2(50, 50);
 
+type Controls = {
+  left: boolean;
+  right: boolean;
+  jump: boolean;
+};
+
+const controlsKeyMap: { [key: string]: keyof Controls } = {
+  ArrowLeft: 'left',
+  KeyA: 'left',
+  ArrowRight: 'right',
+  KeyD: 'right',
+  ArrowUp: 'jump',
+  KeyW: 'jump',
+  Space: 'jump',
+};
+
 export function Player() {
   const [position, setPosition] = useState<Vector2>(new Vector2(500, 0));
-  const keysPressed = useRef<Set<string>>(new Set());
+  const controlsRef = useRef<Controls>({
+    left: false,
+    right: false,
+    jump: false,
+  });
   const bodyRef = useRef<DynamicBody | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      keysPressed.current.add(e.code);
+      if (e.repeat) return;
+      const control = controlsKeyMap[e.code];
+      if (control) {
+        controlsRef.current[control] = true;
+      }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      keysPressed.current.delete(e.code);
+      const control = controlsKeyMap[e.code];
+      if (control) {
+        controlsRef.current[control] = false;
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -56,6 +83,7 @@ export function Player() {
   useAnimationLoop(dt => {
     if (!bodyRef.current) return;
 
+    const controls = controlsRef.current;
     const body = bodyRef.current;
     const velocity = body.velocity;
 
@@ -64,24 +92,14 @@ export function Player() {
 
     const accel = body.grounded ? MOVE_ACCEL_GROUND : MOVE_ACCEL_AIR;
 
-    if (
-      keysPressed.current.has('ArrowLeft') ||
-      keysPressed.current.has('KeyA')
-    ) {
+    if (controls.left) {
       fx -= accel;
     }
-    if (
-      keysPressed.current.has('ArrowRight') ||
-      keysPressed.current.has('KeyD')
-    ) {
+    if (controls.right) {
       fx += accel;
     }
-    if (
-      (keysPressed.current.has('ArrowUp') ||
-        keysPressed.current.has('KeyW') ||
-        keysPressed.current.has('Space')) &&
-      body.grounded
-    ) {
+    if (controls.jump) {
+      controls.jump = false;
       jump = 1;
     }
 
@@ -119,6 +137,13 @@ export function Player() {
         bodyPosition.y - PLAYER_SIZE.y / 2,
       ),
     );
+
+    // Center the viewport on the player
+    window.scrollTo({
+      left: bodyPosition.x + PLAYER_SIZE.x / 2 - window.innerWidth / 2,
+      top: bodyPosition.y + PLAYER_SIZE.y / 2 - window.innerHeight / 2,
+      behavior: 'auto',
+    });
   });
 
   return (
