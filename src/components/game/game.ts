@@ -177,6 +177,7 @@ function resolveAABBCollision(dynamic: DynamicBody, static_: AABB) {
 }
 
 export function stepGameWorld(timeStep: number) {
+  timeStep = Math.min(timeStep, 50); // Cap time step to avoid large jumps
   const dt = timeStep / 1000; // Convert to seconds
 
   // Apply gravity and update velocities

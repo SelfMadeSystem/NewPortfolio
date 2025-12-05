@@ -1,110 +1,47 @@
 ---
 import Layout from '../layout/Layout.astro';
 import { Player } from '../components/game/Player';
-import { SolidElement } from '../components/game/SolidElement';
+import IntroSection from '../components/game/sections/IntroSection.astro';
+import ProceduralDungeonsSection from '../components/game/sections/ProceduralDungeonsSection.astro';
+import SpaceTacticsSection from '../components/game/sections/SpaceTacticsSection.astro';
+import PuzzleEngineSection from '../components/game/sections/PuzzleEngineSection.astro';
+import PixelAdventureSection from '../components/game/sections/PixelAdventureSection.astro';
+import NarrativeQuestSection from '../components/game/sections/NarrativeQuestSection.astro';
+import MechArenaSection from '../components/game/sections/MechArenaSection.astro';
+import RhythmMasterSection from '../components/game/sections/RhythmMasterSection.astro';
+import SurvivalSandboxSection from '../components/game/sections/SurvivalSandboxSection.astro';
 import '../styles/game.css';
 ---
 
 <Layout>
   <div
-    class="w-screen h-[200vh] relative flex flex-col flex-wrap justify-start items-start"
+    class="relative flex h-[300vh] w-[300vw] flex-wrap items-start justify-start overflow-hidden bg-black"
   >
-    <div
-      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0 0 gap-4"
-    >
-      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo1</h1>
-      <div class="flex flex-row flex-wrap gap-20">
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a slightly longer solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm an even longer solid element than the last one!
-        </SolidElement>
+    <div class="pointer-events-none fixed inset-0 z-0">
+      <div
+        class="absolute top-20 left-10 h-96 w-96 animate-pulse rounded-full bg-purple-500/10 blur-3xl"
+      >
+      </div>
+      <div
+        class="absolute right-20 bottom-32 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl"
+      >
+      </div>
+      <div
+        class="absolute top-1/2 left-1/3 h-80 w-80 animate-pulse rounded-full bg-pink-500/10 blur-3xl"
+      >
       </div>
     </div>
-    <div
-      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
-    >
-      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo2</h1>
-      <div class="flex flex-row flex-wrap gap-20">
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a slightly longer solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm an even longer solid element than the last one!
-        </SolidElement>
-      </div>
-    </div>
-    <div
-      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
-    >
-      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo3</h1>
-      <div class="flex flex-row flex-wrap gap-20">
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a slightly longer solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm an even longer solid element than the last one!
-        </SolidElement>
-      </div>
-    </div>
-    <div
-      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
-    >
-      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo4</h1>
-      <div class="flex flex-row flex-wrap gap-20">
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a slightly longer solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm an even longer solid element than the last one!
-        </SolidElement>
-      </div>
-    </div>
-    <div
-      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
-    >
-      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo5</h1>
-      <div class="flex flex-row flex-wrap gap-20">
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a slightly longer solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm an even longer solid element than the last one!
-        </SolidElement>
-      </div>
-    </div>
-    <div
-      class="w-screen h-screen bg-black relative flex flex-col justify-center items-center shrink-0"
-    >
-      <h1 class="top-4 left-4 text-white text-2xl z-1">Game Demo6</h1>
-      <div class="flex flex-row flex-wrap gap-20">
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm a slightly longer solid element!
-        </SolidElement>
-        <SolidElement className="bg-gray-900 border text-white p-4" client:load>
-          Hello, I'm an even longer solid element than the last one!
-        </SolidElement>
-      </div>
-    </div>
+
+    <IntroSection />
+    <ProceduralDungeonsSection />
+    <SpaceTacticsSection />
+    <PuzzleEngineSection />
+    <PixelAdventureSection />
+    <NarrativeQuestSection />
+    <MechArenaSection />
+    <RhythmMasterSection />
+    <SurvivalSandboxSection />
+
     <Player client:load />
   </div>
 </Layout>

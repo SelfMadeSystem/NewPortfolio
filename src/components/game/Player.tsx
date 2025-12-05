@@ -14,7 +14,7 @@ const MOVE_ACCEL_AIR = 8;
 const MOVE_ACCEL_GROUND = 100;
 const MOVE_DECEL_AIR = 1;
 const MOVE_DECEL_GROUND = 50;
-const MOVE_SPEED = 300;
+const MOVE_SPEED = 1000;
 const JUMP_STRENGTH = 500;
 
 const PLAYER_SIZE = new Vector2(50, 50);

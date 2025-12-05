@@ -1,0 +1,50 @@
+---
+import GameSection from '../GameSection.astro';
+import { SolidElement } from '../SolidElement';
+---
+
+<GameSection>
+  <div class="absolute top-12 left-12 text-6xl opacity-20 pointer-events-none">
+    🎮
+  </div>
+  <div
+    class="absolute bottom-20 right-20 w-48 h-48 opacity-5 pointer-events-none"
+  >
+    <img
+      src="/assets/game/dungeon.png"
+      alt="bg"
+      class="w-full h-full object-cover blur-lg"
+    />
+  </div>
+
+  <SolidElement
+    className="bg-linear-to-br from-gray-950 to-gray-800 border-4 border-cyan-500 text-white p-12 rounded-xl max-w-2xl shadow-2xl relative"
+    client:load
+  >
+    <h1
+      class="text-7xl font-black mb-8 bg-linear-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent"
+    >
+      Game Developer
+    </h1>
+    <p class="text-lg leading-relaxed text-gray-200">
+      Crafting immersive interactive experiences with a focus on gameplay,
+      mechanics, and player engagement.
+    </p>
+  </SolidElement>
+
+  <SolidElement
+    className="absolute top-1/4 right-1/4 bg-linear-to-br from-cyan-500/20 to-purple-500/20 border-2 border-cyan-400 text-white p-6 rounded-lg w-56 shadow-lg"
+    client:load
+  >
+    <span class="text-sm font-bold">EXPLORE</span>
+    <p class="text-xs mt-2 text-gray-300">Navigate through my projects</p>
+  </SolidElement>
+
+  <SolidElement
+    className="absolute bottom-1/3 left-1/4 bg-linear-to-br from-purple-500/20 to-pink-500/20 border-2 border-purple-400 text-white p-6 rounded-lg w-56 shadow-lg"
+    client:load
+  >
+    <span class="text-sm font-bold">PLAY</span>
+    <p class="text-xs mt-2 text-gray-300">This portfolio is interactive</p>
+  </SolidElement>
+</GameSection>

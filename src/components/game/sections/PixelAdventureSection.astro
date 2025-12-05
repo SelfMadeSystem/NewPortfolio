@@ -1,0 +1,80 @@
+---
+import GameSection from '../GameSection.astro';
+import { SolidElement } from '../SolidElement';
+---
+
+<GameSection>
+  <div
+    class="absolute bottom-32 right-32 text-8xl opacity-20 pointer-events-none -rotate-12"
+  >
+    ⭐
+  </div>
+
+  <SolidElement
+    className="bg-linear-to-br from-orange-900 to-orange-700 border-4 border-orange-400 text-white rounded-2xl overflow-hidden w-96 h-96 shadow-2xl relative z-10"
+    client:load
+  >
+    <div
+      class="h-48 bg-orange-950 overflow-hidden flex items-center justify-center relative"
+    >
+      <div
+        class="absolute inset-0 bg-linear-to-b from-transparent to-orange-950"
+      >
+      </div>
+      <img
+        src="/assets/game/pixel-adventure.png"
+        alt="Pixel Adventure"
+        class="w-full h-full object-cover"
+      />
+    </div>
+    <div class="p-6">
+      <h2 class="text-2xl font-bold mb-2">Pixel Adventure</h2>
+      <p class="text-sm text-orange-100">Retro platformer action</p>
+      <div class="flex flex-wrap gap-1 mt-3">
+        <span
+          class="px-2 py-1 bg-orange-500/30 border border-orange-400 rounded-full text-xs"
+        >
+          Platformer
+        </span>
+        <span
+          class="px-2 py-1 bg-orange-500/30 border border-orange-400 rounded-full text-xs"
+        >
+          Retro
+        </span>
+      </div>
+    </div>
+  </SolidElement>
+
+  <SolidElement
+    className="absolute top-1/4 left-1/3 bg-orange-500/10 border-2 border-orange-400 text-white p-4 rounded-lg w-48 shadow-lg"
+    client:load
+  >
+    <div class="text-3xl mb-2">🎮</div>
+    <h3 class="font-bold text-sm">Hand-Drawn Art</h3>
+    <p class="text-xs text-orange-200 mt-1">Beautiful pixel sprites</p>
+  </SolidElement>
+
+  <SolidElement
+    className="absolute bottom-1/3 right-1/4 bg-orange-500/10 border-2 border-orange-400 text-white p-4 rounded-lg w-48 shadow-lg"
+    client:load
+  >
+    <div class="text-3xl mb-2">👹</div>
+    <h3 class="font-bold text-sm">Boss Battles</h3>
+    <p class="text-xs text-orange-200 mt-1">Epic confrontations</p>
+  </SolidElement>
+
+  <SolidElement
+    className="absolute top-1/2 left-1/4 bg-orange-500/10 border-2 border-orange-400 text-white p-4 rounded-lg w-48 shadow-lg"
+    client:load
+  >
+    <div class="text-3xl mb-2">🏃</div>
+    <h3 class="font-bold text-sm">Speedrun Mode</h3>
+    <p class="text-xs text-orange-200 mt-1">Race against time</p>
+  </SolidElement>
+
+  <div
+    class="absolute top-1/3 right-1/4 w-32 h-32 border-4 border-dashed border-orange-400/20 rounded-full animate-spin"
+    style="animation-duration: 6s;"
+  >
+  </div>
+</GameSection>
