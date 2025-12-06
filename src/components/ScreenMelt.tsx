@@ -1,5 +1,9 @@
-import { randomInt } from '../utils/mathUtils';
+import { clamp, random } from '../utils/mathUtils';
+import n from 'noisejs';
 import { useEffect, useRef, useState } from 'react';
+
+// the package is kinda broken
+const { Noise } = n as any as { Noise: typeof n };
 
 const displacement = 400;
 const duration = 0.3; // in s
@@ -27,8 +31,23 @@ export default function ScreenMelt() {
 
       const ctx = canvas.getContext('2d')!;
 
+      // Perlin noise setup
+      const waveAmplitude = 187;
+      const noise = new Noise(Math.random()); // Seed for randomness
+      const noiseScales = [0.05, 0.1, 0.2, 0.4];
+      const randOffset = 10;
+
       for (let i = 0; i < Math.ceil(canvas.width / pixelWidth); i++) {
-        const g = randomInt(0, 187);
+        // Use Perlin noise for smooth randomness
+        let g = waveAmplitude / 2; // Base value
+        for (let j = 0; j < noiseScales.length; j++) {
+          const scale = noiseScales[j];
+          // smaller scales have less influence
+          const influence = waveAmplitude / 2 ** (j + 1);
+          g += noise.perlin2(i * scale, 0) * influence;
+        }
+        g += random(-randOffset, randOffset); // add some random noise
+        g = clamp(0, 187, Math.floor(g));
         ctx.fillStyle = `rgb(187.5,${g},0)`;
         ctx.fillRect(i * pixelWidth, 0, pixelWidth, canvas.height);
       }
@@ -65,7 +84,8 @@ export default function ScreenMelt() {
           fill: 'forwards',
         },
       ).onfinish = () => {
-        window.location.href = '/game';
+        // window.location.href = '/game';
+        window.location.reload();
       };
     };
 
