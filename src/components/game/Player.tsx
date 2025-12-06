@@ -32,12 +32,14 @@ const GEARS: Gear[] = [
   { ratio: 0.8, speed: 1000 },
   { ratio: 0.4, speed: 800 },
   { ratio: 0.25, speed: 600 },
-  { ratio: 0.1, speed: 400 },
+  { ratio: 0.2, speed: 450 },
+  { ratio: 0.075, speed: 300 },
 ];
 
 const MAX_RPM = 8000;
 const RPM_UP = 5500;
 const RPM_DOWN = 2000;
+const GEAR_SHIFT_DELAY = 200; // ms
 
 const PLAYER_SIZE = new Vector2(50, 50);
 
@@ -72,6 +74,7 @@ export function Player() {
   const angleRef = useRef<number>(0);
   const bodyRef = useRef<DynamicBody | null>(null);
   const gearRef = useRef<number>(0);
+  const lastGearShiftTimeRef = useRef<number>(0);
   const [gear, setGear] = useState<number>(0);
   const [rpm, setRpm] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
@@ -157,10 +160,12 @@ export function Player() {
     // Upshift
     if (rpm > RPM_UP && gearRef.current < GEARS.length - 1) {
       gearRef.current += 1;
+      lastGearShiftTimeRef.current = Date.now();
     }
     // Downshift
     else if (rpm < RPM_DOWN && gearRef.current > 0) {
       gearRef.current -= 1;
+      lastGearShiftTimeRef.current = Date.now();
     }
     setGear(gearRef.current);
 
@@ -253,6 +258,9 @@ export function Player() {
     });
 
     function getAccel(gear: Gear): number {
+      if (Date.now() - lastGearShiftTimeRef.current < GEAR_SHIFT_DELAY) {
+        return 0; // No acceleration during gear shift delay
+      }
       const rpmFactor = 1 - clamp(rpm / MAX_RPM, 0, 1);
       return rpmFactor * gear.speed;
     }
