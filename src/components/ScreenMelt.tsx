@@ -84,8 +84,7 @@ export default function ScreenMelt() {
           fill: 'forwards',
         },
       ).onfinish = () => {
-        // window.location.href = '/game';
-        window.location.reload();
+        window.location.href = '/game';
       };
     };
 
