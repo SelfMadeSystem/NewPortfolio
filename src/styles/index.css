@@ -50,3 +50,7 @@ body.unloaded .load-in {
     @apply rounded-none bg-black font-mono text-white;
   }
 }
+
+.screenmelt {
+  filter: url(#f1);
+}
