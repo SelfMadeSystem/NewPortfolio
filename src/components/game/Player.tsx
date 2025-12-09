@@ -9,6 +9,7 @@ import {
   removeBody,
   stepGameWorld,
 } from './game';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
 // Top-down ship controls
@@ -16,7 +17,8 @@ const TURN_SPEED = 2 * Math.PI; // radians per second
 // const ACCEL = 800; // acceleration while thrusting (px/s^2)
 // const REV_ACCEL = 400; // reverse acceleration (px/s^2)
 const BRAKE_ACCEL = 800; // braking deceleration (px/s^2)
-const TRACTION = 3000; // how quickly velocity aligns with facing direction (px/s^2)
+const TRACTION = 2000; // how quickly velocity aligns with facing direction (px/s^2)
+const DRIFT_TRACTION = 1000; // traction when drifting (px/s^2)
 const DRAG = 300; // linear drag (px/s^2), slows ship when not thrusting
 const MAX_SPEED = 7000; // px/s
 
@@ -81,6 +83,9 @@ export function Player() {
   const [rpm, setRpm] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
   const [drifting, setDrifting] = useState<boolean>(false);
+  const [skidMarks, setSkidMarks] = useState<
+    { pos: Vector2; angle: number; time: number }[]
+  >([]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -118,7 +123,7 @@ export function Player() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useAnimationLoop(dt => {
+  useAnimationLoop((dt, t) => {
     if (!bodyRef.current) return;
 
     const controls = controlsRef.current;
@@ -165,12 +170,12 @@ export function Player() {
       // Upshift
       if (rpm > RPM_UP && gearRef.current < GEARS.length - 1) {
         gearRef.current += 1;
-        lastGearShiftTimeRef.current = Date.now();
+        lastGearShiftTimeRef.current = t;
       }
       // Downshift
       else if (rpm < RPM_DOWN && gearRef.current > 0) {
         gearRef.current -= 1;
-        lastGearShiftTimeRef.current = Date.now();
+        lastGearShiftTimeRef.current = t;
       }
     } else {
       gearRef.current = 0;
@@ -220,7 +225,10 @@ export function Player() {
     const tractionForce = desiredVelocity.sub(velocity);
     const tractionAccel = tractionForce.clampLen(
       0,
-      Math.min(velocity.length(), TRACTION * (dt / 1000)),
+      Math.min(
+        velocity.length(),
+        (driftingRef.current ? DRIFT_TRACTION : TRACTION) * (dt / 1000),
+      ),
     );
     velocity = velocity.add(tractionAccel);
 
@@ -231,6 +239,20 @@ export function Player() {
     const drifting = Math.abs(newLatSpeed) > driftingThreshold;
     setDrifting(drifting);
     driftingRef.current = drifting;
+
+    if (drifting) {
+      // Add skid marks
+      setSkidMarks(prev => [
+        ...prev,
+        {
+          pos: body.position,
+          angle: angleRef.current + Math.PI / 2,
+          time: t,
+        },
+      ]);
+    }
+    // Remove old skid marks
+    setSkidMarks(prev => prev.filter(mark => t - mark.time < 3000));
 
     // Clamp max speed
     if (velocity.length() > MAX_SPEED) {
@@ -272,7 +294,7 @@ export function Player() {
     });
 
     function getAccel(gear: Gear): number {
-      if (Date.now() - lastGearShiftTimeRef.current < GEAR_SHIFT_DELAY) {
+      if (t - lastGearShiftTimeRef.current < GEAR_SHIFT_DELAY) {
         return 0; // No acceleration during gear shift delay
       }
       if (fwdSpeed > 0 || gear === BACK_GEAR) {
@@ -287,6 +309,28 @@ export function Player() {
   return (
     <>
       <MobileControls controlsRef={controlsRef} />
+      <div className="opacity-70">
+        <AnimatePresence>
+          {skidMarks.map(mark => (
+            <motion.div
+              key={mark.time}
+              className="pointer-events-none absolute"
+              style={{
+                width: '20px',
+                height: '6px',
+                left: `${mark.pos.x - 10}px`,
+                top: `${mark.pos.y - 3}px`,
+                transform: `rotate(${(mark.angle * 180) / Math.PI}deg)`,
+                transformOrigin: 'center',
+              }}
+              exit={{ opacity: 0, transition: { duration: 1 } }}
+            >
+              <div className="absolute top-0 bottom-0 left-0 aspect-square h-full rounded-full bg-gray-800" />
+              <div className="absolute top-0 right-0 bottom-0 aspect-square h-full rounded-full bg-gray-800" />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
       <div
         className={`absolute rounded-full bg-blue-500 ${drifting ? 'opacity-70' : ''}`}
         style={{
