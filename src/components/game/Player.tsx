@@ -18,9 +18,11 @@ const TURN_SPEED = 2 * Math.PI; // radians per second
 // const REV_ACCEL = 400; // reverse acceleration (px/s^2)
 const BRAKE_ACCEL = 800; // braking deceleration (px/s^2)
 const TRACTION = 2000; // how quickly velocity aligns with facing direction (px/s^2)
-const DRIFT_TRACTION = 2500; // traction when drifting (px/s^2)
-const DRAG = 300; // linear drag (px/s^2), slows ship when not thrusting
+const DRIFT_TRACTION = 0.05; // traction when drifting (fraction of velocity per second)
+const DRAG = 80; // linear drag (px/s^2), slows ship when not thrusting
 const MAX_SPEED = 7000; // px/s
+const DRIFT_START_THRESHOLD = 150; // px/s lateral speed to start drifting
+const DRIFT_STOP_THRESHOLD = 5; // px/s lateral speed to stop drifting
 
 type Gear = {
   ratio: number;
@@ -231,7 +233,9 @@ export function Player() {
       0,
       Math.min(
         velocity.length(),
-        (driftingRef.current ? DRIFT_TRACTION : TRACTION) * DT,
+        driftingRef.current
+          ? DRIFT_TRACTION * velocity.length()
+          : TRACTION * DT,
       ),
     );
     velocity = velocity.add(tractionAccel);
@@ -239,12 +243,18 @@ export function Player() {
     const newLatSpeed = velocity.dot(latDirection);
 
     // Determine drifting state based on lateral speed
-    const driftingThreshold = 100; // px/s
-    const drifting = Math.abs(newLatSpeed) > driftingThreshold;
-    setDrifting(drifting);
-    driftingRef.current = drifting;
+    if (!driftingRef.current && Math.abs(newLatSpeed) > DRIFT_START_THRESHOLD) {
+      driftingRef.current = true;
+      setDrifting(true);
+    } else if (
+      driftingRef.current &&
+      Math.abs(newLatSpeed) < DRIFT_STOP_THRESHOLD
+    ) {
+      driftingRef.current = false;
+      setDrifting(false);
+    }
 
-    if (drifting) {
+    if (driftingRef.current) {
       // Add skid marks
       setSkidMarks(prev => [
         ...prev,
