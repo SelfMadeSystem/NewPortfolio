@@ -319,10 +319,12 @@ export function Player() {
 
     // Accumulate time and do fixed timestep ticks
     let acc = deltaT / 1000;
+    let i = 0;
     while (acc > DT) {
       doTick();
       tickRef.current += 1;
       acc -= DT;
+      if (++i > 10) break; // prevent spiral of death
     }
 
     // Center the viewport on the player
