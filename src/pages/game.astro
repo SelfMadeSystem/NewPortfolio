@@ -1,48 +1,26 @@
 ---
 import Layout from '../layout/Layout.astro';
 import { Player } from '../components/game/Player';
-import IntroSection from '../components/game/sections/IntroSection.astro';
-import ProceduralDungeonsSection from '../components/game/sections/ProceduralDungeonsSection.astro';
-import SpaceTacticsSection from '../components/game/sections/SpaceTacticsSection.astro';
-import PuzzleEngineSection from '../components/game/sections/PuzzleEngineSection.astro';
-import PixelAdventureSection from '../components/game/sections/PixelAdventureSection.astro';
-import NarrativeQuestSection from '../components/game/sections/NarrativeQuestSection.astro';
-import MechArenaSection from '../components/game/sections/MechArenaSection.astro';
-import RhythmMasterSection from '../components/game/sections/RhythmMasterSection.astro';
-import SurvivalSandboxSection from '../components/game/sections/SurvivalSandboxSection.astro';
 import '../styles/game.css';
+
+const width = 640;
+const height = 480;
+const upscale = 5;
 ---
 
 <Layout>
   <div id="scrollable">
     <div
-      class="relative flex h-[300vh] w-[300vw] min-w-[2100px] min-h-[1500px] flex-wrap items-start justify-start overflow-hidden bg-black"
+      class="relative flex flex-wrap items-start justify-start overflow-hidden bg-black"
+      style={`width: ${width * upscale}px; height: ${height * upscale}px;`}
     >
-      <div class="pointer-events-none fixed inset-0 z-0">
-        <div
-          class="absolute top-20 left-10 h-96 w-96 animate-pulse rounded-full bg-purple-500/10 blur-3xl"
-        >
-        </div>
-        <div
-          class="absolute right-20 bottom-32 h-72 w-72 animate-pulse rounded-full bg-cyan-500/10 blur-3xl"
-        >
-        </div>
-        <div
-          class="absolute top-1/2 left-1/3 h-80 w-80 animate-pulse rounded-full bg-pink-500/10 blur-3xl"
-        >
-        </div>
-      </div>
-
-      <IntroSection />
-      <ProceduralDungeonsSection />
-      <SpaceTacticsSection />
-      <PuzzleEngineSection />
-      <PixelAdventureSection />
-      <NarrativeQuestSection />
-      <MechArenaSection />
-      <RhythmMasterSection />
-      <SurvivalSandboxSection />
-
+      <img
+        src="/game/track.png"
+        alt="Game Track"
+        class="absolute top-0 left-0 w-full h-full object-cover [image-rendering:pixelated]"
+        width={width}
+        height={height}
+      />
       <Player client:load />
     </div>
   </div>

@@ -12,7 +12,7 @@ export interface StaticBody extends AABB {
 export interface DynamicBody extends AABB {
   type: 'dynamic';
   velocity: Vector2;
-  grounded: boolean;
+  hitWall: boolean;
 }
 
 export type Body = StaticBody | DynamicBody;
@@ -81,7 +81,7 @@ export function addDynamicBox(
     position: new Vector2(x, y),
     size: new Vector2(width, height),
     velocity: new Vector2(0, 0),
-    grounded: false,
+    hitWall: false,
   };
   gameWorld.bodies.push(body);
   gameWorld.dynamicBodies.push(body);
@@ -190,7 +190,6 @@ function resolveAABBCollision(dynamic: DynamicBody, static_: AABB) {
       dynamic.velocity.x,
       Math.min(0, dynamic.velocity.y),
     );
-    dynamic.grounded = true;
   } else {
     dynamic.position = dynamic.position.add(Vector2.Y(overlapBottom));
     dynamic.velocity = new Vector2(
@@ -216,11 +215,12 @@ export function stepGameWorld(timeStep: number) {
 
   // Collision detection and resolution
   for (const dynamic of gameWorld.dynamicBodies) {
-    dynamic.grounded = false;
+    dynamic.hitWall = false;
     // Check against static bodies
     for (const static_ of gameWorld.staticBodies) {
       if (checkAABBCollision(dynamic, static_)) {
         resolveAABBCollision(dynamic, static_);
+        dynamic.hitWall = true;
       }
     }
 

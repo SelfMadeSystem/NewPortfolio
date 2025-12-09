@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from 'react';
 
 // Top-down ship controls
 const TURN_SPEED = 2 * Math.PI; // radians per second
-const TURN_SPEED_SLOW = Math.PI; // rad/s * speed less turning
 // const ACCEL = 800; // acceleration while thrusting (px/s^2)
 // const REV_ACCEL = 400; // reverse acceleration (px/s^2)
 const BRAKE_ACCEL = 800; // braking deceleration (px/s^2)
@@ -33,7 +32,8 @@ const GEARS: Gear[] = [
   { ratio: 0.4, speed: 800 },
   { ratio: 0.25, speed: 600 },
   { ratio: 0.2, speed: 450 },
-  { ratio: 0.075, speed: 300 },
+  { ratio: 0.075, speed: 350 },
+  { ratio: 0.05, speed: 300 },
 ];
 
 const MAX_RPM = 8000;
@@ -57,6 +57,7 @@ const controlsKeyMap: { [key: string]: keyof Controls } = {
   KeyD: 'right',
   ArrowUp: 'forward',
   KeyW: 'forward',
+  KeyZ: 'forward',
   ArrowDown: 'reverse',
   KeyS: 'reverse',
   ShiftLeft: 'reverse',
@@ -75,6 +76,7 @@ export function Player() {
   const bodyRef = useRef<DynamicBody | null>(null);
   const gearRef = useRef<number>(0);
   const lastGearShiftTimeRef = useRef<number>(0);
+  const driftingRef = useRef<boolean>(false);
   const [gear, setGear] = useState<number>(0);
   const [rpm, setRpm] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
@@ -125,8 +127,10 @@ export function Player() {
 
     let turnSpeed = TURN_SPEED;
 
-    if (!controls.reverse) {
-      turnSpeed -= TURN_SPEED_SLOW * clamp(velocity.length() / MAX_SPEED, 0, 1);
+    if (!controls.reverse && !driftingRef.current) {
+      const maxTurnRate = TRACTION / Math.max(velocity.length(), 1); // avoid div by zero
+
+      turnSpeed = Math.min(turnSpeed, maxTurnRate);
     }
 
     // Rotation
@@ -157,15 +161,20 @@ export function Player() {
     const rpm = Math.abs(wheelRPM * currentGear.ratio);
     setRpm(Math.round(rpm));
 
-    // Upshift
-    if (rpm > RPM_UP && gearRef.current < GEARS.length - 1) {
-      gearRef.current += 1;
-      lastGearShiftTimeRef.current = Date.now();
-    }
-    // Downshift
-    else if (rpm < RPM_DOWN && gearRef.current > 0) {
-      gearRef.current -= 1;
-      lastGearShiftTimeRef.current = Date.now();
+    if (currentGear !== BACK_GEAR && fwdSpeed >= 0) {
+      // Upshift
+      if (rpm > RPM_UP && gearRef.current < GEARS.length - 1) {
+        gearRef.current += 1;
+        lastGearShiftTimeRef.current = Date.now();
+      }
+      // Downshift
+      else if (rpm < RPM_DOWN && gearRef.current > 0) {
+        gearRef.current -= 1;
+        lastGearShiftTimeRef.current = Date.now();
+      }
+    } else {
+      gearRef.current = 0;
+      lastGearShiftTimeRef.current = 0;
     }
     setGear(gearRef.current);
 
@@ -205,11 +214,14 @@ export function Player() {
 
     // Apply traction to align velocity with facing direction
     let desiredVelocity = direction.mult(velocity.length());
-    if (reverse && fwdSpeed <= 0) {
+    if (fwdSpeed < 0 || (reverse && fwdSpeed <= 0)) {
       desiredVelocity = desiredVelocity.mult(-1);
     }
     const tractionForce = desiredVelocity.sub(velocity);
-    const tractionAccel = tractionForce.clampLen(0, TRACTION * (dt / 1000));
+    const tractionAccel = tractionForce.clampLen(
+      0,
+      Math.min(velocity.length(), TRACTION * (dt / 1000)),
+    );
     velocity = velocity.add(tractionAccel);
 
     const newLatSpeed = velocity.dot(latDirection);
@@ -218,19 +230,21 @@ export function Player() {
     const driftingThreshold = 100; // px/s
     const drifting = Math.abs(newLatSpeed) > driftingThreshold;
     setDrifting(drifting);
+    driftingRef.current = drifting;
 
     // Clamp max speed
     if (velocity.length() > MAX_SPEED) {
       velocity = velocity.setLength(MAX_SPEED);
     }
 
-    if (drifting) {
-      velocity = velocity.setLength(velocity.length() * 0.99);
-    }
-
     body.velocity = velocity;
 
     stepGameWorld(dt);
+
+    if (body.hitWall) {
+      // Simple response to hitting a wall: reduce speed
+      body.velocity = body.velocity.mult(0.99);
+    }
 
     const bodyPosition = body.position;
     setPosition(
@@ -241,7 +255,7 @@ export function Player() {
     );
 
     const newFwdSpeed = body.velocity.dot(direction);
-    setSpeed(Math.round(newFwdSpeed));
+    setSpeed(newFwdSpeed);
 
     // Center the viewport on the player
     const scrollable = document.getElementById('scrollable')!;
@@ -261,8 +275,12 @@ export function Player() {
       if (Date.now() - lastGearShiftTimeRef.current < GEAR_SHIFT_DELAY) {
         return 0; // No acceleration during gear shift delay
       }
-      const rpmFactor = 1 - clamp(rpm / MAX_RPM, 0, 1);
-      return rpmFactor * gear.speed;
+      if (fwdSpeed > 0 || gear === BACK_GEAR) {
+        const rpmFactor = 1 - clamp(rpm / MAX_RPM, 0, 1);
+        return rpmFactor * gear.speed;
+      } else {
+        return gear.speed;
+      }
     }
   });
 
@@ -287,7 +305,7 @@ export function Player() {
           {gear}
         </div>
         <div className="absolute inset-0 flex items-end justify-center text-white">
-          {speed}
+          {Math.floor(speed)}
         </div>
       </div>
     </>
