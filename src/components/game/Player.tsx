@@ -10,7 +10,7 @@ import {
   stepGameWorld,
 } from './game';
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Top-down ship controls
 const TURN_SPEED = 2 * Math.PI; // radians per second
@@ -18,7 +18,7 @@ const TURN_SPEED = 2 * Math.PI; // radians per second
 // const REV_ACCEL = 400; // reverse acceleration (px/s^2)
 const BRAKE_ACCEL = 800; // braking deceleration (px/s^2)
 const TRACTION = 2000; // how quickly velocity aligns with facing direction (px/s^2)
-const DRIFT_TRACTION = 1000; // traction when drifting (px/s^2)
+const DRIFT_TRACTION = 2500; // traction when drifting (px/s^2)
 const DRAG = 300; // linear drag (px/s^2), slows ship when not thrusting
 const MAX_SPEED = 7000; // px/s
 
@@ -42,6 +42,9 @@ const MAX_RPM = 8000;
 const RPM_UP = 5500;
 const RPM_DOWN = 2000;
 const GEAR_SHIFT_DELAY = 200; // ms
+
+const TICK_RATE = 60; // ticks per second
+const DT = 1 / TICK_RATE; // s per tick
 
 const PLAYER_SIZE = new Vector2(50, 50);
 
@@ -68,6 +71,7 @@ const controlsKeyMap: { [key: string]: keyof Controls } = {
 export function Player() {
   const [position, setPosition] = useState<Vector2>(new Vector2(0, 0));
   const [angle, setAngle] = useState<number>(0);
+  const bodyDivRef = useRef<HTMLDivElement | null>(null);
   const controlsRef = useRef<Controls>({
     left: false,
     right: false,
@@ -79,12 +83,13 @@ export function Player() {
   const gearRef = useRef<number>(0);
   const lastGearShiftTimeRef = useRef<number>(0);
   const driftingRef = useRef<boolean>(false);
+  const tickRef = useRef<number>(0);
   const [gear, setGear] = useState<number>(0);
   const [rpm, setRpm] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
   const [drifting, setDrifting] = useState<boolean>(false);
   const [skidMarks, setSkidMarks] = useState<
-    { pos: Vector2; angle: number; time: number }[]
+    { id: number; pos: Vector2; angle: number; time: number }[]
   >([]);
 
   useEffect(() => {
@@ -123,7 +128,7 @@ export function Player() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useAnimationLoop((dt, t) => {
+  const doTick = useCallback(() => {
     if (!bodyRef.current) return;
 
     const controls = controlsRef.current;
@@ -138,12 +143,14 @@ export function Player() {
       turnSpeed = Math.min(turnSpeed, maxTurnRate);
     }
 
+    console.log(tickRef.current);
+
     // Rotation
     if (controls.left) {
-      angleRef.current -= turnSpeed * (dt / 1000);
+      angleRef.current -= turnSpeed * DT;
     }
     if (controls.right) {
-      angleRef.current += turnSpeed * (dt / 1000);
+      angleRef.current += turnSpeed * DT;
     }
 
     // Wrap angle
@@ -170,12 +177,12 @@ export function Player() {
       // Upshift
       if (rpm > RPM_UP && gearRef.current < GEARS.length - 1) {
         gearRef.current += 1;
-        lastGearShiftTimeRef.current = t;
+        lastGearShiftTimeRef.current = tickRef.current;
       }
       // Downshift
       else if (rpm < RPM_DOWN && gearRef.current > 0) {
         gearRef.current -= 1;
-        lastGearShiftTimeRef.current = t;
+        lastGearShiftTimeRef.current = tickRef.current;
       }
     } else {
       gearRef.current = 0;
@@ -186,16 +193,13 @@ export function Player() {
     // Thrust
     if (forward || reverse) {
       const thrustMag = getAccel(currentGear) * (accelDirection || forward);
-      const thrust = Vector2.fromAngle(
-        angleRef.current,
-        thrustMag * (dt / 1000),
-      );
+      const thrust = Vector2.fromAngle(angleRef.current, thrustMag * DT);
       velocity = velocity.add(thrust);
     } else {
       // Apply linear drag when not thrusting
       const speed = velocity.length();
       if (speed > 0) {
-        const decel = DRAG * (dt / 1000);
+        const decel = DRAG * DT;
         const newSpeed = Math.max(0, speed - decel);
         if (newSpeed === 0) {
           velocity = new Vector2(0, 0);
@@ -207,7 +211,7 @@ export function Player() {
 
     if (reverse && fwdSpeed > 0) {
       // Apply braking deceleration
-      const brakeDecel = BRAKE_ACCEL * (dt / 1000);
+      const brakeDecel = BRAKE_ACCEL * DT;
       const newFwdSpeed = Math.max(0, fwdSpeed - brakeDecel);
       const speedDiff = newFwdSpeed - fwdSpeed;
       velocity = velocity.add(direction.mult(speedDiff));
@@ -227,7 +231,7 @@ export function Player() {
       0,
       Math.min(
         velocity.length(),
-        (driftingRef.current ? DRIFT_TRACTION : TRACTION) * (dt / 1000),
+        (driftingRef.current ? DRIFT_TRACTION : TRACTION) * DT,
       ),
     );
     velocity = velocity.add(tractionAccel);
@@ -245,14 +249,15 @@ export function Player() {
       setSkidMarks(prev => [
         ...prev,
         {
+          id: tickRef.current,
           pos: body.position,
           angle: angleRef.current + Math.PI / 2,
-          time: t,
+          time: Date.now(),
         },
       ]);
     }
     // Remove old skid marks
-    setSkidMarks(prev => prev.filter(mark => t - mark.time < 3000));
+    setSkidMarks(prev => prev.filter(mark => Date.now() - mark.time < 3000));
 
     // Clamp max speed
     if (velocity.length() > MAX_SPEED) {
@@ -261,7 +266,7 @@ export function Player() {
 
     body.velocity = velocity;
 
-    stepGameWorld(dt);
+    stepGameWorld(DT * 1000);
 
     if (body.hitWall) {
       // Simple response to hitting a wall: reduce speed
@@ -279,22 +284,11 @@ export function Player() {
     const newFwdSpeed = body.velocity.dot(direction);
     setSpeed(newFwdSpeed);
 
-    // Center the viewport on the player
-    const scrollable = document.getElementById('scrollable')!;
-    const viewportWidth = scrollable.clientWidth;
-    const viewportHeight = scrollable.clientHeight;
-
-    const targetScrollX = body.position.x - viewportWidth / 2;
-    const targetScrollY = body.position.y - viewportHeight / 2;
-
-    scrollable.scrollTo({
-      left: targetScrollX,
-      top: targetScrollY,
-      behavior: 'auto',
-    });
-
     function getAccel(gear: Gear): number {
-      if (t - lastGearShiftTimeRef.current < GEAR_SHIFT_DELAY) {
+      if (
+        (tickRef.current - lastGearShiftTimeRef.current) * TICK_RATE <
+        GEAR_SHIFT_DELAY
+      ) {
         return 0; // No acceleration during gear shift delay
       }
       if (fwdSpeed > 0 || gear === BACK_GEAR) {
@@ -304,6 +298,39 @@ export function Player() {
         return gear.speed;
       }
     }
+  }, []);
+
+  const lastT = useRef<number>(0);
+
+  useAnimationLoop((_, t) => {
+    const deltaT = t - lastT.current;
+    if (deltaT / 1000 < DT) return;
+    lastT.current = t;
+
+    // Accumulate time and do fixed timestep ticks
+    let acc = deltaT / 1000;
+    while (acc > DT) {
+      doTick();
+      tickRef.current += 1;
+      acc -= DT;
+    }
+
+    // Center the viewport on the player
+    const scrollable = document.getElementById('scrollable')!;
+    const viewportWidth = scrollable.clientWidth;
+    const viewportHeight = scrollable.clientHeight;
+
+    const targetScrollX = bodyRef.current!.position.x - viewportWidth / 2;
+    const targetScrollY = bodyRef.current!.position.y - viewportHeight / 2;
+
+    scrollable.scrollTo({
+      left: targetScrollX,
+      top: targetScrollY,
+      behavior: 'auto',
+    });
+
+    bodyDivRef.current!.style.left = `${bodyRef.current!.position.x - PLAYER_SIZE.x / 2}px`;
+    bodyDivRef.current!.style.top = `${bodyRef.current!.position.y - PLAYER_SIZE.y / 2}px`;
   });
 
   return (
@@ -313,7 +340,7 @@ export function Player() {
         <AnimatePresence>
           {skidMarks.map(mark => (
             <motion.div
-              key={mark.time}
+              key={mark.id}
               className="pointer-events-none absolute"
               style={{
                 width: '20px',
@@ -332,6 +359,7 @@ export function Player() {
         </AnimatePresence>
       </div>
       <div
+        ref={bodyDivRef}
         className={`absolute rounded-full bg-blue-500 ${drifting ? 'opacity-70' : ''}`}
         style={{
           top: `${position.y}px`,
