@@ -5,6 +5,7 @@ import { MobileControls } from './MobileControls';
 import {
   type DynamicBody,
   addDynamicBox,
+  addSolids,
   createDocumentBoundaryWalls,
   removeBody,
   stepGameWorld,
@@ -20,6 +21,7 @@ const BRAKE_ACCEL = 800; // braking deceleration (px/s^2)
 const TRACTION = 2000; // how quickly velocity aligns with facing direction (px/s^2)
 const DRIFT_TRACTION = 0.05; // traction when drifting (fraction of velocity per second)
 const DRAG = 80; // linear drag (px/s^2), slows ship when not thrusting
+const OFFTRACK_FRICTION = 1; // additional friction when off track (fraction of velocity per second)
 const MAX_SPEED = 7000; // px/s
 const DRIFT_START_THRESHOLD = 150; // px/s lateral speed to start drifting
 const DRIFT_STOP_THRESHOLD = 5; // px/s lateral speed to stop drifting
@@ -71,7 +73,7 @@ const controlsKeyMap: { [key: string]: keyof Controls } = {
 };
 
 export function Player() {
-  const [position, setPosition] = useState<Vector2>(new Vector2(0, 0));
+  const [position, setPosition] = useState<Vector2>(new Vector2(1500, 500));
   const [angle, setAngle] = useState<number>(0);
   const bodyDivRef = useRef<HTMLDivElement | null>(null);
   const controlsRef = useRef<Controls>({
@@ -93,6 +95,7 @@ export function Player() {
   const [skidMarks, setSkidMarks] = useState<
     { id: number; pos: Vector2; angle: number; time: number }[]
   >([]);
+  const [onTrack, setOnTrack] = useState<boolean>(true);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -121,6 +124,7 @@ export function Player() {
     );
 
     createDocumentBoundaryWalls();
+    addSolids();
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
@@ -144,8 +148,6 @@ export function Player() {
 
       turnSpeed = Math.min(turnSpeed, maxTurnRate);
     }
-
-    console.log(tickRef.current);
 
     // Rotation
     if (controls.left) {
@@ -192,6 +194,14 @@ export function Player() {
     }
     setGear(gearRef.current);
 
+    function isOnTrack(pos: Vector2): boolean {
+      const trackElement = document.getElementById(
+        'track-path',
+      ) as unknown as SVGPathElement;
+      if (!trackElement) return false;
+      return trackElement.isPointInFill(new DOMPoint(pos.x, pos.y));
+    }
+
     // Thrust
     if (forward || reverse) {
       const thrustMag = getAccel(currentGear) * (accelDirection || forward);
@@ -203,6 +213,23 @@ export function Player() {
       if (speed > 0) {
         const decel = DRAG * DT;
         const newSpeed = Math.max(0, speed - decel);
+        if (newSpeed === 0) {
+          velocity = new Vector2(0, 0);
+        } else {
+          velocity = velocity.setLength(newSpeed);
+        }
+      }
+    }
+
+    const onTrack = isOnTrack(body.position);
+    setOnTrack(onTrack);
+
+    if (!onTrack) {
+      // Apply increased drag when off track
+      const speed = velocity.length();
+      if (speed > 0) {
+        const offTrackDecel = OFFTRACK_FRICTION * speed * DT;
+        const newSpeed = Math.max(0, speed - offTrackDecel);
         if (newSpeed === 0) {
           velocity = new Vector2(0, 0);
         } else {
@@ -255,16 +282,13 @@ export function Player() {
     }
 
     if (driftingRef.current) {
-      // Add skid marks
-      setSkidMarks(prev => [
-        ...prev,
-        {
-          id: tickRef.current,
-          pos: body.position,
-          angle: angleRef.current + Math.PI / 2,
-          time: Date.now(),
-        },
-      ]);
+      const skidMark = {
+        id: tickRef.current,
+        pos: body.position,
+        angle: angleRef.current + Math.PI / 2,
+        time: Date.now(),
+      };
+      setSkidMarks(prev => [...prev, skidMark]);
     }
     // Remove old skid marks
     setSkidMarks(prev => prev.filter(mark => Date.now() - mark.time < 3000));
@@ -312,38 +336,43 @@ export function Player() {
 
   const lastT = useRef<number>(0);
 
-  useAnimationLoop((_, t) => {
-    const deltaT = t - lastT.current;
-    if (deltaT / 1000 < DT) return;
-    lastT.current = t;
+  useAnimationLoop(
+    useCallback(
+      (_, t) => {
+        const deltaT = t - lastT.current;
+        if (deltaT / 1000 < DT) return;
+        lastT.current = t;
 
-    // Accumulate time and do fixed timestep ticks
-    let acc = deltaT / 1000;
-    let i = 0;
-    while (acc > DT) {
-      doTick();
-      tickRef.current += 1;
-      acc -= DT;
-      if (++i > 10) break; // prevent spiral of death
-    }
+        // Accumulate time and do fixed timestep ticks
+        let acc = deltaT / 1000;
+        let i = 0;
+        while (acc > DT) {
+          tickRef.current += 1;
+          doTick();
+          acc -= DT;
+          if (++i > 10) break; // prevent spiral of death
+        }
 
-    // Center the viewport on the player
-    const scrollable = document.getElementById('scrollable')!;
-    const viewportWidth = scrollable.clientWidth;
-    const viewportHeight = scrollable.clientHeight;
+        // Center the viewport on the player
+        const scrollable = document.getElementById('scrollable')!;
+        const viewportWidth = scrollable.clientWidth;
+        const viewportHeight = scrollable.clientHeight;
 
-    const targetScrollX = bodyRef.current!.position.x - viewportWidth / 2;
-    const targetScrollY = bodyRef.current!.position.y - viewportHeight / 2;
+        const targetScrollX = bodyRef.current!.position.x - viewportWidth / 2;
+        const targetScrollY = bodyRef.current!.position.y - viewportHeight / 2;
 
-    scrollable.scrollTo({
-      left: targetScrollX,
-      top: targetScrollY,
-      behavior: 'auto',
-    });
+        scrollable.scrollTo({
+          left: targetScrollX,
+          top: targetScrollY,
+          behavior: 'auto',
+        });
 
-    bodyDivRef.current!.style.left = `${bodyRef.current!.position.x - PLAYER_SIZE.x / 2}px`;
-    bodyDivRef.current!.style.top = `${bodyRef.current!.position.y - PLAYER_SIZE.y / 2}px`;
-  });
+        bodyDivRef.current!.style.left = `${bodyRef.current!.position.x - PLAYER_SIZE.x / 2}px`;
+        bodyDivRef.current!.style.top = `${bodyRef.current!.position.y - PLAYER_SIZE.y / 2}px`;
+      },
+      [doTick],
+    ),
+  );
 
   return (
     <>
@@ -364,15 +393,15 @@ export function Player() {
               }}
               exit={{ opacity: 0, transition: { duration: 1 } }}
             >
-              <div className="absolute top-0 bottom-0 left-0 aspect-square h-full rounded-full bg-gray-800" />
-              <div className="absolute top-0 right-0 bottom-0 aspect-square h-full rounded-full bg-gray-800" />
+              <div className="absolute top-0 bottom-0 left-0 aspect-square h-full rounded-full bg-gray-500" />
+              <div className="absolute top-0 right-0 bottom-0 aspect-square h-full rounded-full bg-gray-500" />
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
       <div
         ref={bodyDivRef}
-        className={`absolute rounded-full bg-blue-500 ${drifting ? 'opacity-70' : ''}`}
+        className={`absolute rounded-full ${onTrack ? 'bg-blue-500' : 'bg-red-500'} ${drifting ? 'opacity-70' : ''}`}
         style={{
           top: `${position.y}px`,
           left: `${position.x}px`,

@@ -127,6 +127,20 @@ export function createDocumentBoundaryWalls() {
   });
 }
 
+export function addSolids() {
+  const solidsG = document.getElementById('solids') as unknown as SVGGElement;
+  if (!solidsG) return;
+  const rects = solidsG.getElementsByTagName('rect');
+  for (let i = 0; i < rects.length; i++) {
+    const rect = rects[i];
+    const x = parseFloat(rect.getAttribute('x') || '0');
+    const y = parseFloat(rect.getAttribute('y') || '0');
+    const width = parseFloat(rect.getAttribute('width') || '0');
+    const height = parseFloat(rect.getAttribute('height') || '0');
+    addStaticBox(x + width / 2, y + height / 2, width, height);
+  }
+}
+
 function checkAABBCollision(a: AABB, b: AABB): boolean {
   const aLeft = a.position.x - a.size.x / 2;
   const aRight = a.position.x + a.size.x / 2;

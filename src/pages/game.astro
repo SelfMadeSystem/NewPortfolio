@@ -2,10 +2,12 @@
 import Layout from '../layout/Layout.astro';
 import { Player } from '../components/game/Player';
 import '../styles/game.css';
+import Map from '../components/game/Map.astro';
+import StarsCanvas from '../components/StarsCanvas';
 
-const width = 640;
-const height = 480;
-const upscale = 5;
+const width = 6400;
+const height = 4800;
+const upscale = 1;
 ---
 
 <Layout>
@@ -14,13 +16,10 @@ const upscale = 5;
       class="relative flex flex-wrap items-start justify-start overflow-hidden bg-black"
       style={`width: ${width * upscale}px; height: ${height * upscale}px;`}
     >
-      <img
-        src="/game/track.png"
-        alt="Game Track"
-        class="absolute top-0 left-0 w-full h-full object-cover [image-rendering:pixelated]"
-        width={width}
-        height={height}
-      />
+      <div class="fixed w-screen h-screen">
+        <StarsCanvas client:load />
+      </div>
+      <Map />
       <Player client:load />
     </div>
   </div>
