@@ -72,6 +72,17 @@ const controlsKeyMap: { [key: string]: keyof Controls } = {
   ShiftLeft: 'reverse',
 };
 
+type CheckpointInfo = {
+  type: 'checkpoint' | 'lap';
+  tick: number;
+  lapTick: number;
+  lapTickDiff?: number;
+  remaining: number;
+  speed: number;
+  speedDiff?: number;
+  timeoutId: number;
+};
+
 export function Player() {
   const [position, setPosition] = useState<Vector2>(new Vector2(1500, 500));
   const [angle, setAngle] = useState<number>(0);
@@ -87,7 +98,11 @@ export function Player() {
   const gearRef = useRef<number>(0);
   const lastGearShiftTimeRef = useRef<number>(0);
   const driftingRef = useRef<boolean>(false);
+  const startTickRef = useRef<number>(-1);
   const tickRef = useRef<number>(0);
+  const allCheckpointsRef = useRef<Set<SVGGeometryElement>>(new Set());
+  const remainingCheckpointsRef = useRef<Set<SVGGeometryElement>>(new Set());
+  const startCheckpointRef = useRef<SVGGeometryElement | null>(null);
   const [gear, setGear] = useState<number>(0);
   const [rpm, setRpm] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
@@ -96,6 +111,20 @@ export function Player() {
     { id: number; pos: Vector2; angle: number; time: number }[]
   >([]);
   const [onTrack, setOnTrack] = useState<boolean>(true);
+  const [passedCheckpointInfo, setPassedCheckpointInfo] =
+    useState<CheckpointInfo | null>(null);
+  const prevCpInfosRef = useRef<CheckpointInfo[][]>([
+    [
+      {
+        type: 'lap',
+        tick: 0,
+        lapTick: 0,
+        remaining: 0,
+        speed: 0,
+        timeoutId: 0,
+      },
+    ],
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -126,6 +155,20 @@ export function Player() {
     createDocumentBoundaryWalls();
     addSolids();
 
+    const cpGroup = document.getElementById('checkpoints');
+    if (cpGroup) {
+      const cps = Array.from(cpGroup.children) as SVGGeometryElement[];
+      cps.forEach(cp => allCheckpointsRef.current.add(cp));
+      remainingCheckpointsRef.current = new Set(allCheckpointsRef.current);
+    }
+
+    const startCp = document.getElementById('start');
+    if (startCp) {
+      startCheckpointRef.current = startCp as unknown as SVGGeometryElement;
+      allCheckpointsRef.current.delete(startCheckpointRef.current);
+      remainingCheckpointsRef.current.delete(startCheckpointRef.current);
+    }
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
@@ -138,6 +181,18 @@ export function Player() {
     if (!bodyRef.current) return;
 
     const controls = controlsRef.current;
+
+    if (startTickRef.current === -1) {
+      if (
+        controls.forward ||
+        controls.reverse ||
+        controls.left ||
+        controls.right
+      ) {
+        startTickRef.current = tickRef.current;
+      }
+    }
+
     const body = bodyRef.current;
     let velocity = body.velocity;
 
@@ -328,6 +383,67 @@ export function Player() {
     const newFwdSpeed = body.velocity.dot(direction);
     setSpeed(newFwdSpeed);
 
+    // Handle checkpoints
+    function setCheckpointInfo(type: 'checkpoint' | 'lap' = 'checkpoint') {
+      const prevCps = prevCpInfosRef.current.at(-2);
+      const currentCps = prevCpInfosRef.current.at(-1)!;
+      const thisLap = currentCps[0];
+      const tick = tickRef.current - startTickRef.current;
+
+      const cpInfo: CheckpointInfo = {
+        type,
+        tick,
+        lapTick: tick - thisLap.tick,
+        remaining: remainingCheckpointsRef.current.size,
+        speed: newFwdSpeed,
+        timeoutId: window.setTimeout(() => {
+          setPassedCheckpointInfo(null);
+        }, 3000),
+      };
+
+      if (prevCps) {
+        const lastCpInfo =
+          type === 'checkpoint' ? prevCps[currentCps.length] : thisLap;
+        cpInfo.lapTickDiff = cpInfo.lapTick - lastCpInfo.lapTick;
+        cpInfo.speedDiff = cpInfo.speed - lastCpInfo.speed;
+      }
+
+      setPassedCheckpointInfo(prev => {
+        if (prev && prev.timeoutId) {
+          clearTimeout(prev.timeoutId);
+        }
+        return cpInfo;
+      });
+
+      if (type === 'checkpoint') {
+        currentCps.push(cpInfo);
+      } else {
+        prevCpInfosRef.current.push([cpInfo]);
+      }
+    }
+
+    const domPos = new DOMPoint(body.position.x, body.position.y);
+    for (const checkpoint of [...remainingCheckpointsRef.current]) {
+      if (checkpoint.isPointInFill(domPos)) {
+        remainingCheckpointsRef.current.delete(checkpoint);
+        console.log('Checkpoint passed!');
+        setCheckpointInfo();
+        break;
+      }
+    }
+
+    if (
+      remainingCheckpointsRef.current.size === 0 &&
+      startCheckpointRef.current
+    ) {
+      if (startCheckpointRef.current.isPointInFill(domPos)) {
+        // Lap complete
+        remainingCheckpointsRef.current = new Set(allCheckpointsRef.current);
+        console.log('Lap complete!');
+        setCheckpointInfo('lap');
+      }
+    }
+
     function getAccel(gear: Gear): number {
       if (
         (tickRef.current - lastGearShiftTimeRef.current) * TICK_RATE <
@@ -409,6 +525,33 @@ export function Player() {
           ))}
         </AnimatePresence>
       </div>
+      {passedCheckpointInfo && (
+        <div className="bg-opacity-50 fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-md bg-black px-4 py-2 text-white">
+          <div>
+            {passedCheckpointInfo.type === 'lap'
+              ? 'Lap Complete!'
+              : 'Checkpoint Passed!'}
+          </div>
+          <div>
+            Time: {(passedCheckpointInfo.tick / TICK_RATE).toFixed(2)}s{' '}
+            {passedCheckpointInfo.lapTickDiff !== undefined &&
+              `(${passedCheckpointInfo.lapTickDiff >= 0 ? '+' : ''}${(
+                passedCheckpointInfo.lapTickDiff / TICK_RATE
+              ).toFixed(2)}s)`}
+          </div>
+          <div>
+            Lap Time: {(passedCheckpointInfo.lapTick / TICK_RATE).toFixed(2)}s
+          </div>
+          <div>Remaining: {passedCheckpointInfo.remaining}</div>
+          <div>
+            Speed: {Math.floor(passedCheckpointInfo.speed)}{' '}
+            {passedCheckpointInfo.speedDiff !== undefined &&
+              `(${passedCheckpointInfo.speedDiff >= 0 ? '+' : ''}${Math.floor(
+                passedCheckpointInfo.speedDiff,
+              )})`}
+          </div>
+        </div>
+      )}
       <div
         ref={bodyDivRef}
         className={`absolute rounded-full ${onTrack ? 'bg-blue-500' : 'bg-red-500'} ${drifting ? 'opacity-70' : ''}`}
