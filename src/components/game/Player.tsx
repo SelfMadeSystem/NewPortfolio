@@ -307,13 +307,23 @@ export function Player() {
       body.velocity = body.velocity.mult(0.99);
     }
 
-    const bodyPosition = body.position;
     setPosition(
       new Vector2(
-        bodyPosition.x - PLAYER_SIZE.x / 2,
-        bodyPosition.y - PLAYER_SIZE.y / 2,
+        body.position.x - body.size.x / 2,
+        body.position.y - body.size.y / 2,
       ),
     );
+
+    const scrollable = document.getElementById('scrollable');
+    const playerIndicator = document.getElementById('player-indicator');
+    const gameMinimap = document.getElementById('game-minimap');
+
+    if (scrollable && playerIndicator && gameMinimap) {
+      const minimapRect = gameMinimap.getBoundingClientRect();
+      const scale = minimapRect.width / scrollable.scrollWidth;
+      playerIndicator.style.left = `${body.position.x * scale}px`;
+      playerIndicator.style.top = `${body.position.y * scale}px`;
+    }
 
     const newFwdSpeed = body.velocity.dot(direction);
     setSpeed(newFwdSpeed);
