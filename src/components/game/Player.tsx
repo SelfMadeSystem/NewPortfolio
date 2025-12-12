@@ -1,6 +1,10 @@
 import { useAnimationLoop } from '../../utils/hooks/useAnimationLoop';
 import { clamp } from '../../utils/mathUtils';
 import { Vector2 } from '../../utils/vec';
+import {
+  type CheckpointInfo,
+  CheckpointInfoOverlay,
+} from './CheckpointInfoOverlay';
 import { MobileControls } from './MobileControls';
 import { type SkidMark, SkidMarks } from './SkidMarks';
 import {
@@ -52,17 +56,6 @@ const TICK_RATE = 60; // ticks per second
 const DT = 1 / TICK_RATE; // s per tick
 
 const PLAYER_SIZE = new Vector2(50, 50);
-
-type CheckpointInfo = {
-  type: 'checkpoint' | 'lap';
-  tick: number;
-  lapTick: number;
-  lapTickDiff?: number;
-  remaining: number;
-  speed: number;
-  speedDiff?: number;
-  timeoutId: number;
-};
 
 export function Player() {
   const [position, setPosition] = useState<Vector2>(new Vector2(1500, 500));
@@ -460,31 +453,10 @@ export function Player() {
       <MobileControls controlsRef={controlsRef} />
       <SkidMarks skidMarks={skidMarks} />
       {passedCheckpointInfo && (
-        <div className="bg-opacity-50 fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-md bg-black px-4 py-2 text-white">
-          <div>
-            {passedCheckpointInfo.type === 'lap'
-              ? 'Lap Complete!'
-              : 'Checkpoint Passed!'}
-          </div>
-          <div>
-            Time: {(passedCheckpointInfo.tick / TICK_RATE).toFixed(2)}s{' '}
-            {passedCheckpointInfo.lapTickDiff !== undefined &&
-              `(${passedCheckpointInfo.lapTickDiff >= 0 ? '+' : ''}${(
-                passedCheckpointInfo.lapTickDiff / TICK_RATE
-              ).toFixed(2)}s)`}
-          </div>
-          <div>
-            Lap Time: {(passedCheckpointInfo.lapTick / TICK_RATE).toFixed(2)}s
-          </div>
-          <div>Remaining: {passedCheckpointInfo.remaining}</div>
-          <div>
-            Speed: {Math.floor(passedCheckpointInfo.speed)}{' '}
-            {passedCheckpointInfo.speedDiff !== undefined &&
-              `(${passedCheckpointInfo.speedDiff >= 0 ? '+' : ''}${Math.floor(
-                passedCheckpointInfo.speedDiff,
-              )})`}
-          </div>
-        </div>
+        <CheckpointInfoOverlay
+          info={passedCheckpointInfo}
+          tickRate={TICK_RATE}
+        />
       )}
       <div
         ref={bodyDivRef}
