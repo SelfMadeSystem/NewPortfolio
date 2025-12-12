@@ -1,4 +1,4 @@
-import type { Controls } from './Player';
+import type { Controls } from './usePlayerControls';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 function isTouchDevice() {

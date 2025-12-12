@@ -2,6 +2,7 @@ import { useAnimationLoop } from '../../utils/hooks/useAnimationLoop';
 import { clamp } from '../../utils/mathUtils';
 import { Vector2 } from '../../utils/vec';
 import { MobileControls } from './MobileControls';
+import { type SkidMark, SkidMarks } from './SkidMarks';
 import {
   type DynamicBody,
   addDynamicBox,
@@ -10,7 +11,7 @@ import {
   removeBody,
   stepGameWorld,
 } from './game';
-import { AnimatePresence, motion } from 'motion/react';
+import { usePlayerControls } from './usePlayerControls';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Top-down ship controls
@@ -52,26 +53,6 @@ const DT = 1 / TICK_RATE; // s per tick
 
 const PLAYER_SIZE = new Vector2(50, 50);
 
-export type Controls = {
-  left: boolean; // rotate left
-  right: boolean; // rotate right
-  forward: boolean; // main thrust
-  reverse: boolean; // reverse thrust / brake
-};
-
-const controlsKeyMap: { [key: string]: keyof Controls } = {
-  ArrowLeft: 'left',
-  KeyA: 'left',
-  ArrowRight: 'right',
-  KeyD: 'right',
-  ArrowUp: 'forward',
-  KeyW: 'forward',
-  KeyZ: 'forward',
-  ArrowDown: 'reverse',
-  KeyS: 'reverse',
-  ShiftLeft: 'reverse',
-};
-
 type CheckpointInfo = {
   type: 'checkpoint' | 'lap';
   tick: number;
@@ -87,12 +68,7 @@ export function Player() {
   const [position, setPosition] = useState<Vector2>(new Vector2(1500, 500));
   const [angle, setAngle] = useState<number>(0);
   const bodyDivRef = useRef<HTMLDivElement | null>(null);
-  const controlsRef = useRef<Controls>({
-    left: false,
-    right: false,
-    forward: false,
-    reverse: false,
-  });
+  const controlsRef = usePlayerControls();
   const angleRef = useRef<number>(0);
   const bodyRef = useRef<DynamicBody | null>(null);
   const gearRef = useRef<number>(0);
@@ -107,9 +83,7 @@ export function Player() {
   const [rpm, setRpm] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
   const [drifting, setDrifting] = useState<boolean>(false);
-  const [skidMarks, setSkidMarks] = useState<
-    { id: number; pos: Vector2; angle: number; time: number }[]
-  >([]);
+  const [skidMarks, setSkidMarks] = useState<SkidMark[]>([]);
   const [onTrack, setOnTrack] = useState<boolean>(true);
   const [passedCheckpointInfo, setPassedCheckpointInfo] =
     useState<CheckpointInfo | null>(null);
@@ -127,24 +101,6 @@ export function Player() {
   ]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.repeat) return;
-      const control = controlsKeyMap[e.code];
-      if (control) {
-        controlsRef.current[control] = true;
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      const control = controlsKeyMap[e.code];
-      if (control) {
-        controlsRef.current[control] = false;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
     bodyRef.current = addDynamicBox(
       position.x + PLAYER_SIZE.x / 2,
       position.y + PLAYER_SIZE.y / 2,
@@ -170,8 +126,6 @@ export function Player() {
     }
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
       removeBody(bodyRef.current!);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -458,6 +412,7 @@ export function Player() {
         return gear.speed;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const lastT = useRef<number>(0);
@@ -503,28 +458,7 @@ export function Player() {
   return (
     <>
       <MobileControls controlsRef={controlsRef} />
-      <div className="opacity-70">
-        <AnimatePresence>
-          {skidMarks.map(mark => (
-            <motion.div
-              key={mark.id}
-              className="pointer-events-none absolute"
-              style={{
-                width: '20px',
-                height: '6px',
-                left: `${mark.pos.x - 10}px`,
-                top: `${mark.pos.y - 3}px`,
-                transform: `rotate(${(mark.angle * 180) / Math.PI}deg)`,
-                transformOrigin: 'center',
-              }}
-              exit={{ opacity: 0, transition: { duration: 1 } }}
-            >
-              <div className="absolute top-0 bottom-0 left-0 aspect-square h-full rounded-full bg-gray-500" />
-              <div className="absolute top-0 right-0 bottom-0 aspect-square h-full rounded-full bg-gray-500" />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
+      <SkidMarks skidMarks={skidMarks} />
       {passedCheckpointInfo && (
         <div className="bg-opacity-50 fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-md bg-black px-4 py-2 text-white">
           <div>
