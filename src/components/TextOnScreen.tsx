@@ -3,7 +3,7 @@ import { Vector2 } from '../utils/vec';
 import { getLines } from '../utils/wordWrap';
 import type { PropsWithChildren } from 'react';
 import type { CSSProperties } from 'react';
-import { type MutableRef, useEffect, useRef } from 'react';
+import { type RefObject, useEffect, useRef } from 'react';
 
 export type TextOnScreen = {
   lines: string[];
@@ -18,7 +18,7 @@ export type TextOnScreen = {
 };
 
 function createTextOnScreen(
-  ref: MutableRef<HTMLDivElement | null>,
+  ref: RefObject<HTMLDivElement | null>,
 ): TextOnScreen {
   const el = ref.current!;
   const lines = getLines(el as HTMLElement);

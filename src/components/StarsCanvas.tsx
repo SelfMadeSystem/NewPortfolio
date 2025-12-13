@@ -11,21 +11,21 @@ import { useEffect, useRef, useState } from 'react';
 
 const defaultOptions = {
   density: 0.5,
-  minSize: 2,
-  maxSize: 2,
+  minSize: 1,
+  maxSize: 4,
   zAmount: 1,
   scrollAmount: 1,
-  shiftSpeedX: 0.4,
-  shiftAmountX: 10,
+  shiftSpeedX: 0,
+  shiftAmountX: 0,
   shiftAmountY: 5,
   mouseShiftAmountX: -50,
   mouseShiftAmountY: -50,
-  touchShiftAmountX: -70,
-  touchShiftAmountY: -70,
+  touchShiftAmountX: 0,
+  touchShiftAmountY: 0,
   minVanishSpeed: 0.05,
   maxVanishSpeed: 0.2,
   vanishOffset: 2,
-  vanishScrollSpeed: 1,
+  vanishScrollSpeed: 0.5,
   mouseEase: 0.8,
   mobileEase: 0.5,
 };
@@ -69,7 +69,6 @@ class StarPlane {
   getDrawPoints(
     canvas: { width: number; height: number },
     time: number,
-    scroll: number,
     options: Options,
   ): Array<DrawableDot> {
     const canvasWidth = canvas.width;
@@ -93,7 +92,7 @@ class StarPlane {
               options.maxVanishSpeed,
               i / (this.points.length - 1),
             ) +
-            (options.vanishScrollSpeed * p.y) / 100 +
+            (options.vanishScrollSpeed * Math.hypot(p.y, p.x)) / 100 +
             i,
         ) *
           options.vanishOffset +
@@ -122,8 +121,8 @@ class StarPlane {
 
   physics(
     t: number,
-    scroll: number,
-    realScroll: number,
+    scrollY: number,
+    scrollX: number,
     mousePos: Vector2,
     options: Options,
     isMobile: boolean,
@@ -140,13 +139,13 @@ class StarPlane {
       const x =
         p.x +
         mousePos.x * shiftX * gz +
-        Math.cos(t * options.shiftSpeedX) * gz * options.shiftAmountX;
+        Math.cos(t * options.shiftSpeedX) * gz * options.shiftAmountX -
+        gz * scrollX * options.scrollAmount;
       const y =
         p.y +
         mousePos.y * shiftY * gz +
         t * gz * options.shiftAmountY -
-        gz * scroll * options.scrollAmount * 0.25 * this.height +
-        realScroll;
+        gz * scrollY * options.scrollAmount;
       const minSize = Math.min(options.minSize, options.maxSize);
       const maxSize = Math.max(options.minSize, options.maxSize);
       const sizeRatio = minSize / maxSize;
@@ -245,8 +244,9 @@ function StarsCanvas({ options }: { options: Options }) {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     const rect = canvas.getBoundingClientRect();
-    const scrollY = window.scrollY;
-    const percentY = scrollY / rect.height;
+    const scrollable = document.getElementById('scrollable')!;
+    const scrollY = scrollable.scrollTop;
+    const scrollX = scrollable.scrollLeft;
 
     const lerpFactor = Math.pow(
       isMobile ? options.mobileEase : options.mouseEase,
@@ -256,18 +256,13 @@ function StarsCanvas({ options }: { options: Options }) {
 
     starPlane.physics(
       t / 1000,
-      percentY,
-      -rect.top,
+      scrollY,
+      scrollX,
       mousePosRef.current.div(rect.width, rect.height),
       options,
       isMobile,
     );
-    const drawPoints = starPlane.getDrawPoints(
-      canvas,
-      t / 1000,
-      percentY,
-      options,
-    );
+    const drawPoints = starPlane.getDrawPoints(canvas, t / 1000, options);
 
     const maxSize = Math.max(options.minSize, options.maxSize);
     const x = (maxSize / canvas.width) * 2;
