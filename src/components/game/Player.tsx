@@ -14,7 +14,7 @@ import {
   createDocumentBoundaryWalls,
   removeBody,
 } from './game';
-import { GHOST_DATA } from './ghostData';
+import GHOST_DATA from './ghostData.json';
 import { usePlayerControls } from './usePlayerControls';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
