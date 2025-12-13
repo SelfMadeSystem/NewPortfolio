@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 export type CheckpointInfo = {
   type: 'checkpoint' | 'lap';
@@ -20,7 +21,7 @@ export function CheckpointInfoOverlay({
   info,
   tickRate,
 }: CheckpointInfoOverlayProps) {
-  return (
+  return createPortal(
     <div className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-md bg-black/50 px-4 py-2 text-white">
       <div>{info.type === 'lap' ? 'Lap Complete!' : 'Checkpoint Passed!'}</div>
       <div>
@@ -35,6 +36,7 @@ export function CheckpointInfoOverlay({
         {info.speedDiff !== undefined &&
           `(${info.speedDiff >= 0 ? '+' : ''}${Math.floor(info.speedDiff)})`}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
