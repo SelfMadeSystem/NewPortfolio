@@ -7,3 +7,15 @@ export function getComputedColor(color: string, element: HTMLElement): string {
   }
   return color;
 }
+
+export function parseNumOrPercent(value: string): number {
+  if (value.endsWith('%')) {
+    const percent = parseFloat(value.slice(0, -1));
+    if (isNaN(percent)) return 0;
+    return percent / 100;
+  } else {
+    const num = parseFloat(value);
+    if (isNaN(num)) return 0;
+    return num;
+  }
+}

@@ -3,6 +3,7 @@ import { useAnimationLoop } from '../utils/hooks/useAnimationLoop';
 import { useCanvas } from '../utils/hooks/useCanvas';
 import { useWindowEvent } from '../utils/hooks/useWindowEvent';
 import { ceilMultiple, clamp, lerp, mod } from '../utils/mathUtils';
+import { parseNumOrPercent } from '../utils/styleUtils';
 import { Vector2, Vector3 } from '../utils/vec';
 import { useEffect, useRef, useState } from 'react';
 
@@ -15,6 +16,7 @@ const defaultOptions = {
   maxSize: 4,
   zAmount: 0.9,
   scrollAmount: 0.2,
+  zoomAmount: 1,
   shiftSpeedX: 0,
   shiftAmountX: 0,
   shiftAmountY: 5,
@@ -69,6 +71,7 @@ class StarPlane {
   getDrawPoints(
     canvas: { width: number; height: number },
     time: number,
+    zoom: number,
     options: Options,
   ): Array<DrawableDot> {
     const canvasWidth = canvas.width;
@@ -76,14 +79,15 @@ class StarPlane {
     const result: Array<DrawableDot> = [];
 
     for (let i = 0; i < this.points.length; i++) {
-      const p = this.points[i];
-      if (
-        p.x < -5 ||
-        p.x > canvasWidth + 5 ||
-        p.y < -5 ||
-        p.y > canvasHeight + 5
-      )
+      let { x, y, z } = this.points[i];
+
+      const zoomFactor = 1 + (zoom - 1) * options.zoomAmount;
+      x = (x - canvasWidth / 2) * zoomFactor + canvasWidth / 2;
+      y = (y - canvasHeight / 2) * zoomFactor + canvasHeight / 2;
+
+      if (x < -5 || x > canvasWidth + 5 || y < -5 || y > canvasHeight + 5)
         continue;
+
       const alpha = clamp(
         Math.sin(
           time *
@@ -92,7 +96,7 @@ class StarPlane {
               options.maxVanishSpeed,
               i / (this.points.length - 1),
             ) +
-            (options.vanishScrollSpeed * Math.hypot(p.y, p.x)) / 100 +
+            (options.vanishScrollSpeed * Math.hypot(y, x)) / 100 +
             i,
         ) *
           options.vanishOffset +
@@ -106,9 +110,9 @@ class StarPlane {
       let b = 1;
 
       result.push({
-        x: p.x,
-        y: p.y,
-        z: p.z * 0.2 + 0.05,
+        x: x,
+        y: y,
+        z: z * 0.2 + 0.05,
         alpha,
         r,
         g,
@@ -123,13 +127,14 @@ class StarPlane {
     t: number,
     scrollY: number,
     scrollX: number,
+    zoom: number,
     mousePos: Vector2,
     options: Options,
     isMobile: boolean,
   ) {
     this.points = this.ogPoints.map(p => {
       let z = p.z; // [0, 1]
-      const gz = z * options.zAmount + (1 - options.zAmount); // [1 - zAmount, 1]
+      const gz = z * options.zAmount + (1 - options.zAmount);
       const shiftX = isMobile
         ? options.touchShiftAmountX
         : options.mouseShiftAmountX;
@@ -245,6 +250,7 @@ function StarsCanvas({ options }: { options: Options }) {
 
     const rect = canvas.getBoundingClientRect();
     const scrollable = document.getElementById('scrollable')!;
+    const zoom = parseNumOrPercent(scrollable.style.zoom || '100%');
     const scrollY = scrollable.scrollTop;
     const scrollX = scrollable.scrollLeft;
 
@@ -258,11 +264,12 @@ function StarsCanvas({ options }: { options: Options }) {
       t / 1000,
       scrollY,
       scrollX,
+      zoom,
       mousePosRef.current.div(rect.width, rect.height),
       options,
       isMobile,
     );
-    const drawPoints = starPlane.getDrawPoints(canvas, t / 1000, options);
+    const drawPoints = starPlane.getDrawPoints(canvas, t / 1000, zoom, options);
 
     const maxSize = Math.max(options.minSize, options.maxSize);
     const x = (maxSize / canvas.width) * 2;

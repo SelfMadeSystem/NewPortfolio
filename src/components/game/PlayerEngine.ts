@@ -52,14 +52,12 @@ export type PlayerState = {
 };
 
 export type PlayerEngineCallbacks = {
-  setAngle: (angle: number) => void;
   setGear: (g: number) => void;
   setRpm: (rpm: number) => void;
   setSpeed: (speed: number) => void;
   setDrifting: (d: boolean) => void;
   setSkidMarks: (updater: (prev: SkidMark[]) => SkidMark[]) => void;
   setOnTrack: (on: boolean) => void;
-  setPosition: (pos: Vector2) => void;
   setPassedCheckpointInfo: (
     updater:
       | ((prev: CheckpointInfo | null) => CheckpointInfo | null)
@@ -128,6 +126,10 @@ export class PlayerEngine {
     return this.tick;
   }
 
+  public getAngle(): number {
+    return this.angle;
+  }
+
   public initCheckpoints(): void {
     const cpGroup = document.getElementById('checkpoints');
     if (cpGroup) {
@@ -180,7 +182,6 @@ export class PlayerEngine {
     // 1) Rotation and turn speed
     const turnSpeed = this.computeTurnSpeed(velocity, controls);
     this.updateRotation(controls, turnSpeed);
-    this.cbs.setAngle(this.angle);
 
     // 2) Drivetrain and RPM/gearbox
     const direction = Vector2.fromAngle(this.angle);
@@ -252,15 +253,8 @@ export class PlayerEngine {
     this.drifting = state.drifting;
     this.remainingCheckpoints = new Set(state.remainingCheckpoints);
 
-    this.cbs.setAngle(this.angle);
     this.cbs.setGear(this.gear);
     this.cbs.setDrifting(this.drifting);
-    this.cbs.setPosition(
-      new Vector2(
-        this.body.position.x - this.body.size.x / 2,
-        this.body.position.y - this.body.size.y / 2,
-      ),
-    );
   }
 
   private computeTurnSpeed(velocity: Vector2, controls: Controls): number {
@@ -428,12 +422,6 @@ export class PlayerEngine {
 
   private updatePositionAndMinimap(): void {
     const body = this.body;
-    this.cbs.setPosition(
-      new Vector2(
-        body.position.x - body.size.x / 2,
-        body.position.y - body.size.y / 2,
-      ),
-    );
 
     const scrollable = document.getElementById('scrollable');
     const playerIndicator = document.getElementById('player-indicator');

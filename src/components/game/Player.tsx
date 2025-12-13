@@ -20,8 +20,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 const PLAYER_SIZE = new Vector2(50, 50);
 
 export function Player() {
-  const [position, setPosition] = useState<Vector2>(new Vector2(1500, 500));
-  const [angle, setAngle] = useState<number>(0);
   const bodyDivRef = useRef<HTMLDivElement | null>(null);
   const controlsRef = usePlayerControls();
   const bodyRef = useRef<DynamicBody | null>(null);
@@ -36,12 +34,7 @@ export function Player() {
     useState<CheckpointInfo | null>(null);
 
   useEffect(() => {
-    bodyRef.current = addDynamicBox(
-      position.x + PLAYER_SIZE.x / 2,
-      position.y + PLAYER_SIZE.y / 2,
-      PLAYER_SIZE.x,
-      PLAYER_SIZE.y,
-    );
+    bodyRef.current = addDynamicBox(0, 0, PLAYER_SIZE.x, PLAYER_SIZE.y);
 
     createDocumentBoundaryWalls();
     addSolids();
@@ -51,17 +44,15 @@ export function Player() {
       body: bodyRef.current!,
       controlsRef,
       callbacks: {
-        setAngle,
         setGear,
         setRpm,
         setSpeed,
         setDrifting,
         setSkidMarks,
         setOnTrack,
-        setPosition,
         setPassedCheckpointInfo,
       },
-      initialAngle: angle,
+      initialAngle: 0,
     });
 
     return () => {
@@ -113,8 +104,10 @@ export function Player() {
       const bodyDiv = bodyDivRef.current;
       if (!bodyDiv) return;
 
-      bodyDiv.style.left = `${body.position.x - body.size.x / 2}px`;
-      bodyDiv.style.top = `${body.position.y - body.size.y / 2}px`;
+      bodyDiv.style.left = `${body.position.x}px`;
+      bodyDiv.style.top = `${body.position.y}px`;
+
+      bodyDiv.style.rotate = `${Math.round(engine.getAngle() * (180 / Math.PI))}deg`;
     }, []),
   );
 
@@ -130,13 +123,10 @@ export function Player() {
       )}
       <div
         ref={bodyDivRef}
-        className={`absolute rounded-full ${onTrack ? 'bg-blue-500' : 'bg-red-500'} ${drifting ? 'opacity-70' : ''}`}
+        className={`absolute rounded-full ${onTrack ? 'bg-blue-500' : 'bg-red-500'} ${drifting ? 'opacity-70' : ''} -translate-1/2`}
         style={{
-          top: `${Math.round(position.y)}px`,
-          left: `${Math.round(position.x)}px`,
           width: `${PLAYER_SIZE.x}px`,
           height: `${PLAYER_SIZE.y}px`,
-          transform: `rotate(${(angle * 180) / Math.PI}deg)`,
           transformOrigin: 'center',
         }}
       >
