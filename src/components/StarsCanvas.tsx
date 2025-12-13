@@ -13,8 +13,8 @@ const defaultOptions = {
   density: 0.5,
   minSize: 1,
   maxSize: 4,
-  zAmount: 1,
-  scrollAmount: 1,
+  zAmount: 0.9,
+  scrollAmount: 0.2,
   shiftSpeedX: 0,
   shiftAmountX: 0,
   shiftAmountY: 5,
@@ -129,7 +129,7 @@ class StarPlane {
   ) {
     this.points = this.ogPoints.map(p => {
       let z = p.z; // [0, 1]
-      const gz = z * options.zAmount;
+      const gz = z * options.zAmount + (1 - options.zAmount); // [1 - zAmount, 1]
       const shiftX = isMobile
         ? options.touchShiftAmountX
         : options.mouseShiftAmountX;
