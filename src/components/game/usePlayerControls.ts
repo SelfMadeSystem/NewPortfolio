@@ -5,6 +5,7 @@ export type Controls = {
   right: boolean; // rotate right
   forward: boolean; // main thrust
   reverse: boolean; // reverse thrust / brake
+  respawn: boolean; // respawn player at last checkpoint
 };
 
 const controlsKeyMap: { [key: string]: keyof Controls } = {
@@ -18,6 +19,7 @@ const controlsKeyMap: { [key: string]: keyof Controls } = {
   ArrowDown: 'reverse',
   KeyS: 'reverse',
   ShiftLeft: 'reverse',
+  Space: 'respawn',
 };
 
 export function usePlayerControls() {
@@ -26,6 +28,7 @@ export function usePlayerControls() {
     right: false,
     forward: false,
     reverse: false,
+    respawn: false,
   });
 
   useEffect(() => {

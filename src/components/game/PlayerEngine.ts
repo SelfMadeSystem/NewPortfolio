@@ -4,6 +4,7 @@ import type { CheckpointInfo } from './CheckpointInfoOverlay';
 import type { SkidMark } from './SkidMarks';
 import type { DynamicBody } from './game';
 import { stepGameWorld } from './game';
+import type { Controls } from './usePlayerControls';
 
 // Control constants and drivetrain
 const TURN_SPEED = 2 * Math.PI; // radians per second
@@ -40,11 +41,14 @@ const GEAR_SHIFT_DELAY = 200; // ms
 export const TICK_RATE = 60; // ticks per second
 export const DT = 1 / TICK_RATE; // s per tick
 
-export type ControlsState = {
-  forward: boolean;
-  reverse: boolean;
-  left: boolean;
-  right: boolean;
+export type PlayerState = {
+  position: Vector2;
+  velocity: Vector2;
+  angle: number;
+  gear: number;
+  lastGearShiftTick: number;
+  drifting: boolean;
+  remainingCheckpoints: Set<SVGGeometryElement>;
 };
 
 export type PlayerEngineCallbacks = {
@@ -66,15 +70,18 @@ export type PlayerEngineCallbacks = {
 
 export class PlayerEngine {
   private body: DynamicBody;
-  private controlsRef: { current: ControlsState };
+  private controlsRef: { current: Controls };
   private cbs: PlayerEngineCallbacks;
 
   private angle = 0;
   private gear = 0;
-  private lastGearShiftTick = 0;
+  private lastGearShiftTick = -1000;
   private drifting = false;
   private startTicking = false;
   private tick = 0;
+  // Used for the norespawn timer.
+  private respawnTicks = 0;
+  private thisRespawnTicks = 0;
 
   private allCheckpoints: Set<SVGGeometryElement> = new Set();
   private remainingCheckpoints: Set<SVGGeometryElement> = new Set();
@@ -85,25 +92,36 @@ export class PlayerEngine {
         type: 'lap',
         tick: 0,
         lapTick: 0,
+        respawnTicks: 0,
         remaining: 0,
         speed: 0,
         timeoutId: 0,
       },
     ],
   ];
+  private playerStates: PlayerState[] = [];
 
   constructor(opts: {
     body: DynamicBody;
-    controlsRef: { current: ControlsState };
+    controlsRef: { current: Controls };
     callbacks: PlayerEngineCallbacks;
     initialAngle?: number;
   }) {
+    const playerStart = document.getElementById('player-start');
+    if (playerStart) {
+      const x = parseFloat(playerStart.getAttribute('cx') || '0');
+      const y = parseFloat(playerStart.getAttribute('cy') || '0');
+      this.body = opts.body;
+      this.body.position = new Vector2(x, y);
+    }
+
     this.body = opts.body;
     this.controlsRef = opts.controlsRef;
     this.cbs = opts.callbacks;
     if (opts.initialAngle != null) this.angle = opts.initialAngle;
 
     this.initCheckpoints();
+    this.addPlayerState();
   }
 
   public getTick(): number {
@@ -139,6 +157,18 @@ export class PlayerEngine {
         this.startTicking = true;
       } else {
         return;
+      }
+    }
+
+    if (controls.respawn) {
+      const lastCpInfo = this.prevCpInfos.at(-1)?.at(-1);
+      if (lastCpInfo) {
+        const cpTick = lastCpInfo.tick;
+        const state = this.playerStates[cpTick];
+        if (state) {
+          this.restoreState(state);
+          this.thisRespawnTicks = this.tick - cpTick;
+        }
       }
     }
 
@@ -208,9 +238,32 @@ export class PlayerEngine {
 
     // 12) Checkpoints and overlay
     this.handleCheckpoints(newFwdSpeed);
+
+    // 13) Save player state for replay
+    this.addPlayerState();
   }
 
-  private computeTurnSpeed(velocity: Vector2, controls: ControlsState): number {
+  public restoreState(state: PlayerState): void {
+    this.body.position = state.position;
+    this.body.velocity = state.velocity;
+    this.angle = state.angle;
+    this.gear = state.gear;
+    this.lastGearShiftTick = state.lastGearShiftTick;
+    this.drifting = state.drifting;
+    this.remainingCheckpoints = new Set(state.remainingCheckpoints);
+
+    this.cbs.setAngle(this.angle);
+    this.cbs.setGear(this.gear);
+    this.cbs.setDrifting(this.drifting);
+    this.cbs.setPosition(
+      new Vector2(
+        this.body.position.x - this.body.size.x / 2,
+        this.body.position.y - this.body.size.y / 2,
+      ),
+    );
+  }
+
+  private computeTurnSpeed(velocity: Vector2, controls: Controls): number {
     let turnSpeed = TURN_SPEED;
     if (!controls.reverse && !this.drifting) {
       const maxTurnRate = TRACTION / Math.max(velocity.length(), 1);
@@ -219,12 +272,12 @@ export class PlayerEngine {
     return turnSpeed;
   }
 
-  private updateRotation(controls: ControlsState, turnSpeed: number): void {
+  private updateRotation(controls: Controls, turnSpeed: number): void {
     if (controls.left) this.angle -= turnSpeed * DT;
     if (controls.right) this.angle += turnSpeed * DT;
   }
 
-  private updateTransmission(fwdSpeed: number, controls: ControlsState): Gear {
+  private updateTransmission(fwdSpeed: number, controls: Controls): Gear {
     const accelDirection =
       (controls.forward ? 1 : 0) - (controls.reverse ? 1 : 0);
 
@@ -265,7 +318,7 @@ export class PlayerEngine {
   private applyThrustAndDrag(
     velocity: Vector2,
     direction: Vector2,
-    controls: ControlsState,
+    controls: Controls,
     fwdSpeed: number,
     currentGear: Gear,
   ): Vector2 {
@@ -402,10 +455,14 @@ export class PlayerEngine {
       const thisLap = currentCps[0];
       const tick = this.tick;
 
+      this.respawnTicks += this.thisRespawnTicks;
+      this.thisRespawnTicks = 0;
+
       const cpInfo: CheckpointInfo = {
         type,
         tick,
         lapTick: tick - thisLap.tick,
+        respawnTicks: this.respawnTicks,
         remaining: this.remainingCheckpoints.size,
         speed: newFwdSpeed,
         timeoutId: window.setTimeout(() => {
@@ -449,5 +506,17 @@ export class PlayerEngine {
         setCheckpointInfo('lap');
       }
     }
+  }
+
+  private addPlayerState(): void {
+    this.playerStates.push({
+      position: this.body.position,
+      velocity: this.body.velocity,
+      angle: this.angle,
+      gear: this.gear,
+      lastGearShiftTick: this.lastGearShiftTick,
+      drifting: this.drifting,
+      remainingCheckpoints: new Set(this.remainingCheckpoints),
+    });
   }
 }

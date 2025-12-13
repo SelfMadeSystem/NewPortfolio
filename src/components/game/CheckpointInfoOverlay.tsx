@@ -1,4 +1,3 @@
-import React from 'react';
 import { createPortal } from 'react-dom';
 
 export type CheckpointInfo = {
@@ -6,6 +5,7 @@ export type CheckpointInfo = {
   tick: number;
   lapTick: number;
   lapTickDiff?: number;
+  respawnTicks: number;
   remaining: number;
   speed: number;
   speedDiff?: number;
@@ -29,6 +29,12 @@ export function CheckpointInfoOverlay({
         {info.lapTickDiff !== undefined &&
           `(${info.lapTickDiff >= 0 ? '+' : ''}${(info.lapTickDiff / tickRate).toFixed(2)}s)`}
       </div>
+      {info.respawnTicks > 0 && (
+        <div>
+          No Respawn Time:{' '}
+          {((info.tick - info.respawnTicks) / tickRate).toFixed(2)}s
+        </div>
+      )}
       <div>Lap Time: {(info.lapTick / tickRate).toFixed(2)}s</div>
       <div>Remaining: {info.remaining}</div>
       <div>
