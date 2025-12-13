@@ -1,11 +1,11 @@
-import { useAnimationLoop } from '../../utils/hooks/useAnimationLoop';
-import { Vector2 } from '../../utils/vec';
+import { useTickRate } from '../../utils/hooks/useTickRate';
 import {
   type CheckpointInfo,
   CheckpointInfoOverlay,
 } from './CheckpointInfoOverlay';
+import { Ghost } from './Ghost';
 import { MobileControls } from './MobileControls';
-import { DT, PlayerEngine, TICK_RATE } from './PlayerEngine';
+import { DT, PLAYER_SIZE, PlayerEngine, TICK_RATE } from './PlayerEngine';
 import { type SkidMark, SkidMarks } from './SkidMarks';
 import {
   type DynamicBody,
@@ -14,16 +14,17 @@ import {
   createDocumentBoundaryWalls,
   removeBody,
 } from './game';
+import { GHOST_DATA } from './ghostData';
 import { usePlayerControls } from './usePlayerControls';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-const PLAYER_SIZE = new Vector2(50, 50);
 
 export function Player() {
   const bodyDivRef = useRef<HTMLDivElement | null>(null);
   const controlsRef = usePlayerControls();
   const bodyRef = useRef<DynamicBody | null>(null);
   const engineRef = useRef<PlayerEngine | null>(null);
+  const ghostTickRef = useRef<() => void>(() => {});
+  const [startTicking, setStartTicking] = useState<boolean>(false);
   const [gear, setGear] = useState<number>(0);
   const [rpm, setRpm] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
@@ -44,6 +45,7 @@ export function Player() {
       body: bodyRef.current!,
       controlsRef,
       callbacks: {
+        setStartTicking,
         setGear,
         setRpm,
         setSpeed,
@@ -61,27 +63,19 @@ export function Player() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const lastT = useRef<number>(0);
+  useTickRate(
+    DT,
+    useCallback(() => {
+      const engine = engineRef.current;
+      if (!engine) return;
 
-  useAnimationLoop(
-    useCallback((_, t) => {
+      engine.step();
+      ghostTickRef.current();
+    }, []),
+    useCallback((_: number, t: number) => {
       const engine = engineRef.current;
       const body = bodyRef.current;
       if (!engine || !body) return;
-
-      const deltaT = t - lastT.current;
-      if (deltaT / 1000 < DT) return;
-      lastT.current = t;
-
-      // Accumulate time and do fixed timestep ticks
-      let acc = deltaT / 1000;
-      let i = 0;
-
-      while (acc > DT) {
-        engine.step();
-        acc -= DT;
-        if (++i > 10) break; // prevent spiral of death
-      }
 
       // Center the viewport on the player
       const scrollable = document.getElementById('scrollable')!;
@@ -123,11 +117,10 @@ export function Player() {
       )}
       <div
         ref={bodyDivRef}
-        className={`absolute rounded-full ${onTrack ? 'bg-blue-500' : 'bg-red-500'} ${drifting ? 'opacity-70' : ''} -translate-1/2`}
+        className={`absolute origin-center rounded-full ${onTrack ? 'bg-blue-500' : 'bg-red-500'} ${drifting ? 'opacity-70' : ''} -translate-1/2`}
         style={{
           width: `${PLAYER_SIZE.x}px`,
           height: `${PLAYER_SIZE.y}px`,
-          transformOrigin: 'center',
         }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -140,6 +133,9 @@ export function Player() {
           {Math.floor(speed)}
         </div>
       </div>
+      {startTicking && (
+        <Ghost running={true} states={GHOST_DATA} onTickRef={ghostTickRef} />
+      )}
     </>
   );
 }

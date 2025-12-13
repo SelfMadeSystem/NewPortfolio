@@ -41,6 +41,8 @@ const GEAR_SHIFT_DELAY = 200; // ms
 export const TICK_RATE = 60; // ticks per second
 export const DT = 1 / TICK_RATE; // s per tick
 
+export const PLAYER_SIZE = new Vector2(50, 50);
+
 export type PlayerState = {
   position: Vector2;
   velocity: Vector2;
@@ -52,6 +54,7 @@ export type PlayerState = {
 };
 
 export type PlayerEngineCallbacks = {
+  setStartTicking: (s: boolean) => void;
   setGear: (g: number) => void;
   setRpm: (rpm: number) => void;
   setSpeed: (speed: number) => void;
@@ -157,6 +160,7 @@ export class PlayerEngine {
         controls.right
       ) {
         this.startTicking = true;
+        this.cbs.setStartTicking(true);
       } else {
         return;
       }
@@ -473,6 +477,7 @@ export class PlayerEngine {
       if (type === 'checkpoint') {
         currentCps.push(cpInfo);
       } else {
+        console.log(this.playerStates);
         this.prevCpInfos.push([cpInfo]);
       }
     };
