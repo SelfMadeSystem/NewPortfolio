@@ -18,7 +18,7 @@ export default function ScreenMelt() {
   useEffect(() => {
     const meltContainer = document.getElementById('melt-container')!;
 
-    const doStuff = () => {
+    const generateMeltCanvas = () => {
       const canvas = document.createElement('canvas');
 
       const scaleDown = 1;
@@ -32,7 +32,7 @@ export default function ScreenMelt() {
       const ctx = canvas.getContext('2d')!;
 
       // Perlin noise setup
-      const waveAmplitude = 187;
+      const waveAmplitude = 127.5;
       const noise = new Noise(Math.random()); // Seed for randomness
       const noiseScales = [0.05, 0.1, 0.2, 0.4];
       const randOffset = 10;
@@ -47,16 +47,17 @@ export default function ScreenMelt() {
           g += noise.perlin2(i * scale, 0) * influence;
         }
         g += random(-randOffset, randOffset); // add some random noise
-        g = clamp(0, 187, Math.floor(g));
-        ctx.fillStyle = `rgb(187.5,${g},0)`;
+        g = clamp(0, waveAmplitude, Math.floor(g));
+        ctx.fillStyle = `rgb(127.5,${g},0)`;
         ctx.fillRect(i * pixelWidth, 0, pixelWidth, canvas.height);
       }
 
       setImageSrc(canvas.toDataURL());
     };
 
-    doStuff();
+    generateMeltCanvas();
 
+    // "meltScreen" is called from outside react to trigger the effect
     (window as any).meltScreen = () => {
       if (!topThingRef.current) return;
       const topThing = topThingRef.current;
@@ -88,9 +89,9 @@ export default function ScreenMelt() {
       };
     };
 
-    window.addEventListener('resize', doStuff);
+    window.addEventListener('resize', generateMeltCanvas);
     return () => {
-      window.removeEventListener('resize', doStuff);
+      window.removeEventListener('resize', generateMeltCanvas);
     };
   }, []);
 
@@ -116,6 +117,7 @@ export default function ScreenMelt() {
           }}
           width={width}
           height={height}
+          colorInterpolationFilters="sRGB"
         >
           <defs>
             <filter id="f1" x="0" y="0" width="100%" height="100%">
