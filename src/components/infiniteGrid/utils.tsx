@@ -1,9 +1,13 @@
 import { Vector2 } from '../../utils/vec';
-import type { ImageMetadata } from 'astro';
+
+export type ResponsiveImageMetadata = {
+  small: string;
+  big: string;
+};
 
 export type InfiniteImagesType = {
   name: string;
-  images: ImageMetadata[];
+  images: ResponsiveImageMetadata[];
   tech: string[];
   description: string;
   link: string;

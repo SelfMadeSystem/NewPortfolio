@@ -95,7 +95,7 @@ export function OpenedImage({
         </button>
         <div className="pointer-events-none absolute top-1/2 left-1/2 flex aspect-video h-screen max-h-[70vh] w-screen max-w-[80vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
           <motion.img
-            src={image.images[index].src}
+            src={image.images[index].big}
             alt={image.name}
             className="h-full w-full object-contain"
             initial={{ opacity: 0 }}

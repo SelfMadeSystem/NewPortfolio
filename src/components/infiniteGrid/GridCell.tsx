@@ -68,7 +68,7 @@ export function GridCell({
       }}
     >
       <img
-        src={image.src}
+        src={image.small}
         alt={name}
         className="h-full w-full select-none [user-drag:none]"
         draggable={false}

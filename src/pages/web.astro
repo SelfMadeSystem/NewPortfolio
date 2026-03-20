@@ -28,67 +28,110 @@ import udemHacks20261 from '../assets/web/udemhacks-2026-1.png';
 import udemHacks20262 from '../assets/web/udemhacks-2026-2.png';
 import udemHacks20263 from '../assets/web/udemhacks-2026-3.png';
 import '../styles/web.css';
-import type { InfiniteImagesType } from '../components/infiniteGrid/utils';
+import type {
+  InfiniteImagesType,
+  ResponsiveImageMetadata,
+} from '../components/infiniteGrid/utils';
 import InfiniteGrid from '../components/infiniteGrid/InfiniteGrid';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { cellSize } from '../components/infiniteGrid/utils';
 
 const description =
   'Showcase of websites and web applications I have developed.';
 
-const images: InfiniteImagesType[] = [
-  {
-    name: 'Abacus Cleaning',
-    images: [abacuscleaning, abacuscleaning1, abacuscleaning2, abacuscleaning3],
-    tech: ['HTML', 'CSS', 'JavaScript'],
-    description: 'A professional website for a cleaning service company.',
-    link: 'https://abacuscleaninginc.com',
-  },
-  {
-    name: 'Blanco',
-    images: [blanco, blanco1, blanco2, blanco3],
-    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
-    description: 'A retro-themed portfolio website for a Dutch artist.',
-    link: 'https://blanco-cq6.pages.dev',
-  },
-  {
-    name: 'Mead Simon',
-    images: [meadsimon, meadsimon1, meadsimon2, meadsimon3, meadsimon4],
-    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
-    description:
-      'A modern portfolio website for the fashion designer Mead Simon.',
-    link: 'https://meadsimon.ca',
-  },
-  {
-    name: 'Metro MTL',
-    images: [metromtl, metromtl1, metromtl2],
-    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
-    description: 'A sleek website for a Montreal-based transportation service.',
-    link: 'https://metromtl.ca',
-  },
-  {
-    name: 'Silly Nans',
-    images: [sillyNans, sillyNans1, sillyNans2, sillyNans3],
-    tech: ['Astro', 'Tailwind CSS', 'TypeScript', 'WebGL'],
-    description:
-      'An interactive website showcasing a collection of fancy effects and animations I made over the years.',
-    link: 'https://shenanigans.shoghisimon.ca',
-  },
-  {
-    name: 'UdemHacks 2025',
-    images: [udemHacks2025, udemHacks20251, udemHacks20252],
-    tech: ['React', 'Tailwind CSS', 'TypeScript'],
-    description:
-      "The inaugural website for UdemHacks, the University of Montreal's hackathon event.",
-    link: 'https://2025.udemhacks.com',
-  },
-  {
-    name: 'UdemHacks 2026',
-    images: [udemHacks2026, udemHacks20261, udemHacks20262, udemHacks20263],
-    tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
-    description:
-      "The website for UdemHacks, the University of Montreal's annual hackathon event.",
-    link: 'https://udemhacks.com',
-  },
-];
+async function responsiveImage(
+  image: ImageMetadata,
+): Promise<ResponsiveImageMetadata> {
+  const result = await getImage({
+    src: image,
+    widths: [cellSize.x, image.width],
+    format: 'webp',
+  });
+  return {
+    small: result.srcSet.values[0].url,
+    big: result.srcSet.values[1].url,
+  };
+}
+
+async function imgs(
+  images: ImageMetadata[],
+): Promise<ResponsiveImageMetadata[]> {
+  const result: Promise<ResponsiveImageMetadata>[] = [];
+  for (const image of images) {
+    result.push(responsiveImage(image));
+  }
+  return await Promise.all(result);
+}
+
+const images: InfiniteImagesType[] = await Promise.all(
+  [
+    {
+      name: 'Abacus Cleaning',
+      images: [
+        abacuscleaning,
+        abacuscleaning1,
+        abacuscleaning2,
+        abacuscleaning3,
+      ],
+      tech: ['HTML', 'CSS', 'JavaScript'],
+      description: 'A professional website for a cleaning service company.',
+      link: 'https://abacuscleaninginc.com',
+    },
+    {
+      name: 'Blanco',
+      images: [blanco, blanco1, blanco2, blanco3],
+      tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+      description: 'A retro-themed portfolio website for a Dutch artist.',
+      link: 'https://blanco-cq6.pages.dev',
+    },
+    {
+      name: 'Mead Simon',
+      images: [meadsimon, meadsimon1, meadsimon2, meadsimon3, meadsimon4],
+      tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+      description:
+        'A modern portfolio website for the fashion designer Mead Simon.',
+      link: 'https://meadsimon.ca',
+    },
+    {
+      name: 'Metro MTL',
+      images: [metromtl, metromtl1, metromtl2],
+      tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+      description:
+        'A sleek website for a Montreal-based transportation service.',
+      link: 'https://metromtl.ca',
+    },
+    {
+      name: 'Silly Nans',
+      images: [sillyNans, sillyNans1, sillyNans2, sillyNans3],
+      tech: ['Astro', 'Tailwind CSS', 'TypeScript', 'WebGL'],
+      description:
+        'An interactive website showcasing a collection of fancy effects and animations I made over the years.',
+      link: 'https://shenanigans.shoghisimon.ca',
+    },
+    {
+      name: 'UdemHacks 2025',
+      images: [udemHacks2025, udemHacks20251, udemHacks20252],
+      tech: ['React', 'Tailwind CSS', 'TypeScript'],
+      description:
+        "The inaugural website for UdemHacks, the University of Montreal's hackathon event.",
+      link: 'https://2025.udemhacks.com',
+    },
+    {
+      name: 'UdemHacks 2026',
+      images: [udemHacks2026, udemHacks20261, udemHacks20262, udemHacks20263],
+      tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+      description:
+        "The website for UdemHacks, the University of Montreal's annual hackathon event.",
+      link: 'https://udemhacks.com',
+    },
+  ].map(async project => {
+    return {
+      ...project,
+      images: await imgs(project.images),
+    };
+  }),
+);
 ---
 
 <Layout description={description}>
