@@ -30,8 +30,25 @@ export function useMagnet<T extends HTMLElement>({
   const x = useSpring(posX, spring);
   const y = useSpring(posY, spring);
 
+  const prefersReducedMotion = useRef(false);
+
   useEffect(() => {
-    if (!scope.current) return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    prefersReducedMotion.current = mediaQuery.matches;
+
+    const handleChange = () => {
+      prefersReducedMotion.current = mediaQuery.matches;
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!scope.current || prefersReducedMotion.current) return;
 
     if (!pointerPos) {
       posX.set(0);
@@ -48,7 +65,7 @@ export function useMagnet<T extends HTMLElement>({
 
   useEffect(() => {
     const element = scope.current;
-    if (!element) return;
+    if (!element || prefersReducedMotion.current) return;
 
     const update = () => {
       let vx = x.get();
