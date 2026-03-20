@@ -653,15 +653,15 @@ export default function Aquarium({ color = 'blue' }: AquariumProps) {
             pointer[1] = PointerClickState.HELD;
         }
 
-        ctx.font = 'bold 24px sans-serif';
-        ctx.fillStyle = 'white';
-        ctx.strokeStyle = 'black';
-        ctx.textBaseline = 'hanging';
-        const text = fps.current.toFixed(1) + ' FPS 2D';
-        ctx.lineWidth = 4;
-        const textTop = 0.1 * window.innerHeight + 10;
-        ctx.strokeText(text, 10, textTop);
-        ctx.fillText(text, 10, textTop);
+        // ctx.font = 'bold 24px sans-serif';
+        // ctx.fillStyle = 'white';
+        // ctx.strokeStyle = 'black';
+        // ctx.textBaseline = 'hanging';
+        // const text = fps.current.toFixed(1) + ' FPS 2D';
+        // ctx.lineWidth = 4;
+        // const textTop = 0.1 * window.innerHeight + 10;
+        // ctx.strokeText(text, 10, textTop);
+        // ctx.fillText(text, 10, textTop);
 
         animationFrameRef.current = requestAnimationFrame(redraw);
       };
