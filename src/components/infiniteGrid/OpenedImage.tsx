@@ -1,3 +1,4 @@
+import { Magnetized } from '../Magnetized';
 import type { InfiniteImagesType } from './utils';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -6,12 +7,14 @@ export function OpenedImage({
   openedImage,
   setOpenedImage,
   setPaused,
+  animating,
 }: {
   openedImage: { image: InfiniteImagesType; index: number };
   setOpenedImage: React.Dispatch<
     React.SetStateAction<{ image: InfiniteImagesType; index: number } | null>
   >;
   setPaused: React.Dispatch<React.SetStateAction<boolean>>;
+  animating: boolean;
 }) {
   const { image, index: initialIndex } = openedImage;
 
@@ -75,38 +78,51 @@ export function OpenedImage({
           </a>
           <p className="mt-2 max-w-lg">{image.description}</p>
         </div>
-        <button
-          className="absolute top-1/4 bottom-1/4 left-0 z-50 cursor-pointer px-4 text-3xl font-bold text-white select-none"
-          onClick={e => {
-            e.stopPropagation();
-            prevImage();
-          }}
-        >
-          &#8249;
-        </button>
-        <button
-          className="absolute top-1/4 right-0 bottom-1/4 z-50 cursor-pointer px-4 text-3xl font-bold text-white select-none"
-          onClick={e => {
-            e.stopPropagation();
-            nextImage();
-          }}
-        >
-          &#8250;
-        </button>
-        <div className="pointer-events-none absolute top-1/2 left-1/2 flex aspect-video h-screen max-h-[70vh] w-screen max-w-[80vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-          <motion.img
-            src={image.images[index].big}
-            alt={image.name}
-            className="h-full w-full object-contain"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              transition: { duration: 0, delay: 0.59 },
-            }}
-            exit={{ opacity: 0 }}
-          />
+        <div className="absolute top-1/2 left-1/2 flex aspect-video h-screen max-h-[70vh] w-screen max-w-[80vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+          <Magnetized className="relative h-full" force={animating ? 0 : 0.05}>
+            <motion.img
+              src={image.images[index].big}
+              alt={image.name}
+              className="h-full w-full object-contain"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+                transition: { duration: 0, delay: 0.59 },
+              }}
+              exit={{ opacity: 0 }}
+            />
+
+            <button
+              className="absolute top-0 bottom-0 -left-1 z-50 cursor-pointer bg-linear-90 from-black/80 to-transparent pr-18 pl-6 text-3xl font-bold text-white opacity-0 transition-all duration-300 select-none hover:opacity-100"
+              onClick={e => {
+                e.stopPropagation();
+                prevImage();
+              }}
+            >
+              &#8249;
+            </button>
+            <button
+              className="absolute top-0 -right-1 bottom-0 z-50 cursor-pointer bg-linear-270 from-black/80 to-transparent pr-6 pl-18 text-3xl font-bold text-white opacity-0 transition-all duration-300 select-none hover:opacity-100"
+              onClick={e => {
+                e.stopPropagation();
+                nextImage();
+              }}
+            >
+              &#8250;
+            </button>
+          </Magnetized>
         </div>
-        <div className="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 text-center text-white">
+        <div className="absolute bottom-4 left-1/2 z-50 flex -translate-x-1/2 flex-col gap-2 text-center text-white">
+          <Magnetized>
+            <a
+              href={image.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-md rounded-lg bg-blue-700 px-4 py-2 font-bold hover:underline"
+            >
+              Visit project
+            </a>
+          </Magnetized>
           <p>
             Image {index + 1} of {image.images.length}
           </p>

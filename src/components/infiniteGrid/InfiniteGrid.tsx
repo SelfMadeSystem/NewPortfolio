@@ -24,6 +24,7 @@ export default function InfiniteGrid({
     image: InfiniteImagesType;
     index: number;
   } | null>(null);
+  const [animating, setAnimating] = useState(false);
 
   const suppressNextClickRef = useRef(false);
   const startPointerRef = useRef<Vector2 | null>(null);
@@ -314,6 +315,7 @@ export default function InfiniteGrid({
                     image,
                     index,
                   });
+                  setAnimating(true);
 
                   const dupe = elem.cloneNode(true) as HTMLButtonElement;
                   const rect = elem.getBoundingClientRect();
@@ -342,14 +344,6 @@ export default function InfiniteGrid({
 
                   const scaleFactor = targetWidth / rect.width;
 
-                  console.log('Animating to', {
-                    targetX,
-                    targetY,
-                    scaleFactor,
-                    targetWidth,
-                    targetHeight,
-                  });
-
                   dupe.animate(
                     [
                       {
@@ -372,6 +366,7 @@ export default function InfiniteGrid({
 
                   setTimeout(() => {
                     document.body.removeChild(dupe);
+                    setAnimating(false);
                   }, 600);
                 }}
                 suppressClickRef={suppressNextClickRef}
@@ -432,6 +427,7 @@ export default function InfiniteGrid({
             openedImage={openedImage}
             setOpenedImage={setOpenedImage}
             setPaused={setPaused}
+            animating={animating}
           />
         )}
       </AnimatePresence>
