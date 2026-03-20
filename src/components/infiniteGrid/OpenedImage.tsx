@@ -1,0 +1,117 @@
+import type { InfiniteImagesType } from './utils';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+
+export function OpenedImage({
+  openedImage,
+  setOpenedImage,
+  setPaused,
+}: {
+  openedImage: { image: InfiniteImagesType; index: number };
+  setOpenedImage: React.Dispatch<
+    React.SetStateAction<{ image: InfiniteImagesType; index: number } | null>
+  >;
+  setPaused: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+  const { image, index: initialIndex } = openedImage;
+
+  const [index, setIndex] = useState(initialIndex);
+
+  const nextImage = useCallback(() => {
+    setIndex(prev => (prev + 1) % image.images.length);
+  }, [image.images.length]);
+
+  const prevImage = useCallback(() => {
+    setIndex(prev => (prev - 1 + image.images.length) % image.images.length);
+  }, [image.images.length]);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'ArrowRight') {
+        nextImage();
+      } else if (e.key === 'ArrowLeft') {
+        prevImage();
+      } else if (e.key === 'Escape') {
+        setOpenedImage(null);
+        setPaused(false);
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [nextImage, prevImage, setOpenedImage, setPaused]);
+
+  return (
+    <motion.div
+      className="bg-opacity-80 fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center bg-black p-8"
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: 1,
+        transition: { duration: 0.6 },
+      }}
+      exit={{ opacity: 0 }}
+    >
+      <div
+        className="select-auto"
+        onClick={e => {
+          e.stopPropagation();
+        }}
+      >
+        <button
+          className="absolute top-0 right-0 z-50 cursor-pointer p-4 text-3xl font-bold text-white select-none"
+          onClick={() => {
+            setOpenedImage(null);
+            setPaused(false);
+          }}
+        >
+          &times;
+        </button>
+        <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2 text-center text-white">
+          <a href={image.link} target="_blank" rel="noopener noreferrer">
+            <h2 className="text-2xl font-bold hover:underline">{image.name}</h2>
+          </a>
+          <p className="mt-2 max-w-lg">{image.description}</p>
+        </div>
+        <button
+          className="absolute top-1/4 bottom-1/4 left-0 z-50 cursor-pointer px-4 text-3xl font-bold text-white select-none"
+          onClick={e => {
+            e.stopPropagation();
+            prevImage();
+          }}
+        >
+          &#8249;
+        </button>
+        <button
+          className="absolute top-1/4 right-0 bottom-1/4 z-50 cursor-pointer px-4 text-3xl font-bold text-white select-none"
+          onClick={e => {
+            e.stopPropagation();
+            nextImage();
+          }}
+        >
+          &#8250;
+        </button>
+        <div className="pointer-events-none absolute top-1/2 left-1/2 flex aspect-video h-screen max-h-[70vh] w-screen max-w-[80vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+          <motion.img
+            src={image.images[index].src}
+            alt={image.name}
+            className="h-full w-full object-contain"
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: 1,
+              transition: { duration: 0, delay: 0.59 },
+            }}
+            exit={{ opacity: 0 }}
+          />
+        </div>
+        <div className="absolute bottom-4 left-1/2 z-50 -translate-x-1/2 text-center text-white">
+          <p>
+            Image {index + 1} of {image.images.length}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
