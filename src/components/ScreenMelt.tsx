@@ -99,7 +99,7 @@ export default function ScreenMelt() {
     <>
       <div
         ref={topThingRef}
-        className="absolute right-0 bottom-0 left-0 z-9999 h-[200vh] bg-black opacity-0"
+        className="pointer-events-none absolute right-0 bottom-0 left-0 z-9999 h-[200vh] bg-black opacity-0"
       ></div>
       {isMelting && (
         <svg
