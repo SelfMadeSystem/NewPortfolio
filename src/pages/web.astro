@@ -8,6 +8,9 @@ import blanco from '../assets/web/blanco.png';
 import blanco1 from '../assets/web/blanco1.png';
 import blanco2 from '../assets/web/blanco2.png';
 import blanco3 from '../assets/web/blanco3.png';
+import htm from '../assets/web/htm.png';
+import htm1 from '../assets/web/htm1.png';
+import htm2 from '../assets/web/htm2.png';
 import meadsimon from '../assets/web/meadsimon.png';
 import meadsimon1 from '../assets/web/meadsimon1.png';
 import meadsimon2 from '../assets/web/meadsimon2.png';
@@ -124,6 +127,14 @@ const images: InfiniteImagesType[] = await Promise.all(
       description:
         "The website for UdemHacks, the University of Montreal's annual hackathon event.",
       link: 'https://udemhacks.com',
+    },
+    {
+      name: 'HackTheMountain 2026',
+      images: [htm, htm1, htm2],
+      tech: ['Astro', 'Tailwind CSS', 'TypeScript'],
+      description:
+        'The website for HackTheMountain, a collaborative hackathon event between the University of Montreal and Polytechnique Montreal.',
+      link: 'https://hackthemountain.ca',
     },
   ].map(async project => {
     return {
