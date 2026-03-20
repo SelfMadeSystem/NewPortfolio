@@ -46,7 +46,7 @@ export function GridCell({
 
   return (
     <button
-      className="relative block cursor-pointer overflow-hidden rounded select-none [user-drag:none]"
+      className="group relative block cursor-pointer overflow-hidden rounded select-none [user-drag:none]"
       draggable={false}
       style={{
         width: cellSize.x,
@@ -67,6 +67,9 @@ export function GridCell({
         }
       }}
     >
+      <div className="absolute top-0 right-0 left-0 z-10 bg-black/50 py-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <p className="text-center text-sm text-white">{name}</p>
+      </div>
       <img
         src={image.small}
         alt={name}

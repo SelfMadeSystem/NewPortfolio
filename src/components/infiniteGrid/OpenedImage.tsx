@@ -71,17 +71,15 @@ export function OpenedImage({
           e.stopPropagation();
         }}
       >
-        <Magnetized class="absolute top-0 right-0">
-          <button
-            className="z-50 cursor-pointer p-4 text-3xl font-bold text-white select-none"
-            onClick={() => {
-              setOpenedImage(null);
-              setPaused(false);
-            }}
-          >
-            &times;
-          </button>
-        </Magnetized>
+        <button
+          className="absolute top-0 right-0 z-50 cursor-pointer p-4 text-3xl font-bold text-white select-none"
+          onClick={() => {
+            setOpenedImage(null);
+            setPaused(false);
+          }}
+        >
+          &times;
+        </button>
         <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2 text-center text-white">
           <a href={image.link} target="_blank" rel="noopener noreferrer">
             <h2 className="text-2xl font-bold hover:underline">{image.name}</h2>
