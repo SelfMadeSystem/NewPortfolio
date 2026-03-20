@@ -80,13 +80,13 @@ export function OpenedImage({
         >
           &times;
         </button>
-        <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2 text-center text-white">
+        <div className="absolute top-4 left-1/2 z-50 -translate-x-1/2 text-center text-white max-sm:w-full">
           <a href={image.link} target="_blank" rel="noopener noreferrer">
             <h2 className="text-2xl font-bold hover:underline">{image.name}</h2>
           </a>
-          <p className="mt-2 max-w-lg">{image.description}</p>
+          <p className="mt-2 sm:max-w-lg">{image.description}</p>
         </div>
-        <div className="absolute top-1/2 left-1/2 flex aspect-video h-screen max-h-[70vh] w-screen max-w-[80vw] -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+        <div className="absolute top-1/2 left-1/2 flex aspect-video h-screen max-h-[70vh] w-screen -translate-x-1/2 -translate-y-1/2 items-center justify-center sm:max-w-[80vw]">
           <Magnetized className="relative h-full" force={animating ? 0 : 0.05}>
             <motion.img
               src={image.images[index].big}

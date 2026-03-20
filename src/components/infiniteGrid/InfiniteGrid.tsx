@@ -331,7 +331,8 @@ export default function InfiniteGrid({
                   document.body.appendChild(dupe);
 
                   const aspectRatio = 16 / 9;
-                  const maxWidth = window.innerWidth * 0.8;
+                  const isSmall = window.innerWidth < 640;
+                  const maxWidth = window.innerWidth * (isSmall ? 1 : 0.8);
                   const maxHeight = window.innerHeight * 0.7;
                   let targetWidth = maxWidth;
                   let targetHeight = maxHeight;
