@@ -85,13 +85,17 @@ export function OpenedImage({
             <motion.img
               src={image.images[index].big}
               alt={image.name}
-              className="h-full w-full object-contain"
+              className="h-full w-full cursor-pointer object-contain"
               initial={{ opacity: 0 }}
               animate={{
                 opacity: 1,
                 transition: { duration: 0, delay: 0.59 },
               }}
               exit={{ opacity: 0 }}
+              onClick={e => {
+                e.stopPropagation();
+                nextImage();
+              }}
             />
 
             <button
@@ -102,15 +106,6 @@ export function OpenedImage({
               }}
             >
               &#8249;
-            </button>
-            <button
-              className="absolute top-0 -right-1 bottom-0 z-50 cursor-pointer bg-linear-270 from-black/80 to-transparent pr-6 pl-18 text-3xl font-bold text-white opacity-0 transition-all duration-300 select-none hover:opacity-100"
-              onClick={e => {
-                e.stopPropagation();
-                nextImage();
-              }}
-            >
-              &#8250;
             </button>
           </Magnetized>
         </div>
