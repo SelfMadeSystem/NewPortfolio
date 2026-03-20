@@ -6,12 +6,10 @@ import SeaWeed from '../components/SeaWeed.tsx';
 import '../styles/index.css';
 import { SlideInLoader } from '../components/SlideInLoader';
 import backend from '../assets/backend.png';
-import game from '../assets/game.png';
 import web from '../assets/web.png';
 import Image from 'astro/components/Image.astro';
 import CursorFollowCard from '../components/CursorFollowCard';
 import BackendCard from '../components/BackendCard';
-import AquariumGL from '../components/AquariumGL';
 import ScreenMelt from '../components/ScreenMelt';
 ---
 
@@ -84,7 +82,11 @@ import ScreenMelt from '../components/ScreenMelt';
             class="flex flex-row flex-wrap justify-center items-stretch p-8 gap-8"
           >
             <CursorFollowCard client:load className="h-full">
-              <a href="/web" class="goto-card w-fit h-full">
+              <a
+                href="/web"
+                class="goto-card w-fit h-full"
+                onclick="meltScreen(this);return false;"
+              >
                 Web Development
                 <Image
                   src={web}
@@ -119,7 +121,7 @@ import ScreenMelt from '../components/ScreenMelt';
               <a
                 href="/game"
                 class="goto-card"
-                onclick="meltScreen();return false;"
+                onclick="meltScreen(this);return false;"
               >
                 Game Development
                 <Image

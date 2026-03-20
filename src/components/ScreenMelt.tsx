@@ -58,7 +58,7 @@ export default function ScreenMelt() {
     generateMeltCanvas();
 
     // "meltScreen" is called from outside react to trigger the effect
-    (window as any).meltScreen = () => {
+    (window as any).meltScreen = (elem: HTMLAnchorElement) => {
       if (!topThingRef.current) return;
       const topThing = topThingRef.current;
 
@@ -85,7 +85,7 @@ export default function ScreenMelt() {
           fill: 'forwards',
         },
       ).onfinish = () => {
-        window.location.href = '/game';
+        window.location.href = elem.href;
       };
     };
 
