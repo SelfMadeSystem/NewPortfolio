@@ -1,5 +1,6 @@
 import { mod } from '../../utils/mathUtils';
 import { Vector2 } from '../../utils/vec';
+import { Magnetized } from '../Magnetized';
 import { GridColumn } from './GridColumn';
 import { OpenedImage } from './OpenedImage';
 import {
@@ -275,17 +276,19 @@ export default function InfiniteGrid({
 
   return (
     <div className="fixed top-0 left-0 flex h-full w-full items-start justify-start overflow-hidden select-none">
-      <motion.a
-        href="/"
-        className="absolute top-4 left-4 z-50 rounded bg-black/50 p-2 text-blue-400 hover:underline"
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: 1,
-          transition: { duration: 0.6, delay: 1 },
-        }}
-      >
-        ← Back
-      </motion.a>
+      <Magnetized class="absolute top-4 left-4 z-50">
+        <motion.a
+          href="/"
+          className="rounded bg-black/50 p-2 text-blue-400 hover:underline"
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            transition: { duration: 0.6, delay: 1 },
+          }}
+        >
+          ← Back
+        </motion.a>
+      </Magnetized>
       <div
         className="pointer-events-none flex"
         style={{
