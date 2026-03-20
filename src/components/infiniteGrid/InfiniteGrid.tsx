@@ -11,7 +11,7 @@ import {
   widthPerCol,
 } from './utils';
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function InfiniteGrid({
   images,
@@ -341,9 +341,6 @@ export default function InfiniteGrid({
                   } else {
                     targetHeight = targetWidth / aspectRatio;
                   }
-
-                  const targetX = window.innerWidth / 2 - targetWidth / 2;
-                  const targetY = window.innerHeight / 2 - targetHeight / 2;
 
                   const scaleFactor = targetWidth / rect.width;
 

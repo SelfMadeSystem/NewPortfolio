@@ -21,7 +21,7 @@ export const heightPerRow = cellSize.y + padding;
 // deterministic 2D -> int hash (returns unsigned 32-bit)
 export function hash2Ints(x: number, y: number): number {
   // combine coordinates into one seed
-  let h = ((x | 0) * 0x9e3769b1) ^ (y | 0);
+  let h = ((x | 0) * 0x9e3769b1 + 15) ^ ((y | 0) + 29);
   // mix (Wang/Jenkins style) to spread bits
   h = h ^ 61 ^ (h >>> 16);
   h = h + (h << 3);

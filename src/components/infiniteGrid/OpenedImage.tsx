@@ -47,6 +47,14 @@ export function OpenedImage({
     };
   }, [nextImage, prevImage, setOpenedImage, setPaused]);
 
+  useEffect(() => {
+    // Prefetch all images
+    image.images.forEach(img => {
+      const prefetch = new Image();
+      prefetch.src = img.big;
+    });
+  }, [image.images]);
+
   return (
     <motion.div
       className="bg-opacity-80 fixed top-0 left-0 z-50 flex h-full w-full items-center justify-center bg-black p-8"
