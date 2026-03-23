@@ -19,13 +19,13 @@ export class ShuffleText extends HTMLElement {
   }
 
   connectedCallback() {
-    this.noShuffle = this.hasAttribute('no-shuffle');
+    this.noShuffle = !this.hasAttribute('shuffle');
     const lines = getLines(this);
     if (lines.length > 1) {
       this.outerHTML = lines
         .map(
           line =>
-            `<shuffle-text style="display: block;" ${this.noShuffle ? 'no-shuffle' : ''}>${line}</shuffle-text>`,
+            `<shuffle-text style="display: block;" ${this.noShuffle ? '' : 'shuffle'}>${line}</shuffle-text>`,
         )
         .join('');
       return;
@@ -33,12 +33,13 @@ export class ShuffleText extends HTMLElement {
     this.originalText = this.innerText;
     this.isSmall = this.originalText.length < 10;
 
-    if (!this.noShuffle)
+    if (!this.noShuffle) {
       this.addEventListener('mouseenter', () => {
         if (!this.started) return;
         this.stopShuffling();
         this.startShuffling();
       });
+    }
 
     this.innerText = '\u00A0'.repeat(this.originalText.length);
     this.classList.add('loaded');

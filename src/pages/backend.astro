@@ -15,6 +15,38 @@ const description =
 
   <script src="../components/ShuffleText.ts"></script>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const anchors = document.querySelectorAll("a[href^='#']");
+      let currentFragment = window.location.hash;
+
+      if (!currentFragment) {
+        currentFragment = '#case-studies';
+        window.location.hash = currentFragment;
+      }
+
+      anchors.forEach(anchor => {
+        if (anchor.getAttribute('href') === currentFragment) {
+          anchor.classList.add('active-tab');
+        } else {
+          anchor.classList.remove('active-tab');
+        }
+      });
+
+      window.addEventListener('hashchange', () => {
+        const newFragment = window.location.hash;
+
+        anchors.forEach(anchor => {
+          if (anchor.getAttribute('href') === newFragment) {
+            anchor.classList.add('active-tab');
+          } else {
+            anchor.classList.remove('active-tab');
+          }
+        });
+      });
+    });
+  </script>
+
   <div class="min-h-screen text-gray-100 font-mono flex flex-col">
     <header class="border-b border-white backdrop-rainbow">
       <shuffle-text class="left-2 top-2">Shoghi Simon's Portfolio</shuffle-text>
@@ -22,7 +54,7 @@ const description =
         <shuffle-text>Backend Development</shuffle-text>
       </h1>
       <a href="/" class="absolute right-0 top-2 text-blue-400 hover:underline">
-        <shuffle-text class="p-2">← Back</shuffle-text>
+        <shuffle-text shuffle class="p-2">← Back</shuffle-text>
       </a>
     </header>
     <main class="flex flex-col md:flex-row grow">
@@ -30,11 +62,13 @@ const description =
         class="max-md:border-b md:border-r border-white p-2 backdrop-rainbow"
       >
         <nav class="flex flex-col space-y-4 text-lg">
-          <a href="#case-studies" class="text-indigo-400 hover:underline"
-            ><shuffle-text>Case Studies</shuffle-text></a
+          <a
+            href="#case-studies"
+            class="px-2 py-1 text-indigo-400 hover:underline"
+            ><shuffle-text shuffle>Case Studies</shuffle-text></a
           >
-          <a href="#projects" class="text-indigo-400 hover:underline"
-            ><shuffle-text>Projects</shuffle-text></a
+          <a href="#projects" class="px-2 py-1 text-indigo-400 hover:underline"
+            ><shuffle-text shuffle>Projects</shuffle-text></a
           >
         </nav>
       </aside>
@@ -81,7 +115,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Join the Discord</shuffle-text
+                shuffle>Join the Discord</shuffle-text
               >
             </a>
           </div>
@@ -119,7 +153,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Visit</shuffle-text
+                shuffle>Visit</shuffle-text
               >
             </a>
           </div>
@@ -154,7 +188,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Visit</shuffle-text
+                shuffle>Visit</shuffle-text
               >
             </a>
           </div>
@@ -191,7 +225,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Join the Discord</shuffle-text
+                shuffle>Join the Discord</shuffle-text
               >
             </a>
           </div>
@@ -225,7 +259,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Visit</shuffle-text
+                shuffle>Visit</shuffle-text
               >
             </a>
           </div>
@@ -260,7 +294,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Visit</shuffle-text
+                shuffle>Visit</shuffle-text
               >
             </a>
           </div>
@@ -291,7 +325,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Visit</shuffle-text
+                shuffle>Visit</shuffle-text
               >
             </a>
           </div>
@@ -325,7 +359,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Visit</shuffle-text
+                shuffle>Visit</shuffle-text
               >
             </a>
           </div>
@@ -356,7 +390,7 @@ const description =
             >
               <shuffle-text
                 class="block px-4 py-2 border-4 border-indigo-700 hover:border-indigo-800"
-                >Visit</shuffle-text
+                shuffle>Visit</shuffle-text
               >
             </a>
           </div>
