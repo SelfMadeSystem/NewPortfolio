@@ -5,6 +5,7 @@ import { WebGLText } from '../components/WebGLText';
 import { HashVisible } from '../components/HashVisible';
 import Layout from '../layout/Layout.astro';
 import '../styles/backend.css';
+import FancyCursor from '../components/FancyCursor';
 
 const description =
   "When applications need to handle millions of users or process complex data, that's where I shine. I've built everything from high-traffic Discord bots to sophisticated development tools and military-grade applications, always focusing on performance, reliability, and developer experience.";
@@ -405,4 +406,6 @@ const description =
       >
     </footer>
   </div>
+
+  <FancyCursor client:load />
 </Layout>

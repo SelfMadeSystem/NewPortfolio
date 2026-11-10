@@ -5,6 +5,10 @@ body {
   background: #000;
 }
 
+* {
+  cursor: none !important;
+}
+
 :root {
   --font-mono: 'Recursive', monospace;
 }

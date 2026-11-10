@@ -35,7 +35,7 @@ const spring: SpringOptions = {
   bounce: 0,
 };
 
-const COLOR = '#000000a0';
+const COLOR = '#ffffffa0';
 const HOVER_COLOR = '#ffffff30';
 const TEXT_COLOR = '#00000000';
 
