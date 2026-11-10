@@ -26,6 +26,33 @@ export default function BackendCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const [clicked, setClicked] = useState(false);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const stopTextAnimationRef = useRef<(() => void) | null>(null);
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const stopTransition = () => {
+      stopTextAnimationRef.current?.();
+      stopTextAnimationRef.current = null;
+      if (navigationTimeoutRef.current !== null) {
+        clearTimeout(navigationTimeoutRef.current);
+        navigationTimeoutRef.current = null;
+      }
+    };
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      stopTransition();
+      setClicked(false);
+      setRect(null);
+      setText('Backend Development');
+    };
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      window.removeEventListener('pageshow', handlePageShow);
+      stopTransition();
+    };
+  }, []);
 
   const pointer = usePointerPosition(cardRef, {
     onlyInside: true,
@@ -128,7 +155,7 @@ export default function BackendCard({
               let i1 = text.length;
               let i2 = text.length;
 
-              intervalAnimationFrame(() => {
+              stopTextAnimationRef.current = intervalAnimationFrame(() => {
                 const randText = textButRandom(text, chars);
                 if (i1 > 0) {
                   i1 -= 1;
@@ -142,7 +169,7 @@ export default function BackendCard({
                 );
               }, 25);
 
-              setTimeout(() => {
+              navigationTimeoutRef.current = setTimeout(() => {
                 window.location.href = '/backend';
               }, 950);
             }}

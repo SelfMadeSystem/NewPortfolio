@@ -17,6 +17,8 @@ export default function ScreenMelt() {
 
   useEffect(() => {
     const meltContainer = document.getElementById('melt-container')!;
+    let meltAnimation: Animation | null = null;
+    let previousOverflow = '';
 
     const generateMeltCanvas = () => {
       const canvas = document.createElement('canvas');
@@ -59,7 +61,7 @@ export default function ScreenMelt() {
 
     // "meltScreen" is called from outside react to trigger the effect
     (window as any).meltScreen = (elem: HTMLAnchorElement) => {
-      if (!topThingRef.current) return;
+      if (!topThingRef.current || meltAnimation) return;
       const topThing = topThingRef.current;
 
       topThing.classList.remove('opacity-0');
@@ -68,10 +70,11 @@ export default function ScreenMelt() {
       topThing.style.top = `${document.documentElement.scrollTop - topThing.clientHeight}px`;
 
       meltContainer.classList.add('screenmelt');
+      previousOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       setIsMelting(true);
 
-      meltContainer.animate(
+      meltAnimation = meltContainer.animate(
         [
           { transform: 'translateY(0)' },
           {
@@ -84,14 +87,28 @@ export default function ScreenMelt() {
           easing: 'linear',
           fill: 'forwards',
         },
-      ).onfinish = () => {
+      );
+      meltAnimation.onfinish = () => {
         window.location.href = elem.href;
       };
     };
 
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted || !meltAnimation) return;
+      meltAnimation.cancel();
+      meltAnimation = null;
+      meltContainer.classList.remove('screenmelt');
+      topThingRef.current?.classList.add('opacity-0');
+      document.body.style.overflow = previousOverflow;
+      setIsMelting(false);
+    };
+
     window.addEventListener('resize', generateMeltCanvas);
+    window.addEventListener('pageshow', handlePageShow);
     return () => {
       window.removeEventListener('resize', generateMeltCanvas);
+      window.removeEventListener('pageshow', handlePageShow);
+      meltAnimation?.cancel();
     };
   }, []);
 
